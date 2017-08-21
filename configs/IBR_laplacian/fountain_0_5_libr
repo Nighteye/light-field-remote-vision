@@ -1,0 +1,21 @@
+config 			./configs/IBR_laplacian/common_parameters
+algorithm		IBR_laplacian
+
+# IMAGE SIZE
+width			3072
+height			2048
+
+# GEOMETRY SCALE
+scale_min		0
+scale_max		0
+
+# VIEW RANGE
+s_min			0
+s_max			10
+s_rmv			5
+
+# INPUT
+mve_name		./in/strecha_datasets/fountain_mve/mve_out_11_3072_2048
+
+# OUTPUT
+outdir			out/IBR_laplacian/fountain_0_5_libr

@@ -1,0 +1,24 @@
+config 			./configs/refocus/common_parameters
+algorithm		refocus
+
+# IMAGE SIZE
+width			768
+height			512
+
+# GEOMETRY SCALE
+scale_min		0
+scale_max		0
+
+# VIEW RANGE
+s_min			0
+s_max			11
+s_rmv			5
+t_min			0
+t_max			0
+t_rmv			0
+
+# INPUT
+mve_name		./in/strecha_datasets/fountain_mve/mve_out_11_768_512
+
+# OUTPUT
+outdir			out/refocus/fountain_camouflage

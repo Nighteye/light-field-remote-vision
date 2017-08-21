@@ -1,0 +1,7 @@
+TEMPLATE	 = subdirs
+CONFIG		+= ordered
+SUBDIRS          = cocolib tools/reference_compare tools/parse_lfa_results examples/3rdparty/GCO3 examples/3rdparty/TRW_S examples examples++ lightfields unstructured_lf/3rdparty/rply unstructured_lf
+
+DISTFILES = README\
+            LICENSE\
+            rebuild\

@@ -1,0 +1,10 @@
+nchannels		3
+lambda	   	   	0.001
+lambda_max_factor  	100.0
+niter		   	100
+nmeta_iter		10
+gradient_step		0.1
+ugrad_threshold		1.
+sigma_sensor		1.
+dw_type			0
+gw_type 		1	

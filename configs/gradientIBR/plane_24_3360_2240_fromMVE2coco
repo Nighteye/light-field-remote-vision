@@ -1,0 +1,24 @@
+config 			./configs/gradientIBR/common_parameters
+algorithm		fromMVE2coco
+
+width			3360
+height			2240
+
+# Compute warps from depthmaps (mve scene)
+# INPUT
+mve_name		./in/greg_datasets/plane/mve_out_24_3360_2240
+
+# OUTPUT
+lf_name			./in/greg_datasets/plane/plane_coco/v_%02i.png
+tau_name		./in/greg_datasets/plane/plane_coco/tau_%02i.pfm
+dpart_name		./in/greg_datasets/plane/plane_coco/partial_tau_%02i.pfm
+uWarped_name		./in/greg_datasets/plane/plane_coco/uWarped_%02i.pfm
+uDepth_name		./in/greg_datasets/plane/plane_coco/uDepth.pfm
+
+scale_min		2
+scale_max		2
+
+s_min			0
+s_max			4
+s_rmv			0
+

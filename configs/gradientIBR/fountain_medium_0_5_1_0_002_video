@@ -1,0 +1,31 @@
+config 			./configs/gradientIBR/common_parameters
+algorithm		IBR_video
+
+width			1536
+height			1024
+
+# INPUT
+mve_name		./in/strecha_datasets/fountain_mve/mve_out_11_1536_1024
+
+# OUTPUT
+lf_name			./in/strecha_datasets/fountain_coco/fountain_medium_0_5/v_%02i.png
+tau_name		./in/strecha_datasets/fountain_coco/fountain_medium_0_5/tau_%02i.pfm
+dpart_name		./in/strecha_datasets/fountain_coco/fountain_medium_0_5/partial_tau_%02i.pfm
+uWarped_name		./in/strecha_datasets/fountain_coco/fountain_medium_0_5/uWarped_%02i.pfm
+uDepth_name		./in/strecha_datasets/fountain_coco/fountain_medium_0_5/uDepth.pfm
+
+# PARAMETERS
+dt_alpha		1.0
+dt_beta			0.0
+lambda	   	   	0.002
+
+scale_min		0
+scale_max		0
+
+s_min			0
+s_max			10
+s_rmv			5
+
+# output
+outdir			./out/gradientIBR/fountain/fountain_medium_0_5_video
+outfile			fountain_medium_0_5_1_0_002_%03i.png

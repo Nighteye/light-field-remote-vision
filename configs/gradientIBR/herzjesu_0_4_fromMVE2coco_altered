@@ -1,0 +1,25 @@
+config 			./configs/gradientIBR/common_parameters
+algorithm		fromMVE2coco
+
+width			3072
+height			2048
+
+# Compute warps from mesh (mve scene)
+# INPUT
+mve_name		./in/strecha_datasets/herzjesu_mve/mve_out_8_3072_2048_altered
+
+# OUTPUT
+lf_name			./in/strecha_datasets/herzjesu_coco/herzjesu_altered_0_4/v_%02i.png
+tau_name		./in/strecha_datasets/herzjesu_coco/herzjesu_altered_0_4/tau_%02i.pfm
+dpart_name		./in/strecha_datasets/herzjesu_coco/herzjesu_altered_0_4/partial_tau_%02i.pfm
+uWarped_name		./in/strecha_datasets/herzjesu_coco/herzjesu_altered_0_4/uWarped_%02i.pfm
+uDepth_name		./in/strecha_datasets/herzjesu_coco/herzjesu_altered_0_4/uDepth.pfm
+
+scale_min		0
+scale_max		0
+
+s_min			0
+s_max			7
+s_rmv			4
+
+

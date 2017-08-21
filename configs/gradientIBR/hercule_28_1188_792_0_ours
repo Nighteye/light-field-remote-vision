@@ -1,0 +1,41 @@
+config 			./configs/gradientIBR/common_parameters
+
+width			1188
+height			792
+
+# lumigraph rendering, if so then lumi_name must not be empty, if not deform_name and dpart_name must not be empty
+lumigraph		0
+
+# Compute warps from mesh (mve scene)
+# INPUT
+mve_name		./in/greg_datasets/hercule_mve/mve_out_28_1188_792_0
+
+# OUTPUT
+lf_name			./in/greg_datasets/hercule_coco/hercule_28_1188_792_0_ours/v_%02i.png
+tau_name		./in/greg_datasets/hercule_coco/hercule_28_1188_792_0_ours/tau_%02i.pfm
+dpart_name		./in/greg_datasets/hercule_coco/hercule_28_1188_792_0_ours/partial_tau_%02i.pfm
+deform_name		./in/greg_datasets/hercule_coco/hercule_28_1188_792_0_ours/deform_weights_%02i.pfm
+
+DEPTH FILTERING
+scale			0
+depth_name		./in/greg_datasets/hercule_coco/hercule_28_1188_792_0_ours/depth_%02i.pfm
+depthFromPC_name	./in/greg_datasets/hercule_coco/hercule_28_1188_792_0_ours/depthFromPC_%02i.pfm
+depthFromMVE_name	./in/greg_datasets/hercule_coco/hercule_28_1188_792_0_ours/depthFromMVE_%02i.pfm
+depthSuper_name	        ./in/greg_datasets/hercule_coco/hercule_28_1188_792_0_ours/depthSuper_%02i.pfm
+
+# PARAMETERS
+
+
+# Cocolib, IBR
+#init_name		./out/gradientIBR/hercule/hercule_28_1188_792_ours_0/u_init_filled.pfm
+
+s_min			0
+s_max			27
+s_rmv			0
+
+dsf			1
+
+# output
+outdir			./out/gradientIBR/hercule/hercule_28_1188_792_0_ours
+outfile			hercule_28_1188_792_0_ours.png
+

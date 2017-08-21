@@ -1,0 +1,28 @@
+config 			./configs/cvpr2016/common_parameters
+
+# light field configuration
+lf_name			./in/blender/skull/v_%02i.png
+tau_name		./in/blender/skull/tau_%02i.pfm
+dpart_name		./in/blender/skull/partial_tau_%02i.pfm
+init_name		./out/superresolution/skull/a0.0_b0.1_c0.001/u_init_filled.pfm
+
+s_min			0
+s_max			8
+s_rmv			4
+
+dsf			1
+lambda			0.001
+gradient_step		1.0
+niter		   	100
+nmeta_iter		10
+gw_type 		0	
+
+# superresolution algorithm params
+dt_alpha		0.0
+dt_beta			0.1
+
+# output
+outdir			./out/superresolution/skull/a0.0_b0.1_c0.001
+outfile			skull_a0.0_b0.1_c0.001.png
+
+

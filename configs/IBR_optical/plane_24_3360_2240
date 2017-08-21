@@ -1,0 +1,37 @@
+config 			./configs/IBR_optical/common_parameters
+
+# PARAMETERS
+
+width			3360
+height			2240
+
+s_min			0
+s_max			23
+s_rmv			0
+
+scale_min		2
+scale_max		2
+pyramidHeight		0
+
+# INPUT
+
+mve_name		./in/greg_datasets/plane_mve/mve_out_24_3360_2240
+cameraName		./in/greg_datasets/plane_mve/mve_out_24_3360_2240/views/view_%04i.mve/meta.ini
+imageName		./in/greg_datasets/plane_mve/mve_out_24_3360_2240/views/view_%04i.mve/undistorted.png
+
+lf_name			./in/greg_datasets/plane_coco/plane_24_3360_2240/v_%02i.png
+tau_name		./in/greg_datasets/plane_coco/plane_24_3360_2240/tau_%02i.pfm
+dpart_name		./in/greg_datasets/plane_coco/plane_24_3360_2240/partial_tau_%02i.pfm
+deform_name		./in/greg_datasets/plane_coco/plane_24_3360_2240/deform_weights_%02i.pfm
+depth_name		./in/greg_datasets/plane_coco/plane_24_3360_2240/depth_%02i.pfm
+depthFromPC_name	./in/greg_datasets/plane_coco/plane_24_3360_2240/depthFromPC_%02i.pfm
+uWarped_name		./in/greg_datasets/plane_coco/plane_24_3360_2240/uWarped_%02i.pfm
+uDepth_name		./in/greg_datasets/plane_coco/plane_24_3360_2240/uDepth.pfm
+
+# OUTPUT
+
+init_name		./out/IBR_optical/plane/plane_24_3360_2240/u_init_filled.pfm
+outdir			./out/IBR_optical/plane/plane_24_3360_2240
+
+outfile			plane_24_3360_2240.png
+

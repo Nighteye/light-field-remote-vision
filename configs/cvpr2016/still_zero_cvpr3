@@ -1,0 +1,22 @@
+config 			./configs/cvpr2016/common_parameters
+
+# light field configuration
+lf_name				./in/hci_lf/blender/stillLife/zero/v_%02i.png
+tau_name			./in/hci_lf/blender/stillLife/zero/tau_%02i.pfm
+dpart_name			./in/hci_lf/blender/stillLife/zero/partial_tau_%02i.pfm
+
+s_min			0
+s_max			8
+s_rmv			4
+
+dsf			1
+
+# superresolution algorithm params
+dt_alpha		1.0
+dt_beta			3.0
+
+# output
+outdir			./out/superresolution/stillLife/zero_cvpr3
+outfile			stillLife_zero_cvpr3.png
+
+

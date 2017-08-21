@@ -1,0 +1,29 @@
+# light field configuration
+lf_name			./in/war_rig/v_%02i.png
+tau_name		./in/war_rig/tau_%02i.pfm
+dpart_name		./in/war_rig/partial_tau_%02i.pfm
+depth_name		./in/war_rig/v_%02i.exr
+cam_name		./in/war_rig/%08i.txt
+ply_name		./in/war_rig/war_rig.ply
+
+s_min			0
+s_max			8
+s_rmv			4
+
+dsf			3
+nchannels		3
+ks			3
+
+# superresolution algorithm params
+lambda	   	   	0.1
+lambda_max_factor  	100.0
+niter		   	100
+
+ugrad_thres 1.
+sigma_sensor 1.
+
+# output
+outdir			./out/superresolution/war_rig
+outfile			war_rig.png
+
+

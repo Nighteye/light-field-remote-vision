@@ -1,0 +1,27 @@
+# light field configuration
+lf_name				./in/hci_lf/blender/buddha/3x3/v_%02i.png
+tau_name			./in/hci_lf/blender/buddha/3x3/tau_%02i.pfm
+dpart_name			./in/hci_lf/blender/buddha/3x3/partial_tau_%02i.pfm
+
+s_min			0
+s_max			8
+s_rmv			4
+
+dsf			3
+nchannels		3
+ks			3
+
+# superresolution algorithm params
+lambda	   	   	0.01
+lambda_max_factor  	100.0
+dtterm_param		2.0
+niter		   	100
+
+ugrad_threshold 0.
+sigma_sensor 1.
+
+# output
+outdir			./out/superresolution/buddha/3x3
+outfile			buddha_3x3.png
+
+

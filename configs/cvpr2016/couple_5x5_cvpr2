@@ -1,0 +1,22 @@
+config 			./configs/cvpr2016/common_parameters
+
+# light field configuration
+lf_name				./in/hci_lf/gantry/couple/5x5/v_%02i.png
+tau_name			./in/hci_lf/gantry/couple/5x5/tau_%02i.pfm
+dpart_name			./in/hci_lf/gantry/couple/5x5/partial_tau_%02i.pfm
+
+s_min			0
+s_max			24
+s_rmv			12
+
+dsf			3
+
+# superresolution algorithm params
+dt_alpha		1.0
+dt_beta			2.0
+
+# output
+outdir			./out/superresolution/couple/5x5_cvpr2
+outfile			couple_5x5_cvpr2.png
+
+

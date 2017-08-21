@@ -1,0 +1,251 @@
+TEMPLATE	 = lib
+VERSION          = 0.0.1
+CONFIG		+= qt debug staticlib
+
+HEADERS		= defs.h\
+                  \
+                  common/gsl_image.h\
+                  common/gsl_image_statistics.h\
+                  common/gsl_matrix_helper.h\
+                  common/gsl_matrix_derivatives.h\
+                  common/gsl_matrix_convolutions.h\
+                  common/parse_config.h\
+                  common/color_spaces.h\
+                  common/histogram.h\
+                  common/debug.h\
+                  common/profiler.h\
+                  common/hdf5_tools.h\
+                  common/menger_curvature.h\
+                  \
+                  cuda/cuda_interface.h\
+                  cuda/cuda_helper.h\
+                  cuda/cuda_reduce.h\
+                  cuda/simplex_reprojection.h\
+                  cuda/cuda_kernels.cuh\
+                  cuda/cuda_convolutions.h\
+                  cuda/cuda_convolutions.cuh\
+                  cuda/cuda_image_processing.h\
+                  cuda/cuda_image_processing.cuh\
+                  cuda/cuda_volume_4d.h\
+                  cuda/cuda_volume_4d.cuh\
+                  \
+                  cocolib++/compute_api/compute_buffer.h\
+                  cocolib++/compute_api/compute_engine.h\
+                  cocolib++/compute_api/compute_grid.h\
+                  cocolib++/compute_api/compute_array.h\
+                  cocolib++/compute_api/reprojections.h\
+                  cocolib++/compute_api/kernels_algebra.h\
+                  cocolib++/compute_api/kernels_reprojections.h\
+                  cocolib++/compute_api/kernels_vtv.h\
+                  cocolib++/compute_api/kernels_multilabel.h\
+                  \
+                  cocolib++/compute_api_implementation_cuda/compute_api_implementation_cuda.h\
+                  \
+                  cocolib++/models/variational_model.h\
+                  cocolib++/models/inverse_problem.h\
+                  cocolib++/models/multilabel_problem.h\
+                  \
+                  cocolib++/regularizers/regularizer.h\
+                  cocolib++/regularizers/vtv_s.h\
+                  cocolib++/regularizers/vtv_f.h\
+                  cocolib++/regularizers/vtv_j.h\
+                  cocolib++/regularizers/tgv_2.h\
+                  cocolib++/regularizers/multilabel.h\
+                  cocolib++/regularizers/multilabel_potts.h\
+                  cocolib++/regularizers/multilabel_decision.h\
+                  \
+                  cocolib++/data_terms/data_term.h\
+                  cocolib++/data_terms/rof.h\
+                  cocolib++/data_terms/denoising.h\
+                  cocolib++/data_terms/deconvolution.h\
+                  cocolib++/data_terms/multilabel_linear_cost.h\
+                  \
+                  cocolib++/solvers/solver.h\
+                  cocolib++/solvers/solver_chambolle_pock.h\
+                  cocolib++/solvers/stopping_criterion.h\
+                  \
+                  anisotropic_diffusion/anisotropic_diffusion.h\
+                  anisotropic_diffusion/anisotropic_diffusion.cuh\
+                  \
+                  tv/tv_l2.h\
+                  tv/tv_l2.h\
+                  tv/tv_l2.cuh\
+                  tv/tv_convex.cuh\
+                  tv/tv_deblurring.h\
+                  tv/tv_deblurring.cuh\
+                  tv/tv_inpainting.h\
+                  tv/tv_inpainting.cuh\
+                  tv/tv_linear.h\
+                  tv/tv_linear.cuh\
+                  \
+                  vtv/vtv.h\
+                  vtv/vtv.cuh\
+                  #vtv/vtv_sr_greg.cuh\
+                  vtv/vtv_solvers.h\
+                  \
+                  tc/tc.h\
+                  tc/tc_deblurring.h\
+                  tc/tc_inpainting.h\
+                  tc/tc_linear.h\
+                  tc/tc_l2.h\
+                  tc/tc.cuh\
+                  tc/tc_arrays.cuh\
+                  tc/tc_energies.cuh\
+                  \
+                  multilabel/multilabel.h\
+                  multilabel/multilabel.cuh\
+                  multilabel/multilabel_dataterms.h\
+                  multilabel/multilabel_dataterms.cuh\
+                  multilabel/tv_multilabel.h\
+                  multilabel/tv_multilabel.cuh\
+                  multilabel/potts_multilabel_simplex.h\
+                  multilabel/potts_multilabel_simplex.cuh\
+                  multilabel/vectorial_multilabel.h\
+                  multilabel/vectorial_multilabel.cuh\
+                  multilabel/vectorial_multilabel_primal_prox_kernels.cu\
+                  multilabel/vectorial_multilabel_dual_prox_kernels.cu\
+                  \
+                  optic_flow/vtv_l1_optical_flow.h\
+                  optic_flow/vtv_l1_optical_flow_image.cuh\
+                  optic_flow/vtv_l1_optical_flow_helpers.cuh\
+ 
+ 
+
+SOURCES         = common/gsl_image.cpp\
+                  common/gsl_image_statistics.cpp\
+                  common/gsl_matrix_helper.cpp\
+                  common/gsl_matrix_derivatives.cpp\
+                  common/gsl_matrix_convolutions.cpp\
+                  common/parse_config.cpp\
+                  common/color_spaces.cpp\
+                  common/histogram.cpp\
+                  common/debug.cpp\
+                  common/profiler.cpp\
+                  common/menger_curvature.cpp\
+                  common/hdf5_tools.cpp\
+                  \
+                  cocolib++/compute_api/compute_array.cpp\
+                  cocolib++/compute_api/reprojections.cpp\
+                  cocolib++/compute_api/convolutions_api.cpp\
+                  \
+                  cocolib++/regularizers/regularizer.cpp\
+                  cocolib++/regularizers/vtv_s.cpp\
+                  cocolib++/regularizers/vtv_f.cpp\
+                  cocolib++/regularizers/vtv_j.cpp\
+                  cocolib++/regularizers/tgv_2.cpp\
+                  cocolib++/regularizers/multilabel.cpp\
+                  cocolib++/regularizers/multilabel_potts.cpp\
+                  cocolib++/regularizers/multilabel_decision.cpp\
+                  \
+                  cocolib++/data_terms/data_term.cpp\
+                  cocolib++/data_terms/rof.cpp\
+                  cocolib++/data_terms/denoising.cpp\
+                  cocolib++/data_terms/deconvolution.cpp\
+                  cocolib++/data_terms/multilabel_linear_cost.cpp\
+                  \
+                  cocolib++/models/variational_model.cpp\
+                  cocolib++/models/inverse_problem.cpp\
+                  cocolib++/models/multilabel_problem.cpp\
+                  \
+                  cocolib++/solvers/solver.cpp\
+                  cocolib++/solvers/solver_chambolle_pock.cpp\
+                  cocolib++/solvers/stopping_criterion.cpp
+                  
+
+CUDA_SOURCES    = cuda/cuda_interface.cu\
+                  cuda/cuda_helper.cu\
+                  cuda/cuda_convolutions.cu\
+                  cuda/cuda_reduce.cu\
+                  cuda/simplex_reprojection.cu\
+                  cuda/cuda_kernels.cu\
+                  cuda/cuda_image_processing.cu\
+                  cuda/cuda_volume_4d.cu\
+                  cuda/cuda_coco_algorithms.cu\
+                  \
+                  cocolib++/compute_api_implementation_cuda/compute_buffer.cu\
+                  cocolib++/compute_api_implementation_cuda/compute_engine.cu\
+                  cocolib++/compute_api_implementation_cuda/compute_grid.cu\
+                  cocolib++/compute_api_implementation_cuda/kernels_vtv.cu\
+                  cocolib++/compute_api_implementation_cuda/kernels_reprojections.cu\
+                  cocolib++/compute_api_implementation_cuda/kernels_algebra.cu\
+                  cocolib++/compute_api_implementation_cuda/kernels_multilabel.cu\
+                  cocolib++/compute_api_implementation_cuda/convolutions.cu\
+                  \
+                  anisotropic_diffusion/anisotropic_diffusion.cu\
+                  \
+                  tv/tv_l2.cu\
+                  tv/tv_l2_pd_project.cu\
+                  tv/tv_l2_pd_semi_implicit.cu\
+                  tv/tv_l2_fgp.cu\
+                  tv/tv_convex.cu\
+                  tv/tv_convex_fista.cu\
+                  tv/tv_deblurring.cu\
+                  tv/tv_inpainting.cu\
+                  tv/tv_linear.cu\
+                  \
+                  vtv/vtv.cu\
+                  vtv/vtv_rof.cu\
+                  vtv/vtv_deblurring.cu\
+                  vtv/vtv_inpainting.cu\
+                  vtv/vtv_sr.cu\
+                  #vtv/vtv_sr_greg.cu\
+                  #vtv/vtv_sr_unstructured.cu\
+                  vtv/vtv_zooming.cu\
+                  vtv/vtv_rof_sum.cu\
+                  \
+                  tc/tc.cu\
+                  tc/tc_arrays.cu\
+                  tc/tc_energies.cu\
+                  tc/tc_l2.cu\
+                  tc/tc_linear.cu\
+                  tc/tc_inpainting.cu\
+                  tc/tc_deblurring.cu\
+                  \
+                  multilabel/multilabel.cu\
+                  multilabel/multilabel_dataterms.cu\
+                  multilabel/tv_multilabel.cu\
+                  multilabel/potts_multilabel_simplex.cu\
+                  multilabel/vectorial_multilabel.cu\
+                  \
+                  optic_flow/vtv_l1_optical_flow.cu\
+                  optic_flow/vtv_l1_optical_flow_image.cu\
+                  optic_flow/vtv_l1_optical_flow_helpers.cu
+
+
+DISTFILES = README\
+            relink\
+            \
+            common/makefile\
+            cuda/makefile\
+            tv/makefile\
+            vtv/makefile\
+            tc/makefile
+
+
+TARGET		= cocolib
+
+include("../extra_qmake_flags.pri")
+include("../extra_nvcc_flags.pri")
+include("../extra_libs.pri")
+include("../nvcc_link.pri")
+
+QMAKE_CXXFLAGS += -I.
+
+linux-g++: LIBS += -lglut -lGL
+macx-g++: LIBS+= -framework GLUT
+
+OBJECTS_DIR = ./obj
+
+
+########################################################################
+#  CUDA
+########################################################################
+
+cuda.output = ${OBJECTS_DIR}${QMAKE_FILE_BASE}_cuda.obj
+cuda.commands = nvcc -c $$NVFLAGS -Xcompiler $$join(QMAKE_CXXFLAGS,",") $$join(INCLUDEPATH,'" -I "','-I "','"') ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}
+cuda.dependency_type = TYPE_C
+cuda.depend_command = nvcc -M -Xcompiler $$join(QMAKE_CXXFLAGS,",") $$join(INCLUDEPATH,'" -I "','-I "','"') ${QMAKE_FILE_NAME} | sed "s_^.*:__" | sed "s_^\\ *__" | tr -d '\\n'
+
+cuda.input = CUDA_SOURCES
+QMAKE_EXTRA_COMPILERS += cuda
+########################################################################

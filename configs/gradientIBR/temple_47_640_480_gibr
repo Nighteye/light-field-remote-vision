@@ -1,0 +1,36 @@
+config 			./configs/gradientIBR/common_parameters
+
+width			640
+height			480
+
+# lumigraph rendering, if so then lumi_name must not be empty, if not deform_name and dpart_name must not be empty
+lumigraph		0
+
+# Compute warps from mesh (mve scene)
+# INPUT
+mve_name		./in/middlebury/temple_mve/mve_out_47_640_480
+
+# OUTPUT
+lf_name			./in/greg_datasets/temple_coco/temple_47_640_480_gibr/v_%02i.png
+tau_name		./in/greg_datasets/temple_coco/temple_47_640_480_gibr/tau_%02i.pfm
+dpart_name		./in/greg_datasets/temple_coco/temple_47_640_480_gibr/partial_tau_%02i.pfm
+deform_name		./in/greg_datasets/temple_coco/temple_47_640_480_gibr/deform_weights_%02i.pfm
+depth_name		./in/greg_datasets/temple_coco/temple_47_640_480_gibr/depth_%02i.pfm
+depthFromPC_name	./in/greg_datasets/temple_coco/temple_47_640_480_gibr/depthFromPC_%02i.pfm
+
+# PARAMETERS
+
+
+# Cocolib, IBR
+init_name		./out/gradientIBR/temple/temple_47_640_480_gibr/u_init_filled.pfm
+
+s_min			0
+s_max			46
+s_rmv			0
+
+dsf			1
+
+# output
+outdir			./out/gradientIBR/temple/temple_47_640_480_gibr
+outfile			temple_47_640_480_gibr.png
+

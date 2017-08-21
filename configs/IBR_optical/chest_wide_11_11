@@ -1,0 +1,33 @@
+config 			./configs/IBR_optical/common_parameters
+algorithm		IBR_optical
+
+# IMAGE SIZE
+width			3888
+height			2592
+
+# WINDOW SIZE
+
+# wider
+#window_width_1		1458
+#window_width_2		2430
+#window_height_1		1296
+#window_height_2		1944
+
+#window_width_1		$((6*width/16))
+#window_width_2		$((10*width/16))
+#window_height_1		$((8*height/16))
+#window_height_2		$((12*height/16))
+
+# VIEW RANGE
+s_min			4
+s_max			12
+s_rmv			11
+t_min			4
+t_max			12
+t_rmv			11
+
+# INPUT
+mve_name		./in/stanford/chest_original/mve_out_289_3888_2592
+
+# OUTPUT
+outdir			out/IBR_optical/chest_wide_cropped

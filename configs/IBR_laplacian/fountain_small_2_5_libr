@@ -1,0 +1,19 @@
+config 			./configs/IBR_laplacian/common_parameters
+algorithm		IBR_laplacian
+
+width			768
+height			512
+
+# Compute warps from mesh (mve scene)
+# INPUT
+mve_name		./in/strecha_datasets/fountain_mve/mve_out_11_768_512
+
+# OUTPUT
+
+scale_min		2
+scale_max		2
+
+s_min			0
+s_max			10
+s_rmv			5
+

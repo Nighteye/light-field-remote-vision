@@ -1,0 +1,15 @@
+#!/bin/bash
+echo "*************************************************"
+echo "**                                             **"
+echo "** This script will install all packages you   **"
+echo "** need to compile cocolib and the examples    **"
+echo "** on Ubuntu-based Linux distributions.        **"
+echo "** Tested on Mint too, it works, might work    **"
+echo "** on other distros with apt, too.             **"
+echo "**                                             **"
+echo "** Then, run './configure.sh'.                 **"
+echo "**                                             **"
+echo "** The script needs 'sudo' rights to continue. **"
+echo "**                                             **"
+echo "*************************************************"
+sudo apt-get install g++ libqt4-dev libgsl0-dev libann-dev zlib1g-dev libhdf5-serial-dev

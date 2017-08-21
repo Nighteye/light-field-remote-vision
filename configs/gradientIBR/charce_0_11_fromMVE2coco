@@ -1,0 +1,24 @@
+config 			./configs/gradientIBR/common_parameters
+algorithm		fromMVE2coco
+
+width			1680
+height			1120
+
+# Compute warps from mesh (mve scene)
+# INPUT
+mve_name		./in/greg_datasets/charce_mve/mve_out_13_1680_1120
+
+# OUTPUT
+lf_name			./in/greg_datasets/charce_coco/charce_0_11/v_%02i.png
+tau_name		./in/greg_datasets/charce_coco/charce_0_11/tau_%02i.pfm
+dpart_name		./in/greg_datasets/charce_coco/charce_0_11/partial_tau_%02i.pfm
+uWarped_name		./in/greg_datasets/charce_coco/charce_0_11/uWarped_%02i.pfm
+uDepth_name		./in/greg_datasets/charce_coco/charce_0_11/uDepth.pfm
+
+scale_min		0
+scale_max		0
+
+s_min			0
+s_max			12
+s_rmv			11
+

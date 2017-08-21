@@ -1,0 +1,28 @@
+config 			./configs/IBR_optical/common_parameters
+algorithm		IBR_optical
+
+# IMAGE SIZE
+width			3888
+height			2592
+
+# WINDOW SIZE
+
+# wider
+#window_width_1		1458
+#window_width_2		2430
+#window_height_1		972
+#window_height_2		1620
+
+# VIEW RANGE
+s_min			4
+s_max			12
+s_rmv			8
+t_min			4
+t_max			12
+t_rmv			8
+
+# INPUT
+mve_name		./in/stanford/bracelet_original/mve_out_289_3888_2592
+
+# OUTPUT
+outdir			out/IBR_optical/bracelet_wide_cropped

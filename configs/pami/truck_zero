@@ -1,0 +1,23 @@
+config 			./configs/pami/common_parameters
+
+# light field configuration
+lf_name				./in/stanford/truck_lf/zero/v_%02i.png
+tau_name			./in/stanford/truck_lf/zero/tau_%02i.pfm
+dpart_name			./in/stanford/truck_lf/zero/partial_tau_%02i.pfm
+
+s_min			0
+s_max			24
+s_rmv			12
+
+dsf			1
+
+# output
+outdir			./out/pami/truck_lf/zero
+outfile			truck_lf_zero.png
+
+# overwrite
+lambda	   	   	0.2
+lambda_max_factor  	100.0
+niter		   	200
+
+

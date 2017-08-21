@@ -1,0 +1,23 @@
+config 			./configs/gradientIBR/common_parameters
+
+width			1188
+height			792
+
+# OUTPUT
+lf_name			./in/greg_datasets/hercule_coco/hercule_1_0/v_%02i.png
+tau_name		./in/greg_datasets/hercule_coco/hercule_1_0/tau_%02i.pfm
+dpart_name		./in/greg_datasets/hercule_coco/hercule_1_0/partial_tau_%02i.pfm
+
+# PARAMETERS
+dt_alpha		0.1
+dt_beta			0.5
+lambda	   	   	0.002
+
+s_min			0
+s_max			24
+s_rmv			0
+
+# output
+outdir			./out/gradientIBR/hercule/hercule_1_0
+outfile			hercule_1_0_01_05_002.png
+

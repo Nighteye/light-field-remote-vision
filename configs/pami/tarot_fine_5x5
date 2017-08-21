@@ -1,0 +1,23 @@
+config 			./configs/pami/common_parameters
+
+# light field configuration
+lf_name				./in/stanford/tarot_fine_lf/5x5/v_%02i.png
+tau_name			./in/stanford/tarot_fine_lf/5x5/tau_%02i.pfm
+dpart_name			./in/stanford/tarot_fine_lf/5x5/partial_tau_%02i.pfm
+
+s_min			0
+s_max			24
+s_rmv			12
+
+dsf			3
+
+# output
+outdir			./out/pami/tarot_fine_lf/5x5
+outfile			tarot_fine_lf_5x5.png
+
+# overwrite
+lambda	   	   	0.1
+lambda_max_factor  	100.0
+niter		   	200
+
+

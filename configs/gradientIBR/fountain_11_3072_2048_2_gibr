@@ -1,0 +1,41 @@
+config 			./configs/gradientIBR/common_parameters
+
+width			3072
+height			2048
+
+# lumigraph rendering, if so then lumi_name must not be empty, if not deform_name and dpart_name must not be empty
+lumigraph		0
+
+# Compute warps from mesh (mve scene)
+# INPUT
+mve_name		./in/strecha_datasets/fountain_mve/mve_out_11_3072_2048_2
+
+# OUTPUT
+lf_name			./in/strecha_datasets/fountain_coco/fountain_11_3072_2048_2_gibr/v_%02i.png
+tau_name		./in/strecha_datasets/fountain_coco/fountain_11_3072_2048_2_gibr/tau_%02i.pfm
+dpart_name		./in/strecha_datasets/fountain_coco/fountain_11_3072_2048_2_gibr/partial_tau_%02i.pfm
+deform_name		./in/strecha_datasets/fountain_coco/fountain_11_3072_2048_2_gibr/deform_weights_%02i.pfm
+
+DEPTH FILTERING
+scale			2
+depth_name		./in/strecha_datasets/fountain_coco/fountain_11_3072_2048_2_gibr/depth_%02i.pfm
+depthFromPC_name	./in/strecha_datasets/fountain_coco/fountain_11_3072_2048_2_gibr/depthFromPC_%02i.pfm
+depthFromMVE_name	./in/strecha_datasets/fountain_coco/fountain_11_3072_2048_2_gibr/depthFromMVE_%02i.pfm
+depthSuper_name	        ./in/strecha_datasets/fountain_coco/fountain_11_3072_2048_2_gibr/depthSuper_%02i.pfm
+
+# PARAMETERS
+
+
+# Cocolib, IBR
+#init_name		./out/gradientIBR/fountain/fountain_11_3072_2048_2_gibr/u_init_filled.pfm
+
+s_min			0
+s_max			10
+s_rmv			5
+
+dsf			1
+
+# output
+outdir			./out/gradientIBR/fountain/fountain_11_3072_2048_2_gibr
+outfile			fountain_11_3072_2048_2_gibr.png
+

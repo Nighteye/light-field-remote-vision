@@ -1,0 +1,42 @@
+COCOLIB is a library for convex continuous optimization,
+focusing on the minimization of functionals of the type
+
+E(u) = J(u) + F(u)
+
+where u is an image (i.e. vector-valued function on an interval),
+J is a convex and closed regularizer, and F a convex and closed
+data term (e.g. inverse problems, inpainting, segmentation ...).
+
+
+COCOLIB is hosted on SourceForge. Check the homepage for the most
+recent version and documentation:
+
+https://sourceforge.net/p/cocolib/
+
+Offline documentation is available in "../docs".
+
+This is the library directory. From here, you can build both
+the library "cocolib/libcocolib.a" via
+
+> qmake cocolib.pro
+> make
+
+
+
+
+
+**  Copyright (C) 2011 Bastian Goldluecke
+
+**  COCOLIB is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+    
+**  This program is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+   
+**  You should have received a copy of the GNU General Public License
+**  along with this program in the file "LICENSE".
+**  If not, see <http://www.gnu.org/licenses/>.

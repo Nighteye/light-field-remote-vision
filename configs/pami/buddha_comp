@@ -1,0 +1,18 @@
+config 			./configs/pami/common_parameters
+
+# light field configuration
+lf_name				./in/hci_lf/blender/buddha/comp/v_%02i.png
+tau_name			./in/hci_lf/blender/buddha/comp/tau_%02i.pfm
+dpart_name			./in/hci_lf/blender/buddha/comp/partial_tau_%02i.pfm
+
+s_min			0
+s_max			8
+s_rmv			4
+
+dsf			1
+
+# output
+outdir			./out/pami/buddha/comp
+outfile			buddha_comp.png
+
+

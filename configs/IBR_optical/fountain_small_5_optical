@@ -1,0 +1,21 @@
+config 			./configs/IBR_optical/common_parameters
+algorithm		IBR_optical
+
+# IMAGE SIZE
+width			768
+height			512
+
+pyramidHeight		8
+computeFlow		0
+
+# VIEW RANGE
+s_min			0
+s_max			10
+s_rmv			5
+
+# INPUT
+cameraName		./in/strecha_datasets/fountain_mve/mve_out_11_768_512/views/view_%04i.mve/meta.ini
+imageName		./in/strecha_datasets/fountain_mve/mve_out_11_768_512/views/view_%04i.mve/undistorted.png
+
+# OUTPUT
+outdir			out/IBR_optical/fountain_small_5_optical

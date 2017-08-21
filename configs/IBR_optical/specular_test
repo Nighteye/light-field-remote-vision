@@ -1,0 +1,21 @@
+config 			./configs/IBR_optical/common_parameters
+algorithm		IBR_optical
+
+# IMAGE SIZE
+width			800
+height			600
+
+pyramidHeight		8
+computeFlow		1
+
+# VIEW RANGE
+s_min			0
+s_max			19
+s_rmv			0
+
+# INPUT
+cameraName		./in/greg_datasets/specular_test/v_%02i.ini
+imageName		./in/greg_datasets/specular_test/v_%02i.png
+
+# OUTPUT
+outdir			out/IBR_optical/specular_test_0_optical

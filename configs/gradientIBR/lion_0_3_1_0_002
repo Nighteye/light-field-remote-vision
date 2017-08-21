@@ -1,0 +1,22 @@
+config 			./configs/gradientIBR/common_parameters
+
+width			1680
+height			1120
+
+# OUTPUT
+lf_name			./in/greg_datasets/lion_coco/lion_0_3/v_%02i.png
+tau_name		./in/greg_datasets/lion_coco/lion_0_3/tau_%02i.pfm
+dpart_name		./in/greg_datasets/lion_coco/lion_0_3/partial_tau_%02i.pfm
+
+# PARAMETERS
+dt_alpha		1.0
+dt_beta			0.0
+lambda	   	   	0.002
+
+s_min			0
+s_max			12
+s_rmv			3
+
+# output
+outdir			./out/gradientIBR/lion/lion_0_3
+outfile			lion_0_3_1_0_002.png

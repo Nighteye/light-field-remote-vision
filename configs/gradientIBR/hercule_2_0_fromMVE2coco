@@ -1,0 +1,24 @@
+config 			./configs/gradientIBR/common_parameters
+algorithm		fromMVE2coco
+
+width			1188
+height			792
+
+# Compute warps from mesh (mve scene)
+# INPUT
+mve_name		./in/greg_datasets/hercule_mve/mve_out_28_1188_792
+
+# OUTPUT
+lf_name			./in/greg_datasets/hercule_coco/hercule_2_0/v_%02i.png
+tau_name		./in/greg_datasets/hercule_coco/hercule_2_0/tau_%02i.pfm
+dpart_name		./in/greg_datasets/hercule_coco/hercule_2_0/partial_tau_%02i.pfm
+uWarped_name		./in/greg_datasets/hercule_coco/hercule_2_0/uWarped_%02i.pfm
+uDepth_name		./in/greg_datasets/hercule_coco/hercule_2_0/uDepth.pfm
+
+scale_min		2
+scale_max		2
+
+s_min			0
+s_max			27
+s_rmv			0
+

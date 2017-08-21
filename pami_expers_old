@@ -1,0 +1,96 @@
+
+# In this version we decimate the input lightfield, and compare the final image with the original one
+# This evaluation has still a 'but': the downsampling convolution kernel is a PERFECT box filer.
+
+# When the original images do not have a size % 3 they are cropped for evaluation
+ # 'convert' is from the ImageMagick toolkit (www.imagemagick.org)
+
+#########################
+ x3 en 5x5 with COMP DISP
+#########################
+
+# BUDDHA
+#./lightfields -config configs/disparity_epi_buddha
+
+./lightfields -config configs/sr_deci_buddha_5x5_ours
+./lightfields -config configs/sr_deci_buddha_5x5_gold
+
+./psnr in/hci_lf/blender/buddha/lowRes_centerView.png out/superresolution/expes/AUX/deci/sr_deci_buddha_5x5_gold.png
+./psnr in/hci_lf/blender/buddha/lowRes_centerView.png out/superresolution/expes/AUX/deci/sr_deci_buddha_5x5_ours.png
+
+# HORSES
+#./lightfields -config configs/disparity_epi_horses
+
+#./lightfields -config configs/sr_deci_horses_5x5_ours
+#./lightfields -config configs/sr_deci_horses_5x5_gold
+
+#convert out/superresolution/expes/sr_horses_5x5_ours.png -gamma .45455 -resize 1024x576 -gamma 2.2 out/superresolution/expes/sr_horses_5x5_ours.png
+#convert out/superresolution/expes/sr_horses_5x5_gold.png -gamma .45455 -resize 1024x576 -gamma 2.2 out/superresolution/expes/sr_horses_5x5_gold.png
+
+#./psnr in/hci_lf/blender/horses/lowRes_centerView.png out/superresolution/expes/sr_horses_5x5_gold.png
+#./psnr in/hci_lf/blender/horses/lowRes_centerView.png out/superresolution/expes/sr_horses_5x5_ours.png
+
+# STILL
+./lightfields -config configs/disparity_epi_still
+
+./lightfields -config configs/sr_deci_still_5x5_ours  
+./lightfields -config configs/sr_deci_still_5x5_gold
+
+./psnr in/hci_lf/blender/stillLife/lowRes_centerView.png out/superresolution/expes/AUX/deci/sr_deci_still_5x5_gold.png
+./psnr in/hci_lf/blender/stillLife/lowRes_centerView.png out/superresolution/expes/AUX/deci/sr_deci_still_5x5_ours.png
+
+# MARIA 
+./lightfields -config configs/disparity_epi_maria
+./lightfields -config configs/sr_deci_maria_5x5_comp_ours
+./lightfields -config configs/sr_deci_maria_5x5_comp_gold
+
+./psnr in/hci_lf/gantry/maria/lowRes_centerView.png out/superresolution/expes/AUX/deci/sr_deci_maria_5x5_comp_gold.png
+./psnr in/hci_lf/gantry/maria/lowRes_centerView.png out/superresolution/expes/AUX/deci/sr_deci_maria_5x5_comp_ours.png
+
+# COUPLE
+./lightfields -config configs/disparity_epi_couple
+
+./lightfields -config configs/sr_deci_couple_5x5_comp_ours
+./lightfields -config configs/sr_deci_couple_5x5_comp_gold
+
+convert in/hci_lf/gantry/couple/lowRes_centerView.png -crop 897x897+0+0 in/hci_lf/gantry/couple/lowRes_centerView_crop.png
+
+./psnr in/hci_lf/gantry/couple/lowRes_centerView_crop.png out/superresolution/expes/AUX/deci/sr_deci_couple_5x5_comp_gold.png
+./psnr in/hci_lf/gantry/couple/lowRes_centerView_crop.png out/superresolution/expes/AUX/deci/sr_deci_couple_5x5_comp_ours.png
+
+
+# TRUCK
+./lightfields -config configs/stanford/disparity_epi_truck  
+
+./lightfields -config configs/sr_deci_truck_5x5_ours 
+./lightfields -config configs/sr_deci_truck_5x5_gold
+
+convert in/stanford/truck_lf/lowRes_centerView.png -crop 639x480+0+0 in/stanford/truck_lf/lowRes_centerView_crop.png
+
+./psnr in/stanford/truck_lf/lowRes_centerView_crop.png out/superresolution/expes/AUX/deci/sr_deci_truck_5x5_comp_gold.png
+./psnr in/stanford/truck_lf/lowRes_centerView_crop.png out/superresolution/expes/AUX/deci/sr_deci_truck_5x5_comp_ours.png
+
+
+# GUM NUTS
+./lightfields -config configs/stanford/disparity_epi_gum_nuts  
+
+./lightfields -config configs/sr_deci_gum_nuts_5x5_gold
+./lightfields -config configs/sr_deci_gum_nuts_5x5_ours
+
+convert in/stanford/gum_nuts_lf/lowRes_centerView.png -crop 639x768+0+0 in/stanford/gum_nuts_lf/lowRes_centerView_crop.png
+
+./psnr in/stanford/gum_nuts_lf/lowRes_centerView_crop.png out/superresolution/expes/AUX/deci/sr_deci_gum_nuts_5x5_comp_gold.png
+./psnr in/stanford/gum_nuts_lf/lowRes_centerView_crop.png out/superresolution/expes/AUX/deci/sr_deci_gum_nuts_5x5_comp_ours.png
+
+
+# TAROT
+./lightfields -config configs/stanford/disparity_epi_tarot_fine
+
+./lightfields -config configs/sr_deci_tarot_fine_5x5_ours
+./lightfields -config configs/sr_deci_tarot_fine_5x5_gold
+
+convert in/stanford/tarot_fine_lf/lowRes_centerView.png -crop 510x510+0+0 in/stanford/tarot_fine_lf/lowRes_centerView_crop.png
+
+./psnr in/stanford/tarot_fine_lf/lowRes_centerView_crop.png out/superresolution/expes/AUX/deci/sr_deci_tarot_fine_5x5_comp_gold.png
+./psnr in/stanford/tarot_fine_lf/lowRes_centerView_crop.png out/superresolution/expes/AUX/deci/sr_deci_tarot_fine_5x5_comp_ours.png
+

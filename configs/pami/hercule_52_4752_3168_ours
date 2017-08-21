@@ -1,0 +1,31 @@
+config 			./configs/pami/common_parameters
+
+# lumigraph rendering, if so then lumi_name must not be empty, if not deform_name and dpart_name must not be empty
+lumigraph		0
+
+# Compute warps from mesh (mve scene)
+# INPUT
+mve_name		./in/greg_datasets/hercule_mve/mve_out_52_4752_3168
+
+# OUTPUT
+lf_name			./in/greg_datasets/hercule_coco/hercule_52_4752_3168_ours/v_%02i.png
+tau_name		./in/greg_datasets/hercule_coco/hercule_52_4752_3168_ours/tau_%02i.pfm
+dpart_name		./in/greg_datasets/hercule_coco/hercule_52_4752_3168_ours/partial_tau_%02i.pfm
+deform_name		./in/greg_datasets/hercule_coco/hercule_52_4752_3168_ours/deform_weights_%02i.pfm
+
+# PARAMETERS
+
+
+# Cocolib, IBR
+init_name		./out/pami/hercule/hercule_52_4752_3168_ours/u_init_filled.pfm
+
+s_min			0
+s_max			51
+s_rmv			0
+
+dsf			1
+
+# output
+outdir			./out/pami/hercule/hercule_52_4752_3168_ours
+outfile			hercule/hercule_52_4752_3168_ours.png
+

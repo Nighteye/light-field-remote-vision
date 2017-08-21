@@ -1,0 +1,21 @@
+config 			./configs/IBR_optical/common_parameters
+algorithm		IBR_optical
+flowAlg			pixflow_ultra
+
+# IMAGE SIZE
+width			3888
+height			2592
+
+# VIEW RANGE
+s_min			8
+s_max			10
+s_rmv			0
+t_min			8
+t_max			10
+t_rmv			0
+
+# INPUT
+mve_name		./in/stanford/tarot_coarse_original/mve_out_289_3888_2592
+
+# OUTPUT
+outdir			out/IBR_optical/tarot_coarse_band_ultra

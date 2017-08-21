@@ -1,0 +1,21 @@
+config 			./configs/refocus/common_parameters
+algorithm		refocus
+
+# IMAGE SIZE
+width			3888
+height			2592
+
+# VIEW RANGE
+s_min			8
+s_max			10
+s_rmv			9
+t_min			8
+t_max			10
+t_rmv			9
+
+# INPUT
+cameraName		./in/stanford/tarot_coarse_original/v_%02i_%02i.ini
+imageName		./in/stanford/tarot_coarse_original/v_%02i_%02i.png
+
+# OUTPUT
+outdir			out/refocus/tarot_coarse_original_refocus
