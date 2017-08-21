@@ -3,7 +3,13 @@ ULF.pro.user.e9e57b8
 Makefile
 in
 out
+obj
+*.pro
 *.pri
+*.pro.user
+*.o
+*.a
+
 cocolib/Makefile
 cocolib/cocolib/Makefile
 cocolib/cocolib/anisotropic_diffusion/makefile
