@@ -1305,6 +1305,178 @@ void LFScene::testTriangulation(uint x, uint y) {
     assert(false);
 }
 
+void LFScene::curveFittingDLT() {
+
+    const bool verbose = false;
+    const uint nbPixels = _camWidth*_camHeight;
+
+    assert(_windowWidth > 0 && _windowHeight > 0);
+
+    // INIT MAPS
+
+    std::vector<cv::Point3f> parameter3Map(nbPixels);
+    std::vector<cv::Point2f> parameterAlpha2Map(nbPixels);
+    std::vector<cv::Point2f> parameterBeta2Map(nbPixels);
+    std::vector<cv::Point2f > parameter6AlphauMap(nbPixels);
+    std::vector<cv::Point2f > parameter6AlphavMap(nbPixels);
+    std::vector<cv::Point2f> parameter6BetaMap(nbPixels);
+    std::vector<float> finalCost3Map(nbPixels);
+    std::vector<float> finalCost4Map(nbPixels);
+    std::vector<float> finalCost6Map(nbPixels);
+
+    for(uint y = 0 ; y < (uint)_camHeight ; ++y) {
+
+        for(uint x = 0 ; x < (uint)_camWidth ; ++x) {
+
+            const uint idx = y*_camWidth + x;
+
+            parameter3Map[idx].x = 0.0; parameter3Map[idx].y = 0.0; parameter3Map[idx].z = 0.0;
+            parameterAlpha2Map[idx].x = 0.0; parameterAlpha2Map[idx].y = 0.0;
+            parameterBeta2Map[idx].x = 0.0; parameterBeta2Map[idx].y = 0.0;
+            parameter6AlphauMap[idx].x = 0.0; parameter6AlphauMap[idx].y = 0.0;
+            parameter6AlphavMap[idx].x = 0.0; parameter6AlphavMap[idx].y = 0.0;
+            parameter6BetaMap[idx].x = 0.0; parameter6BetaMap[idx].y = 0.0;
+            finalCost3Map[idx] = 0.0;
+            finalCost4Map[idx] = 0.0;
+            finalCost6Map[idx] = 0.0;
+        }
+    }
+
+    Uint32 beginingLoop(0), endLoop(0), elapsedTime(0);
+    beginingLoop = SDL_GetTicks();
+
+    std::cout << "[";
+
+    for(uint y = _windowH1 ; y < _windowH2 ; ++y) {
+
+        for(uint x = _windowW1 ; x < _windowW2 ; ++x) {
+
+            if(verbose) {
+                if(x != 8*_camWidth/16 || y != 21*_camHeight/32) {
+                    continue;
+                }
+            }
+
+            const uint idx = y*_camWidth + x;
+            std::vector<cv::Point2f> flow;
+            std::vector<cv::Mat> R, R_transp, K, K_inv;
+            std::vector<cv::Point3f> C, t;
+
+            for(uint camIdx = 0 ; camIdx < _vCam.size() ; ++camIdx) {
+
+                if(camIdx == _centralIndex) { // remove target view (central)
+
+                    continue;
+                }
+
+                if(_flowedLightField[idx][camIdx].x >= 0 && _flowedLightField[idx][camIdx].y >= 0) {
+
+                    flow.push_back(_flowedLightField[idx][camIdx]);
+
+                    PinholeCamera v_k = _vCam[camIdx]->getPinholeCamera();
+                    glm::mat3 glmK = v_k._K;
+                    glm::mat3 glmR = v_k._R;
+                    glm::vec3 glmC = v_k._C;
+                    glm::vec3 glmt = v_k._t;
+                    K.push_back((cv::Mat_<float>(3,3) << glmK[0][0], glmK[1][0], glmK[2][0],
+                            glmK[0][1], glmK[1][1], glmK[2][1],
+                            glmK[0][2], glmK[1][2], glmK[2][2]));
+                    K_inv.push_back(K.back().inv());
+                    R.push_back((cv::Mat_<float>(3,3) << glmR[0][0], glmR[1][0], glmR[2][0],
+                            glmR[0][1], glmR[1][1], glmR[2][1],
+                            glmR[0][2], glmR[1][2], glmR[2][2]));
+                    R_transp.push_back((cv::Mat_<float>(3,3) << glmR[0][0], glmR[0][1], glmR[0][2],
+                            glmR[1][0], glmR[1][1], glmR[1][2],
+                            glmR[2][0], glmR[2][1], glmR[2][2]));
+                    C.push_back(cv::Point3f((float)glmC[0], (float)glmC[1], (float)glmC[2]));
+                    t.push_back(cv::Point3f((float)glmt[0], (float)glmt[1], (float)glmt[2]));
+                }
+            }
+
+            //            assert(flow.size() >= 8);
+            assert(R.size() == R_transp.size()); // nb samples
+            assert(R_transp.size() == K.size());
+            assert(K.size() == K_inv.size());
+            assert(K_inv.size() == C.size());
+            assert(C.size() == t.size());
+            assert(t.size() == flow.size());
+
+            //                if(x == 3363 && y == 15) {
+            //                    testTriangulation(x, y);
+            //                }
+
+            std::vector<float> parameters3(3); // (a, bu, bv)
+            std::vector<float> parameters4(4); // (au, av, bu, bv)
+            std::vector<float> parameters6(6); // (aus, aut, avs, avt, bu, bv)
+            float finalCostLF(0.0);
+
+            triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters3, finalCostLF, verbose);
+            finalCost3Map[idx] = (float)finalCostLF;
+            triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters4, finalCostLF, verbose);
+            finalCost4Map[idx] = (float)finalCostLF;
+            triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters6, finalCostLF, verbose);
+            finalCost6Map[idx] = (float)finalCostLF;
+
+            parameter3Map[idx].x = (float)parameters3[0]; // a
+            parameter3Map[idx].y = (float)parameters3[1]; // bu
+            parameter3Map[idx].z = (float)parameters3[2]; // bv
+
+            parameterAlpha2Map[idx].x = (float)parameters4[0]; // au
+            parameterAlpha2Map[idx].y = (float)parameters4[1]; // av
+            parameterBeta2Map[idx].x = (float)parameters4[2]; // bu
+            parameterBeta2Map[idx].y = (float)parameters4[3]; // bv
+
+            parameter6AlphauMap[idx].x = (float)parameters6[0]; // aus
+            parameter6AlphauMap[idx].y = (float)parameters6[1]; // aut
+            parameter6AlphavMap[idx].x = (float)parameters6[2]; // avs
+            parameter6AlphavMap[idx].y = (float)parameters6[3]; // avt
+            parameter6BetaMap[idx].x = (float)parameters6[4]; // bu
+            parameter6BetaMap[idx].y = (float)parameters6[5]; // bv
+        }
+    }
+
+    std::cout << "]";
+
+    endLoop = SDL_GetTicks();
+    elapsedTime = endLoop - beginingLoop;
+    std::cout << "elapsedTime: " << elapsedTime << std::endl;
+
+    // SAVE PARAMETER MAPS
+    std::string parameter3MapName = _outdir + "/parameter3MapDLT.pfm";
+    std::cout << "Writing parameter map " << parameter3MapName  << std::endl;
+    savePFM(parameter3Map, _camWidth, _camHeight, parameter3MapName );
+
+    std::string parameterAlpha2MapName = _outdir + "/parameterAlpha2MapDLT.pfm";
+    std::cout << "Writing alpha parameter map " << parameterAlpha2MapName << std::endl;
+    savePFM(parameterAlpha2Map, _camWidth, _camHeight, parameterAlpha2MapName);
+    std::string parameterBeta2MapName = _outdir + "/parameterBeta2MapDLT.pfm";
+    std::cout << "Writing beta parameter map " << parameterBeta2MapName << std::endl;
+    savePFM(parameterBeta2Map, _camWidth, _camHeight, parameterBeta2MapName);
+
+    std::string parameter6AlphauMapName = _outdir + "/parameter6AlphauMapDLT.pfm";
+    std::cout << "Writing alpha u parameter map " << parameter6AlphauMapName << std::endl;
+    savePFM(parameter6AlphauMap, _camWidth, _camHeight, parameter6AlphauMapName);
+    std::string parameter6AlphavMapName = _outdir + "/parameter6AlphavMapDLT.pfm";
+    std::cout << "Writing alpha v parameter map " << parameter6AlphavMapName << std::endl;
+    savePFM(parameter6AlphavMap, _camWidth, _camHeight, parameter6AlphavMapName);
+    std::string parameter6BetaMapName = _outdir + "/parameter6BetaMapDLT.pfm";
+    std::cout << "Writing beta parameter map " << parameter6BetaMapName << std::endl;
+    savePFM(parameter6BetaMap, _camWidth, _camHeight, parameter6BetaMapName);
+
+    // SAVE FINAL COST MAPS
+    std::string finalCost3MapName = _outdir + "/finalCost3MapDLT.pfm";
+    std::cout << "Writing final cost (3 parameters) " << finalCost3MapName << std::endl;
+    savePFM(finalCost3Map, _camWidth, _camHeight, finalCost3MapName);
+
+    std::string finalCost4MapName = _outdir + "/finalCost4MapDLT.pfm";
+    std::cout << "Writing final cost (4 parameters) " << finalCost4MapName << std::endl;
+    savePFM(finalCost4Map, _camWidth, _camHeight, finalCost4MapName);
+
+    std::string finalCost6MapName = _outdir + "/finalCost6MapDLT.pfm";
+    std::cout << "Writing final cost (6 parameters) " << finalCost6MapName << std::endl;
+    savePFM(finalCost6Map, _camWidth, _camHeight, finalCost6MapName);
+}
+
 void LFScene::curveFitting() {
     
     const bool verbose = false;
@@ -2539,29 +2711,29 @@ void LFScene::renderLightFlowVideo() {
         sprintf( cameraNameChar, cameraName.c_str(), frame );
         loadTargetView(targetK, targetR, targetC, std::string(cameraNameChar));
         
-//        // update target camera
-//        float step = 100;
-//        PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 1]->getPinholeCamera();
-//        PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 1]->getPinholeCamera();
+        //        // update target camera
+        //        float step = 100;
+        //        PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 1]->getPinholeCamera();
+        //        PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 1]->getPinholeCamera();
         
-//        PinholeCamera targetCam = _vCam[_centralIndex]->getPinholeCamera(); // same K and R as central camera
-//        glm::mat3 glmTargetK = targetCam._K;
-//        glm::mat3 glmTargetR = targetCam._R;
-//        glm::vec3 glmTargetC = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
-//        glm::vec3 glmTargett = -glmTargetR * glmTargetC;
+        //        PinholeCamera targetCam = _vCam[_centralIndex]->getPinholeCamera(); // same K and R as central camera
+        //        glm::mat3 glmTargetK = targetCam._K;
+        //        glm::mat3 glmTargetR = targetCam._R;
+        //        glm::vec3 glmTargetC = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
+        //        glm::vec3 glmTargett = -glmTargetR * glmTargetC;
         
-//        targetK = (cv::Mat_<float>(3,3) << glmTargetK[0][0], glmTargetK[1][0], glmTargetK[2][0],
-//                glmTargetK[0][1], glmTargetK[1][1], glmTargetK[2][1],
-//                glmTargetK[0][2], glmTargetK[1][2], glmTargetK[2][2]);
-//        targetK_inv = targetK.inv();
-//        targetR = (cv::Mat_<float>(3,3) << glmTargetR[0][0], glmTargetR[1][0], glmTargetR[2][0],
-//                glmTargetR[0][1], glmTargetR[1][1], glmTargetR[2][1],
-//                glmTargetR[0][2], glmTargetR[1][2], glmTargetR[2][2]);
-//        targetR_transp = (cv::Mat_<float>(3,3) << glmTargetR[0][0], glmTargetR[0][1], glmTargetR[0][2],
-//                glmTargetR[1][0], glmTargetR[1][1], glmTargetR[1][2],
-//                glmTargetR[2][0], glmTargetR[2][1], glmTargetR[2][2]);
-//        targetC = cv::Point3f((float)glmTargetC[0], (float)glmTargetC[1], (float)glmTargetC[2]);
-//        targett = cv::Point3f((float)glmTargett[0], (float)glmTargett[1], (float)glmTargett[2]);
+        //        targetK = (cv::Mat_<float>(3,3) << glmTargetK[0][0], glmTargetK[1][0], glmTargetK[2][0],
+        //                glmTargetK[0][1], glmTargetK[1][1], glmTargetK[2][1],
+        //                glmTargetK[0][2], glmTargetK[1][2], glmTargetK[2][2]);
+        //        targetK_inv = targetK.inv();
+        //        targetR = (cv::Mat_<float>(3,3) << glmTargetR[0][0], glmTargetR[1][0], glmTargetR[2][0],
+        //                glmTargetR[0][1], glmTargetR[1][1], glmTargetR[2][1],
+        //                glmTargetR[0][2], glmTargetR[1][2], glmTargetR[2][2]);
+        //        targetR_transp = (cv::Mat_<float>(3,3) << glmTargetR[0][0], glmTargetR[0][1], glmTargetR[0][2],
+        //                glmTargetR[1][0], glmTargetR[1][1], glmTargetR[1][2],
+        //                glmTargetR[2][0], glmTargetR[2][1], glmTargetR[2][2]);
+        //        targetC = cv::Point3f((float)glmTargetC[0], (float)glmTargetC[1], (float)glmTargetC[2]);
+        //        targett = cv::Point3f((float)glmTargett[0], (float)glmTargett[1], (float)glmTargett[2]);
         
         // init buffers
         for(uint i = 0 ; i < outputImage3param.size() ; ++i) {
@@ -2784,11 +2956,11 @@ void LFScene::renderLightFlowLambertianVideo() {
 
         // TARGET CAM PARAMETERS
 
-//        std::string cameraName = _outdir + "/%08i.ini";
-//        char cameraNameChar[500];
-//        memset(cameraNameChar, 0, sizeof(cameraNameChar));
-//        sprintf( cameraNameChar, cameraName.c_str(), frame );
-//        loadTargetView(targetK, targetR, targetC, std::string(cameraNameChar));
+        //        std::string cameraName = _outdir + "/%08i.ini";
+        //        char cameraNameChar[500];
+        //        memset(cameraNameChar, 0, sizeof(cameraNameChar));
+        //        sprintf( cameraNameChar, cameraName.c_str(), frame );
+        //        loadTargetView(targetK, targetR, targetC, std::string(cameraNameChar));
 
         // update target camera
         float step = 100;
@@ -2800,8 +2972,8 @@ void LFScene::renderLightFlowLambertianVideo() {
         glmTargetK[0][0] += (float)frame * 600.0f;
         glmTargetK[1][1] = glmTargetK[0][0];
         glm::mat3 glmTargetR = targetCam._R;
-//        glm::vec3 glmTargetC = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
-//        glm::vec3 glmTargetC = targetCam._C + (float)frame * 2.5f * glm::vec3(0, 0, 1) + (float)frame * 0.5f * glm::vec3(0, 1, 0);
+        //        glm::vec3 glmTargetC = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
+        //        glm::vec3 glmTargetC = targetCam._C + (float)frame * 2.5f * glm::vec3(0, 0, 1) + (float)frame * 0.5f * glm::vec3(0, 1, 0);
         glm::vec3 glmTargetC = targetCam._C;
 
         targetK = (cv::Mat_<float>(3,3) << glmTargetK[0][0], glmTargetK[1][0], glmTargetK[2][0],
@@ -2851,34 +3023,34 @@ void LFScene::renderLightFlowLambertianVideo() {
                     projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage3param, weightMap3param, destPoint3param);
                 }
 
-//                // 4 PARAMETERS
-//                cv::Point2f destPoint4param = cv::Point2f(0.0, 0.0);
-//                const cv::Point2f alpha4param = mapAlpha4param[idx];
-//                const cv::Point2f beta4param = mapBeta4param[idx];
+                //                // 4 PARAMETERS
+                //                cv::Point2f destPoint4param = cv::Point2f(0.0, 0.0);
+                //                const cv::Point2f alpha4param = mapAlpha4param[idx];
+                //                const cv::Point2f beta4param = mapBeta4param[idx];
 
-//                splatProjection4param(destPoint4param, alpha4param, beta4param, targetK, targetR, targetC);
+                //                splatProjection4param(destPoint4param, alpha4param, beta4param, targetK, targetR, targetC);
 
-//                // interpolation (splatting)
-//                if(0.0 <= destPoint4param.x && destPoint4param.x < (float)_camWidth &&
-//                        0.0 <= destPoint4param.y && destPoint4param.y < (float)_camHeight) {
+                //                // interpolation (splatting)
+                //                if(0.0 <= destPoint4param.x && destPoint4param.x < (float)_camWidth &&
+                //                        0.0 <= destPoint4param.y && destPoint4param.y < (float)_camHeight) {
 
-//                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage4param, weightMap4param, destPoint4param);
-//                }
+                //                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage4param, weightMap4param, destPoint4param);
+                //                }
 
-//                // 6 PARAMETERS
-//                cv::Point2f destPoint6param = cv::Point2f(0.0, 0.0);
-//                const cv::Point2f alphau6param = mapAlphau6param[idx];
-//                const cv::Point2f alphav6param = mapAlphav6param[idx];
-//                const cv::Point2f beta6param = mapBeta6param[idx];
+                //                // 6 PARAMETERS
+                //                cv::Point2f destPoint6param = cv::Point2f(0.0, 0.0);
+                //                const cv::Point2f alphau6param = mapAlphau6param[idx];
+                //                const cv::Point2f alphav6param = mapAlphav6param[idx];
+                //                const cv::Point2f beta6param = mapBeta6param[idx];
 
-//                splatProjection6param(destPoint6param, alphau6param, alphav6param, beta6param, targetK, targetR, targetC);
+                //                splatProjection6param(destPoint6param, alphau6param, alphav6param, beta6param, targetK, targetR, targetC);
 
-//                // interpolation (splatting)
-//                if(0.0 <= destPoint6param.x && destPoint6param.x < (float)_camWidth &&
-//                        0.0 <= destPoint6param.y && destPoint6param.y < (float)_camHeight) {
+                //                // interpolation (splatting)
+                //                if(0.0 <= destPoint6param.x && destPoint6param.x < (float)_camWidth &&
+                //                        0.0 <= destPoint6param.y && destPoint6param.y < (float)_camHeight) {
 
-//                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage6param, weightMap6param, destPoint6param);
-//                }
+                //                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage6param, weightMap6param, destPoint6param);
+                //                }
             }
         }
 
@@ -2892,27 +3064,27 @@ void LFScene::renderLightFlowLambertianVideo() {
                     outputImage3param[idx] /= weightMap3param[idx];
                 }
 
-//                if(weightMap4param[idx] != 0) {
-//                    outputImage4param[idx] /= weightMap4param[idx];
-//                }
+                //                if(weightMap4param[idx] != 0) {
+                //                    outputImage4param[idx] /= weightMap4param[idx];
+                //                }
 
-//                if(weightMap6param[idx] != 0) {
-//                    outputImage6param[idx] /= weightMap6param[idx];
-//                }
+                //                if(weightMap6param[idx] != 0) {
+                //                    outputImage6param[idx] /= weightMap6param[idx];
+                //                }
             }
         }
 
         std::cout << "Hole filling" << std::endl;
         pushPull(_camWidth, _camHeight, outputImage3param, weightMap3param);
-//        pushPull(_camWidth, _camHeight, outputImage4param, weightMap4param);
-//        pushPull(_camWidth, _camHeight, outputImage6param, weightMap6param);
+        //        pushPull(_camWidth, _camHeight, outputImage4param, weightMap4param);
+        //        pushPull(_camWidth, _camHeight, outputImage6param, weightMap6param);
 
         // SAVE PNG OUTMUT FILES
 
         char tempCharArray[500];
-//        std::string outputImage3paramName = _outdir + "/output3param_%02lu_%02lu_%03lu.png";
-//        std::string outputImage4paramName = _outdir + "/output4param_%02lu_%02lu_%03lu.png";
-//        std::string outputImage6paramName = _outdir + "/output6param_%02lu_%02lu_%03lu.png";
+        //        std::string outputImage3paramName = _outdir + "/output3param_%02lu_%02lu_%03lu.png";
+        //        std::string outputImage4paramName = _outdir + "/output4param_%02lu_%02lu_%03lu.png";
+        //        std::string outputImage6paramName = _outdir + "/output6param_%02lu_%02lu_%03lu.png";
         std::string outputImage3paramName = _outdir + "/zoom3param_%02lu_%02lu_%03lu.png";
         std::string outputImage4paramName = _outdir + "/zoom4param_%02lu_%02lu_%03lu.png";
         std::string outputImage6paramName = _outdir + "/zoom6param_%02lu_%02lu_%03lu.png";
@@ -2922,15 +3094,15 @@ void LFScene::renderLightFlowLambertianVideo() {
         std::cout << "Save output image " << tempCharArray << std::endl;
         savePNG(outputImage3param, _camWidth, _camHeight, tempCharArray);
 
-//        memset(tempCharArray, 0, sizeof(tempCharArray));
-//        sprintf( tempCharArray, outputImage4paramName.c_str(), _sRmv, _tRmv, frame );
-//        std::cout << "Save output image " << tempCharArray << std::endl;
-//        savePNG(outputImage4param, _camWidth, _camHeight, tempCharArray);
+        //        memset(tempCharArray, 0, sizeof(tempCharArray));
+        //        sprintf( tempCharArray, outputImage4paramName.c_str(), _sRmv, _tRmv, frame );
+        //        std::cout << "Save output image " << tempCharArray << std::endl;
+        //        savePNG(outputImage4param, _camWidth, _camHeight, tempCharArray);
 
-//        memset(tempCharArray, 0, sizeof(tempCharArray));
-//        sprintf( tempCharArray, outputImage6paramName.c_str(), _sRmv, _tRmv, frame );
-//        std::cout << "Save output image " << tempCharArray << std::endl;
-//        savePNG(outputImage6param, _camWidth, _camHeight, tempCharArray);
+        //        memset(tempCharArray, 0, sizeof(tempCharArray));
+        //        sprintf( tempCharArray, outputImage6paramName.c_str(), _sRmv, _tRmv, frame );
+        //        std::cout << "Save output image " << tempCharArray << std::endl;
+        //        savePNG(outputImage6param, _camWidth, _camHeight, tempCharArray);
     }
 }
 

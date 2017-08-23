@@ -152,7 +152,11 @@ public:
     // print some info
     void testTriangulation(uint x, uint y);
 
-    // new function that fits a linear 4D ray model from light flow samples
+    // fits a linear 4D ray model from light flow samples, linear least square (DLT method)
+    // flowed LF -> estimated model (triangulation)
+    void curveFittingDLT();
+
+    // fits a linear 4D ray model from light flow samples, non-linear least square
     // flowed LF -> estimated model (triangulation)
     void curveFitting();
 
@@ -166,7 +170,7 @@ public:
     // compute the bayesian information criterion (BIC) for model selection
     void bic();
 
-    // render nove view by interpolating the light flow
+    // render novel view by interpolating the light flow
     void renderLightFlow();
     void renderLightFlowLambertianModel();
     void renderLightFlowVideo();

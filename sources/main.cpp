@@ -245,7 +245,10 @@ int main( int argc, char **argv ) {
                 //                lfScene.computeFlowedLFStarConfig();
                 lfScene.computeFlowedLFCustomConfig();
 
-//                std::cout << "Fit position models to light flow samples" << std::endl;
+                std::cout << "Fit position models to light flow samples as a linear least square problem (DLT method)" << std::endl;
+                lfScene.curveFittingDLT();
+
+//                std::cout << "Fit position models to light flow samples as a non-linear least square problem" << std::endl;
 //                lfScene.curveFitting();
 
 //                std::cout << "Fit color models to light flow samples" << std::endl;
@@ -257,7 +260,7 @@ int main( int argc, char **argv ) {
 ///
 //                lfScene.bic();
 
-                lfScene.renderLightFlowLambertianVideo();
+//                lfScene.renderLightFlowLambertianVideo();
             }
 
         } else {
