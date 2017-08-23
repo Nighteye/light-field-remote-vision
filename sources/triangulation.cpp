@@ -374,6 +374,9 @@ void triangulationLF(int nbSamples, const std::vector<cv::Point2f> &flow,
     computeResidualParameters(nbSamples, flow, K_inv, R_transp, C,
                               eigenVectors, eigenValues, samplePoint);
 
+    // perform DLT to initialize optimization
+    DLT(nbSamples, samplePoint, x);
+
     optimize(nbSamples, eigenVectors, eigenValues, samplePoint, x, finalCost, verbose);
 }
 
@@ -674,6 +677,84 @@ void printEigen(const std::vector<float>& eigenVectors,
               << samplePoint[3] << ")" << std::endl;
 }
 
+void DLT(uint nbSamples,
+         const std::vector<float>& samplePoint,
+         std::vector<float> &x) {
+
+    const uint nbParams = x.size();
+
+    switch(nbParams) {
+
+    case 3:
+    {
+        cv::Mat M4 = cv::Mat::zeros(2*nbSamples, 4, CV_32FC1); // 3g + 1 (homogeneous)
+
+        // fill system matrix
+        for(uint k(0) ; k < nbSamples ; ++k) {
+
+            M4.at<float>(2*k + 0, 0) = samplePoint[4*k+2]; M4.at<float>(2*k + 0, 1) = 1; M4.at<float>(2*k + 0, 2) = 0; M4.at<float>(2*k + 0, 3) = -samplePoint[4*k+0];
+            M4.at<float>(2*k + 1, 0) = samplePoint[4*k+3]; M4.at<float>(2*k + 1, 1) = 0; M4.at<float>(2*k + 1, 2) = 1; M4.at<float>(2*k + 1, 3) = -samplePoint[4*k+1];
+        }
+
+        cv::SVD svd4(M4);
+
+//        assert(svd4.vt.at<float>(svd4.vt.rows-1, 3) > 0.00001);
+        x[0] = svd4.vt.at<float>(svd4.vt.rows-1, 0)/svd4.vt.at<float>(svd4.vt.rows-1, 3);
+        x[1] = svd4.vt.at<float>(svd4.vt.rows-1, 1)/svd4.vt.at<float>(svd4.vt.rows-1, 3);
+        x[2] = svd4.vt.at<float>(svd4.vt.rows-1, 2)/svd4.vt.at<float>(svd4.vt.rows-1, 3);
+    }
+        break;
+
+    case 4:
+    {
+        cv::Mat M5 = cv::Mat::zeros(2*nbSamples, 5, CV_32FC1); // 4g + 1 (homogeneous)
+
+        // fill system matrix
+        for(uint k(0) ; k < nbSamples ; ++k) {
+
+            M5.at<float>(2*k + 0, 0) = samplePoint[4*k+2]; M5.at<float>(2*k + 0, 1) = 0; M5.at<float>(2*k + 0, 2) = 1; M5.at<float>(2*k + 0, 3) = 0; M5.at<float>(2*k + 0, 4) = -samplePoint[4*k+0];
+            M5.at<float>(2*k + 1, 0) = 0; M5.at<float>(2*k + 1, 1) = samplePoint[4*k+3]; M5.at<float>(2*k + 1, 2) = 0; M5.at<float>(2*k + 1, 3) = 1; M5.at<float>(2*k + 1, 4) = -samplePoint[4*k+1];
+        }
+
+        cv::SVD svd5(M5);
+
+//        assert(svd5.vt.at<float>(svd5.vt.rows-1, 4) > 0.00001);
+        x[0] = svd5.vt.at<float>(svd5.vt.rows-1, 0)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
+        x[1] = svd5.vt.at<float>(svd5.vt.rows-1, 1)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
+        x[2] = svd5.vt.at<float>(svd5.vt.rows-1, 2)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
+        x[3] = svd5.vt.at<float>(svd5.vt.rows-1, 3)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
+    }
+        break;
+
+    case 6:
+    {
+        cv::Mat M7 = cv::Mat::zeros(2*nbSamples, 7, CV_32FC1); // 6g + 1 (homogeneous)
+
+        // fill system matrix
+        for(uint k(0) ; k < nbSamples ; ++k) {
+
+            M7.at<float>(2*k + 0, 0) = samplePoint[4*k+2]; M7.at<float>(2*k + 0, 1) = samplePoint[4*k+3]; M7.at<float>(2*k + 0, 2) = 0; M7.at<float>(2*k + 0, 3) = 0; M7.at<float>(2*k + 0, 4) = 1; M7.at<float>(2*k + 0, 5) = 0; M7.at<float>(2*k + 0, 6) = -samplePoint[4*k+0];
+            M7.at<float>(2*k + 1, 0) = 0; M7.at<float>(2*k + 1, 1) = 0; M7.at<float>(2*k + 1, 2) = samplePoint[4*k+2]; M7.at<float>(2*k + 1, 3) = samplePoint[4*k+3]; M7.at<float>(2*k + 1, 4) = 0; M7.at<float>(2*k + 1, 5) = 1; M7.at<float>(2*k + 1, 6) = -samplePoint[4*k+1];
+        }
+
+        cv::SVD svd7(M7);
+
+//        assert(svd7.vt.at<float>(svd7.vt.rows-1, 6) > 0.00001);
+        x[0] = svd7.vt.at<float>(svd7.vt.rows-1, 0)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
+        x[1] = svd7.vt.at<float>(svd7.vt.rows-1, 1)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
+        x[2] = svd7.vt.at<float>(svd7.vt.rows-1, 2)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
+        x[3] = svd7.vt.at<float>(svd7.vt.rows-1, 3)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
+        x[4] = svd7.vt.at<float>(svd7.vt.rows-1, 4)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
+        x[5] = svd7.vt.at<float>(svd7.vt.rows-1, 5)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
+    }
+        break;
+
+    default:
+        assert(false);
+        break;
+    }
+}
+
 void optimize(int kNumObservations,
               const std::vector<float>& eigenVectors,
               const std::vector<float>& eigenValues,
@@ -685,11 +766,10 @@ void optimize(int kNumObservations,
     const uint nbParams = x.size();
 
     // init model parameters
-    const double initialValue = 0.0;
     std::vector<double> xd(nbParams);
     for(uint i = 0 ; i < xd.size() ; ++i) {
 
-        xd[i] = initialValue;
+        xd[i] = (double) x[i];
     }
 
     if(verbose) {
@@ -744,16 +824,16 @@ void optimize(int kNumObservations,
     Solve(options, &problem, &summary);
     finalCost = summary.final_cost;
 
-    for(uint i = 0 ; i < xd.size() ; ++i) {
-
-        x[i] = (float)xd[i];
-    }
-
     if(verbose) {
         std::cout << summary.FullReport() << std::endl;
         for(uint i = 0 ; i < nbParams ; ++i) {
-            std::cout << "parameter " << i << ": " << initialValue << " -> " << x[i] << std::endl;
+            std::cout << "parameter " << i << ": " << x[i] << " -> " << xd[i] << std::endl;
         }
+    }
+
+    for(uint i = 0 ; i < xd.size() ; ++i) {
+
+        x[i] = (float)xd[i];
     }
 }
 

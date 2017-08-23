@@ -10,7 +10,7 @@
 #./ULF -config configs/IBR_optical/chest_wide_cropped
 
 
-
+#./ULF -config configs/IBR_optical/tarot_fine_wide_08_08
 #./ULF -config configs/IBR_optical/tarot_coarse_wide_08_08
 #./ULF -config configs/IBR_optical/bracelet_wide_08_08
 #./ULF -config configs/IBR_optical/chest_wide_08_08
@@ -22,8 +22,6 @@
 #./ULF -config configs/IBR_optical/tarot_coarse_wide_14_08
 #./ULF -config configs/IBR_optical/bracelet_wide_14_08
 #./ULF -config configs/IBR_optical/chest_wide_14_08
-
-#./ULF -config configs/IBR_optical/tarot_fine_wide_08_08
 
 #echo "View (08, 08)"
 #../psnr out/IBR_optical/tarot_coarse_wide_cropped/tarot_coarse_original_08_08.png out/IBR_optical/tarot_coarse_wide_cropped/tarot_coarse_lamb_08_08.png
@@ -48,7 +46,7 @@
 #../psnr out/IBR_optical/chest_wide_cropped/chest_original_08_08.png out/IBR_optical/chest_wide_cropped/chest_3param_08_08.png
 #../psnr out/IBR_optical/tarot_fine_wide_cropped/tarot_fine_original_08_08.png out/IBR_optical/tarot_fine_wide_cropped/tarot_fine_3param_08_08.png
 
-#./ULF -config configs/IBR_optical/tarot_coarse_video
+./ULF -config configs/IBR_optical/tarot_coarse_video
 ./ULF -config configs/IBR_optical/tarot_fine_video
 ./ULF -config configs/IBR_optical/bracelet_video
 ./ULF -config configs/IBR_optical/chest_video

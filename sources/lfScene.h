@@ -152,11 +152,11 @@ public:
     // print some info
     void testTriangulation(uint x, uint y);
 
-    // fits a linear 4D ray model from light flow samples, linear least square (DLT method)
+    // fits a linear 4D ray model from light flow samples, with DLT initialization
     // flowed LF -> estimated model (triangulation)
     void curveFittingDLT();
 
-    // fits a linear 4D ray model from light flow samples, non-linear least square
+    // fits a linear 4D ray model from light flow samples, without DLT initialization
     // flowed LF -> estimated model (triangulation)
     void curveFitting();
 

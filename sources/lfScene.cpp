@@ -1393,13 +1393,15 @@ void LFScene::curveFittingDLT() {
                 }
             }
 
-            //            assert(flow.size() >= 8);
+            const uint nbSamples = flow.size();
+
+            //            assert(nbSamples >= 8);
             assert(R.size() == R_transp.size()); // nb samples
             assert(R_transp.size() == K.size());
             assert(K.size() == K_inv.size());
             assert(K_inv.size() == C.size());
             assert(C.size() == t.size());
-            assert(t.size() == flow.size());
+            assert(t.size() == nbSamples);
 
             //                if(x == 3363 && y == 15) {
             //                    testTriangulation(x, y);
@@ -1410,12 +1412,15 @@ void LFScene::curveFittingDLT() {
             std::vector<float> parameters6(6); // (aus, aut, avs, avt, bu, bv)
             float finalCostLF(0.0);
 
-            triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters3, finalCostLF, verbose);
-            finalCost3Map[idx] = (float)finalCostLF;
-            triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters4, finalCostLF, verbose);
-            finalCost4Map[idx] = (float)finalCostLF;
-            triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters6, finalCostLF, verbose);
-            finalCost6Map[idx] = (float)finalCostLF;
+            if(nbSamples >= 2) {
+
+                triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters3, finalCostLF, verbose);
+                finalCost3Map[idx] = (float)finalCostLF;
+                triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters4, finalCostLF, verbose);
+                finalCost4Map[idx] = (float)finalCostLF;
+                triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters6, finalCostLF, verbose);
+                finalCost6Map[idx] = (float)finalCostLF;
+            }
 
             parameter3Map[idx].x = (float)parameters3[0]; // a
             parameter3Map[idx].y = (float)parameters3[1]; // bu

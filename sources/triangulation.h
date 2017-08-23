@@ -61,6 +61,11 @@ void reprojectionCheck(const std::vector<float> &point3D, int nbSamples,
 
 void printEigen(const std::vector<float>& eigenVectors, const std::vector<float>& eigenValues, const std::vector<float>& samplePoint);
 
+// perform DLT to initialize optimization
+void DLT(uint nbSamples,
+         const std::vector<float>& samplePoint,
+         std::vector<float> &x);
+
 // fit one set of sample with new LF model, polynome of degree 1
 void optimize(int kNumObservations,
               const std::vector<float>& eigenVectors,
