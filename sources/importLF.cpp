@@ -569,7 +569,53 @@ void LFScene::importCustomMVEViews() {
 // custom camera configuration
 void LFScene::importCustomTOLFViews() {
 
+    assert(!_imageName.empty());
+    assert(!_cameraName.empty());
 
+    _nbCameras = 25;
+    _centralIndex = _nbCameras/2;
+
+    std::cout << "Import cameras and images" << std::endl;
+
+    for ( uint viewIndex = 0 ; viewIndex < _nbCameras ; ++viewIndex ) {
+
+        char imageNameChar[500];
+        char cameraNameChar[500];
+        sprintf( imageNameChar, _imageName.c_str(), viewIndex );
+        sprintf( cameraNameChar, _cameraName.c_str() ); // should be the same whatever the view index
+
+        std::cout << "Import camera " << cameraNameChar << " and image " << imageNameChar << " ..." << std::endl;
+
+        InputCam *v_k = new InputCam( _camWidth, _camHeight, _outdir );
+
+        // Import camera parameters and load vbos
+        if( v_k->importTexture(imageNameChar) ) {
+
+            // Import camera parameters and load vbos
+            if( v_k->importCamParameters(cameraNameChar) ) {
+
+                _vCam.push_back( v_k );
+
+            } else {
+
+                assert( viewIndex != _centralIndex );
+                std::cout << "Error while loading camera parameters of view " << viewIndex << std::endl;
+                delete v_k;
+                v_k = 0;
+            }
+
+        } else {
+
+            assert( viewIndex != _centralIndex );
+            std::cout << "Error while loading input image of view " << viewIndex << ": file doesn't exist" << std::endl;
+            delete v_k;
+            v_k = 0;
+        }
+    }
+
+    assert(_nbCameras == _vCam.size());
+
+    std::cout << "done!" << std::endl;
 }
 
 // for each view import source images and camera parameters (blender datasets for example)
