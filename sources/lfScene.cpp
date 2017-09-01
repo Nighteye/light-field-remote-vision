@@ -75,7 +75,7 @@ PinholeCamera InputCam::getPinholeCamera() const {
 
 LFScene::LFScene(std::string outdir,
                  std::string winTitle,
-                 std::string mveName,
+                 std::string mveName, std::string imageName, std::string cameraName,
                  int windowW1, int windowW2, int windowH1, int windowH2,
                  uint camWidth, uint camHeight,
                  int sMin, int sMax, int sRmv,
@@ -83,7 +83,7 @@ LFScene::LFScene(std::string outdir,
     
     _outdir(outdir),
     _windowTitle(winTitle),
-    _mveName(mveName),
+    _mveName(mveName), _imageName(imageName), _cameraName(cameraName),
     _windowW1(windowW1), _windowW2(windowW2), _windowH1(windowH1), _windowH2(windowH2),
     _camWidth(camWidth), _camHeight(camHeight),
     _sMin(sMin), _sMax(sMax), _sRmv(sRmv),
@@ -164,8 +164,7 @@ void LFScene::computeVisibilityMask(std::vector<cv::Point2f>& flowLtoR, std::vec
     }
 }
 
-void LFScene::computePerPixelCorresp(std::string imageName,
-                                     std::string flowAlg)
+void LFScene::computePerPixelCorresp(std::string flowAlg)
 {
     std::string leftImageName = "";
     std::string rightImageName = "";
@@ -200,10 +199,10 @@ void LFScene::computePerPixelCorresp(std::string imageName,
         std::vector<bool> currentVisibilityMaskr(imageSize);
         
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), sl );
+        sprintf( tempCharArray, _imageName.c_str(), sl );
         leftImageName = std::string(tempCharArray);
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), sr );
+        sprintf( tempCharArray, _imageName.c_str(), sr );
         rightImageName = std::string(tempCharArray);
         
         // testOpticalFlow(leftImageName, rightImageName);
@@ -460,14 +459,13 @@ void LFScene::computeFlowedLightfield()
 
 void LFScene::computePerPixelCorrespStarConfig(std::string flowAlg) {
     
-    std::string imageName = _mveName + "/views" + "/view_%04i.mve" + "/undistorted.png";
     std::string leftImageName = "";
     std::string rightImageName = "";
     const std::string flowLtoRName = _outdir + "/flow%02luto%02lu.pfm";
     
     char tempCharArray[500];
     int mveIndexLeft = _centralT*17 + _centralS; // HACK, TODO: stanford LF range as parameter
-    sprintf( tempCharArray, imageName.c_str(), mveIndexLeft );
+    sprintf( tempCharArray, _imageName.c_str(), mveIndexLeft );
     leftImageName = std::string(tempCharArray);
     
     const uint imageSize = _camHeight*_camWidth;
@@ -495,7 +493,7 @@ void LFScene::computePerPixelCorrespStarConfig(std::string flowAlg) {
             
             // stanford images
             int mveIndexRight = t*17 + s; // HACK, TODO: stanford LF range as parameter
-            sprintf( tempCharArray, imageName.c_str(), mveIndexRight );
+            sprintf( tempCharArray, _imageName.c_str(), mveIndexRight );
             rightImageName = std::string(tempCharArray);
             
             std::cout << "Computing flow between view " << leftImageName << " and " << rightImageName << std::endl;
@@ -599,7 +597,6 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
     assert(_nbCameras == sIndicesLeft.size());
     // nbFlows = _nbCameras - 1;
     
-    std::string imageName = _mveName + "/views" + "/view_%04i.mve" + "/undistorted.png";
     std::string leftImageName = "";
     std::string rightImageName = "";
     const std::string flowLtoRName = _outdir + "/flow%02lu.pfm";
@@ -625,11 +622,11 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
         
         int mveIndexLeft = tLeft*17 + sLeft; // HACK, TODO: stanford LF range as parameter
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), mveIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), mveIndexLeft );
         leftImageName = std::string(tempCharArray);
         int mveIndexRight = tRight*17 + sRight; // HACK, TODO: stanford LF range as parameter
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), mveIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), mveIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view " << leftImageName << " and " << rightImageName << std::endl;
@@ -665,11 +662,11 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
         
         int mveIndexLeft = tLeft*17 + sLeft; // HACK, TODO: stanford LF range as parameter
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), mveIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), mveIndexLeft );
         leftImageName = std::string(tempCharArray);
         int mveIndexRight = tRight*17 + sRight; // HACK, TODO: stanford LF range as parameter
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), mveIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), mveIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view " << leftImageName << " and " << rightImageName << std::endl;
@@ -700,11 +697,11 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
         
         int mveIndexLeft = tLeft*17 + sLeft; // HACK, TODO: stanford LF range as parameter
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), mveIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), mveIndexLeft );
         leftImageName = std::string(tempCharArray);
         int mveIndexRight = tRight*17 + sRight; // HACK, TODO: stanford LF range as parameter
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), mveIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), mveIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view " << leftImageName << " and " << rightImageName << std::endl;
@@ -736,11 +733,11 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
         
         int mveIndexLeft = tLeft*17 + sLeft; // HACK, TODO: stanford LF range as parameter
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), mveIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), mveIndexLeft );
         leftImageName = std::string(tempCharArray);
         int mveIndexRight = tRight*17 + sRight; // HACK, TODO: stanford LF range as parameter
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, imageName.c_str(), mveIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), mveIndexRight );
         rightImageName = std::string(tempCharArray);
         
         memset(tempCharArray, 0, sizeof(tempCharArray));
@@ -753,7 +750,6 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
 // TODO: change mve indices before using this function!!!
 void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
     
-    std::string imageName = _mveName + "/views" + "/view_%04i.mve" + "/undistorted.png";
     std::string leftImageName = "";
     std::string rightImageName = "";
     int viewIndexLeft = 0;
@@ -768,11 +764,11 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
     // INIT (central view)
     
     viewIndexLeft = _S*(t - _tMin) + (_centralS - _sMin);
-    sprintf( tempCharArray, imageName.c_str(), viewIndexLeft );
+    sprintf( tempCharArray, _imageName.c_str(), viewIndexLeft );
     leftImageName = std::string(tempCharArray);
     
     viewIndexRight = _S*(t + 1 - _tMin) + (_centralS - _sMin);
-    sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+    sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
     rightImageName = std::string(tempCharArray);
     
     std::cout << "Computing flow between view (" << _centralS << ", " << t << ") and ("
@@ -791,7 +787,7 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
     // -----------------------------------------------------------------------------------
     
     viewIndexRight = _S*(t - 1 - _tMin) + (_centralS - _sMin);
-    sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+    sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
     rightImageName = std::string(tempCharArray);
     
     std::cout << "Computing flow between view (" << _centralS << ", " << t << ") and ("
@@ -812,7 +808,7 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
     if(_centralS < _sMax) {
         
         viewIndexRight = _S*(t  - _tMin) + (_centralS + 1 - _sMin);
-        sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view (" << _centralS << ", " << t << ") and ("
@@ -832,7 +828,7 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
     if(_centralS > _sMin) {
         
         viewIndexRight = _S*(t  - _tMin) + (_centralS - 1 - _sMin);
-        sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view (" << _centralS << ", " << t << ") and ("
@@ -852,11 +848,11 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
     for(int s = _centralS + 1 ; s <= _sMax ; ++s) {
         
         viewIndexLeft = _S*(t - _tMin) + (s - _sMin);
-        sprintf( tempCharArray, imageName.c_str(), viewIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), viewIndexLeft );
         leftImageName = std::string(tempCharArray);
         
         viewIndexRight = _S*(t + 1 - _tMin) + (s - _sMin);
-        sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view (" << s << ", " << t << ") and ("
@@ -875,7 +871,7 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
         // -----------------------------------------------------------------------------------
         
         viewIndexRight = _S*(t - 1 - _tMin) + (s - _sMin);
-        sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view (" << s << ", " << t << ") and ("
@@ -896,7 +892,7 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
         if(s < _sMax) {
             
             viewIndexRight = _S*(t  - _tMin) + (s + 1 - _sMin);
-            sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+            sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
             rightImageName = std::string(tempCharArray);
             
             std::cout << "Computing flow between view (" << s << ", " << t << ") and ("
@@ -917,11 +913,11 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
     for(int s = _centralS - 1 ; s >=_sMin ; --s) {
         
         viewIndexLeft = _S*(t - _tMin) + (s - _sMin);
-        sprintf( tempCharArray, imageName.c_str(), viewIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), viewIndexLeft );
         leftImageName = std::string(tempCharArray);
         
         viewIndexRight = _S*(t + 1 - _tMin) + (s - _sMin);
-        sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view (" << s << ", " << t << ") and ("
@@ -940,7 +936,7 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
         // -----------------------------------------------------------------------------------
         
         viewIndexRight = _S*(t - 1 - _tMin) + (s - _sMin);
-        sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view (" << s << ", " << t << ") and ("
@@ -961,7 +957,7 @@ void LFScene::computePerPixelCorrespBandConfig(std::string flowAlg) {
         if(s > _sMin) {
             
             viewIndexRight = _S*(t  - _tMin) + (s - 1 - _sMin);
-            sprintf( tempCharArray, imageName.c_str(), viewIndexRight );
+            sprintf( tempCharArray, _imageName.c_str(), viewIndexRight );
             rightImageName = std::string(tempCharArray);
             
             std::cout << "Computing flow between view (" << s << ", " << t << ") and ("

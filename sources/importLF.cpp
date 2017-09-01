@@ -442,13 +442,11 @@ void LFScene::importStanfordMVEViews() {
 
         for ( int s = _sMin ; s <= _sMax ; ++s ) {
 
-            std::string cameraName = _mveName + "/views" + "/view_%04i.mve" + "/meta.ini";
-            std::string imageName = _mveName + "/views" + "/view_%04i.mve" + "/undistorted.png";
-            char cameraNameChar[500];
             char imageNameChar[500];
+            char cameraNameChar[500];
             int mveIndex = t*17 + s; // HACK, TODO: stanford LF range as parameter
-            sprintf( cameraNameChar, cameraName.c_str(), mveIndex );
-            sprintf( imageNameChar, imageName.c_str(), mveIndex );
+            sprintf( imageNameChar, _imageName.c_str(), mveIndex );
+            sprintf( cameraNameChar, _cameraName.c_str(), mveIndex );
 
             std::cout << "Import camera " << cameraNameChar << " and image " << imageNameChar << " ..." << std::endl;
 
@@ -523,15 +521,13 @@ void LFScene::importCustomMVEViews() {
 
     for ( uint viewIndex = 0 ; viewIndex < _nbCameras ; ++viewIndex ) {
 
-        std::string cameraName = _mveName + "/views" + "/view_%04i.mve" + "/meta.ini";
-        std::string imageName = _mveName + "/views" + "/view_%04i.mve" + "/undistorted.png";
-        char cameraNameChar[500];
         char imageNameChar[500];
+        char cameraNameChar[500];
         int s = sIndices[viewIndex];
         int t = tIndices[viewIndex];
         int mveIndex = t*17 + s; // HACK
-        sprintf( cameraNameChar, cameraName.c_str(), mveIndex );
-        sprintf( imageNameChar, imageName.c_str(), mveIndex );
+        sprintf( imageNameChar, _imageName.c_str(), mveIndex );
+        sprintf( cameraNameChar, _cameraName.c_str(), mveIndex );
 
         std::cout << "Import camera " << cameraNameChar << " and image " << imageNameChar << " ..." << std::endl;
 
@@ -567,20 +563,29 @@ void LFScene::importCustomMVEViews() {
     std::cout << "done!" << std::endl;
 }
 
+// load TOLF dataset (image and camera matrices)
+// camera matrices are obainted thank to their own calibration
+// TOLF FORMAT
+// custom camera configuration
+void LFScene::importCustomTOLFViews() {
+
+
+}
+
 // for each view import source images and camera parameters (blender datasets for example)
 // BLENDER FORMAT (rows only)
-void LFScene::importViewsNoDepth( std::string cameraName, std::string imageName ) {
+void LFScene::importViewsNoDepth() {
 
     std::cout << "Import cameras and images" << std::endl;
 
     uint viewIndex = 0;
     for ( int s = _sMin ; s <= _sMax ; ++s ) {
 
-        char cameraNameChar[500];
         char imageNameChar[500];
+        char cameraNameChar[500];
 
-        sprintf( cameraNameChar, cameraName.c_str(), s );
-        sprintf( imageNameChar, imageName.c_str(), s );
+        sprintf( imageNameChar, _imageName.c_str(), s );
+        sprintf( cameraNameChar, _cameraName.c_str(), s );
 
         // std::cout << "Import camera " << cameraNameChar << " and image " << imageNameChar << " ..." << std::endl;
 

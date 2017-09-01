@@ -94,7 +94,7 @@ public:
 
     LFScene(std::string outdir,
             std::string winTitle,
-            std::string mveName,
+            std::string mveName, std::string imageName, std::string cameraName,
             int windowW1, int windowW2, int windowH1, int windowH2,
             uint camWidth, uint camHeight,
             int sMin, int sMax, int sRmv,
@@ -107,23 +107,28 @@ public:
     // load standford lightfield dataset (image and camera matrices)
     // camera matrices are obainted thank to openMVG calibration
     // MVE FORMAT (convert rows to rows and column)
-    void importStanfordMVEViews( );
+    void importStanfordMVEViews();
 
     // same as above (without target view)
     // custom camera configuration
     void importCustomMVEViews();
 
+    // load TOLF dataset (image and camera matrices)
+    // camera matrices are obainted thank to their own calibration
+    // TOLF FORMAT
+    // custom camera configuration
+    void importCustomTOLFViews();
+
     // for each view import source images and camera parameters (blender datasets for example)
     // BLENDER FORMAT (rows only)
-    void importViewsNoDepth( std::string cameraName, std::string imageName = 0 );
+    void importViewsNoDepth();
 
     // IBR_optical
     // ---------------------------------------------------------------------------------------------------------- //
     void computeVisibilityMask(std::vector<cv::Point2f>& flowLtoR, std::vector<cv::Point2f>& flowRtoL,
                                std::vector<bool>& visibilityMask);
 
-    void computePerPixelCorresp(std::string imageName,
-                                std::string flowAlg);
+    void computePerPixelCorresp(std::string flowAlg);
 
     // old function that computes 3D points from optical flow (LF flow), and compare with classic triangulation (minimization of reproj error)
     void computeFlowedLightfield();
@@ -181,6 +186,8 @@ private:
     std::string _outdir;
     std::string _windowTitle;
     std::string _mveName;
+    std::string _imageName;
+    std::string _cameraName;
     uint _windowW1, _windowW2, _windowH1, _windowH2;
     int _windowWidth, _windowHeight;
     uint _camWidth, _camHeight;

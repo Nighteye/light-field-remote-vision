@@ -145,7 +145,7 @@ int main( int argc, char **argv ) {
         config_data->_imageName = " ";
         checkRequirement(config_data);
         const bool stanford = false; // TODO config param
-//        const float depthFocal = 2.5;// TODO config param
+        //        const float depthFocal = 2.5;// TODO config param
         const float depthFocal = 0;
 
         // load scene
@@ -188,11 +188,21 @@ int main( int argc, char **argv ) {
         config_data->_lf_name = " ";
         config_data->_tau_name = " ";
         config_data->_dpart_name = " ";
-        if(!config_data->_mve_name.empty()) {
-            config_data->_imageName = " ";
-            config_data->_cameraName = " ";
+
+        // necessary parameters
+        const bool stanford = true; // TODO config param
+        if(stanford) {
+
+            assert(!config_data->_mve_name.empty());
+            config_data->_imageName = config_data->_mve_name + "/views" + "/view_%04i.mve" + "/undistorted.png";
+            config_data->_cameraName = config_data->_mve_name + "/views" + "/view_%04i.mve" + "/meta.ini";
+
+        } else {
+
+            assert(!config_data->_imageName.empty());
+            assert(!config_data->_cameraName.empty());
+            config_data->_mve_name = " ";
         }
-        //        checkRequirement(config_data);
 
         if(config_data->_windowW1 == 0 && config_data->_windowW2 == 0) {
             config_data->_windowW1 = 0;
@@ -206,13 +216,10 @@ int main( int argc, char **argv ) {
         std::cout << "Window width: from " << config_data->_windowW1 << " to " << config_data->_windowW2 << std::endl;
         std::cout << "Window height: from " << config_data->_windowH1 << " to " << config_data->_windowH2 << std::endl;
 
-        const bool stanford = true; // TODO config param
-        const bool band = false; // was there to test band config
-
         // load lfScene
         LFScene lfScene(config_data->_outdir,
-                        "Light Flow Interpolation",
-                        config_data->_mve_name,
+                        "Plenoptic Space Linearization",
+                        config_data->_mve_name, config_data->_imageName, config_data->_cameraName,
                         config_data->_windowW1, config_data->_windowW2,
                         config_data->_windowH1, config_data->_windowH2,
                         config_data->_w, config_data->_h,
@@ -221,69 +228,71 @@ int main( int argc, char **argv ) {
 
         if(stanford) {
 
-            std::cout << "Import stanford views, stanford format" << std::endl;
+            std::cout << "Import STANFORD views, MVE format" << std::endl;
             //            lfScene.importStanfordMVEViews();
             lfScene.importCustomMVEViews();
 
-            if(config_data->_computeFlow != 0) {
-                //                std::cout << "Compute optical flow" << std::endl;
-                //                if(band) {
-                //                    lfScene.computePerPixelCorrespBandConfig(config_data->_flowAlg);
-                //                } else {
-                //                    lfScene.computePerPixelCorrespStarConfig(config_data->_flowAlg);
-                //                }
-
-                lfScene.computePerPixelCorrespCustomConfig(config_data->_flowAlg);
-
-            } else {
-                std::cout << "Optical flow already computed" << std::endl;
-            }
-
-            if(!band) {
-
-                std::cout << "Compute flowed lightfield" << std::endl;
-                //                lfScene.computeFlowedLFStarConfig();
-                lfScene.computeFlowedLFCustomConfig();
-
-                std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
-                lfScene.curveFittingDLT();
-
-//                std::cout << "Fit position models to light flow samples, without DLT initialization" << std::endl;
-//                lfScene.curveFitting();
-
-//                std::cout << "Fit color models to light flow samples" << std::endl;
-//                lfScene.curveFittingColor();
-
-//                std::cout << "Render image by interpolating the light flow" << std::endl;
-//                lfScene.renderLightFlow();
-////                lfScene.renderLightFlowLambertianModel();
-///
-//                lfScene.bic();
-
-//                lfScene.renderLightFlowLambertianVideo();
-            }
-
         } else {
 
-            std::cout << "Import source images, camera parameters and init empty depth maps" << std::endl;
-            lfScene.importViewsNoDepth( config_data->_cameraName, config_data->_imageName );
-
-            if(config_data->_computeFlow != 0) {
-                std::cout << "Compute optical flow" << std::endl;
-                lfScene.computePerPixelCorresp(config_data->_imageName, config_data->_flowAlg);
-            } else {
-                std::cout << "Optical flow already computed" << std::endl;
-            }
-
-            std::cout << "Compute optical flow" << std::endl;
-            lfScene.computeFlowedLightfield();
-
-            std::cout << "Compute point cloud from optical flow, given a target view" << std::endl;
-            lfScene.curveFitting();
-
-            //        std::cout << "Rendering Loop" << std::endl;
-            //        lfScene.renderingLoop();
+            std::cout << "Import TOLF views, TOLF format" << std::endl;
+            lfScene.importCustomTOLFViews();
         }
+
+        if(config_data->_computeFlow != 0) {
+            //                std::cout << "Compute optical flow" << std::endl;
+            //                if(band) { // was there to test band config
+            //                    lfScene.computePerPixelCorrespBandConfig(config_data->_flowAlg);
+            //                } else {
+            //                    lfScene.computePerPixelCorrespStarConfig(config_data->_flowAlg);
+            //                }
+
+            lfScene.computePerPixelCorrespCustomConfig(config_data->_flowAlg);
+
+        } else {
+            std::cout << "Optical flow already computed" << std::endl;
+        }
+
+        std::cout << "Compute flowed lightfield" << std::endl;
+        //                lfScene.computeFlowedLFStarConfig();
+        lfScene.computeFlowedLFCustomConfig();
+
+        std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
+        lfScene.curveFittingDLT();
+
+        //                std::cout << "Fit position models to light flow samples, without DLT initialization" << std::endl;
+        //                lfScene.curveFitting();
+
+        //                std::cout << "Fit color models to light flow samples" << std::endl;
+        //                lfScene.curveFittingColor();
+
+        //                std::cout << "Render image by interpolating the light flow" << std::endl;
+        //                lfScene.renderLightFlow();
+        ////                lfScene.renderLightFlowLambertianModel();
+        ///
+        //                lfScene.bic();
+
+        //                lfScene.renderLightFlowLambertianVideo();
+
+        // DEPRECATED FUNCTIONS
+
+        //            std::cout << "Import source images, camera parameters and init empty depth maps" << std::endl;
+        //            lfScene.importViewsNoDepth();
+
+        //            if(config_data->_computeFlow != 0) {
+        //                std::cout << "Compute optical flow" << std::endl;
+        //                lfScene.computePerPixelCorresp(config_data->_flowAlg);
+        //            } else {
+        //                std::cout << "Optical flow already computed" << std::endl;
+        //            }
+
+        //            std::cout << "Compute optical flow" << std::endl;
+        //            lfScene.computeFlowedLightfield();
+
+        //            std::cout << "Compute point cloud from optical flow, given a target view" << std::endl;
+        //            lfScene.curveFitting();
+
+        //            //        std::cout << "Rendering Loop" << std::endl;
+        //            //        lfScene.renderingLoop();
 
     } else if(algo == "fromMVE2coco") {
 
