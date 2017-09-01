@@ -102,7 +102,8 @@ public:
             int windowW1, int windowW2, int windowH1, int windowH2,
             uint camWidth, uint camHeight,
             int sMin, int sMax, int sRmv,
-            int tMin, int tMax, int tRmv);
+            int tMin, int tMax, int tRmv,
+            bool stanfordConfig);
     ~LFScene();
 
     // IMPORT_LF
@@ -197,6 +198,7 @@ private:
     uint _camWidth, _camHeight;
     int _sMin, _sMax, _sRmv;
     int _tMin, _tMax, _tRmv;
+    const bool _stanfordConfig;
     int _mveRdrIdx; // mve render index
     int _S, _T; // LF angular range
     int _centralS, _centralT; // central view angular coordinates
@@ -204,8 +206,11 @@ private:
     uint _renderIndex;
     uint _centralIndex; // index of the central view (for optical flow)
     std::vector<InputCam*> _vCam;
-
     std::vector<std::vector<cv::Point2f> > _flowedLightField;
+    std::vector<int> _sIndicesRight;
+    std::vector<int> _tIndicesRight;
+    std::vector<int> _sIndicesLeft;
+    std::vector<int> _tIndicesLeft;
 };
 
 #endif /* #ifndef LF_SCENE_H */

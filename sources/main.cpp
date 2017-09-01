@@ -224,7 +224,8 @@ int main( int argc, char **argv ) {
                         config_data->_windowH1, config_data->_windowH2,
                         config_data->_w, config_data->_h,
                         config_data->_s_min, config_data->_s_max, config_data->_s_rmv,
-                        config_data->_t_min, config_data->_t_max, config_data->_t_rmv);
+                        config_data->_t_min, config_data->_t_max, config_data->_t_rmv,
+                        stanford);
 
         if(stanford) {
 
@@ -237,7 +238,6 @@ int main( int argc, char **argv ) {
             std::cout << "Import TOLF views, TOLF format" << std::endl;
             lfScene.importCustomTOLFViews();
         }
-        return 0;
 
         if(config_data->_computeFlow != 0) {
             //                std::cout << "Compute optical flow" << std::endl;
@@ -252,6 +252,8 @@ int main( int argc, char **argv ) {
         } else {
             std::cout << "Optical flow already computed" << std::endl;
         }
+
+        return 0;
 
         std::cout << "Compute flowed lightfield" << std::endl;
         //                lfScene.computeFlowedLFStarConfig();

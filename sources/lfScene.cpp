@@ -79,7 +79,8 @@ LFScene::LFScene(std::string outdir,
                  int windowW1, int windowW2, int windowH1, int windowH2,
                  uint camWidth, uint camHeight,
                  int sMin, int sMax, int sRmv,
-                 int tMin, int tMax, int tRmv) :
+                 int tMin, int tMax, int tRmv,
+                 bool stanfordConfig) :
     
     _outdir(outdir),
     _windowTitle(winTitle),
@@ -88,6 +89,7 @@ LFScene::LFScene(std::string outdir,
     _camWidth(camWidth), _camHeight(camHeight),
     _sMin(sMin), _sMax(sMax), _sRmv(sRmv),
     _tMin(tMin), _tMax(tMax), _tRmv(tRmv),
+    _stanfordConfig(stanfordConfig),
     _flowedLightField(camWidth*camHeight) {
     
     _mveRdrIdx = 17*_tRmv + _sRmv;
@@ -106,6 +108,93 @@ LFScene::LFScene(std::string outdir,
     
     _windowWidth = windowW2 - windowW1;
     _windowHeight = windowH2 - windowH1;
+
+    if(stanfordConfig) {
+
+        // EXAMPLE WITH STANFORD DATASET
+
+        /* (6,  6) -> (4, 4)
+         * (6,  6) -> (6, 4)
+         * (8,  6) -> (8, 4)
+         * (10, 6) -> (10, 4)
+         * (10, 6) -> (12, 4)
+         *
+         * (6,  6) -> (4, 6)
+         * (8,  8) -> (6, 6)
+         * (8,  8) -> (8, 6)
+         * (8,  8) -> (10, 6)
+         * (10, 6) -> (12, 6)
+         *
+         * (6,  8) -> (4, 8)
+         * (8,  8) -> (6, 8)
+         * central flow, don't count
+         * (8,  8) -> (10, 8)
+         * (10, 8) -> (12, 8)
+         *
+         * (6, 10) -> (4, 10)
+         * (8,  8) -> (6, 10)
+         * (8,  8) -> (8, 10)
+         * (8,  8) -> (10, 10)
+         * (10, 10) -> (12, 10)
+         *
+         * (6,  10) -> (4, 12)
+         * (6,  10) -> (6, 12)
+         * (8,  10) -> (8, 12)
+         * (10, 10) -> (10, 12)
+         * (10, 10) -> (12, 12)
+         * */
+
+        _sIndicesRight = {_sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8,
+                          _sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8,
+                          _sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8,
+                          _sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8,
+                          _sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8};
+
+        _tIndicesRight = {_tMin, _tMin, _tMin, _tMin, _tMin,
+                          _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2,
+                          _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4,
+                          _tMin + 6, _tMin + 6, _tMin + 6, _tMin + 6, _tMin + 6,
+                          _tMin + 8, _tMin + 8, _tMin + 8, _tMin + 8, _tMin + 8};
+
+        _sIndicesLeft = {_sMin + 2, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 6,
+                         _sMin + 2, _sMin + 4, _sMin + 4, _sMin + 4, _sMin + 6,
+                         _sMin + 2, _sMin + 4, _sMin + 4, _sMin + 4, _sMin + 6,
+                         _sMin + 2, _sMin + 4, _sMin + 4, _sMin + 4, _sMin + 6,
+                         _sMin + 2, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 6};
+
+        _tIndicesLeft = {_tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2,
+                         _tMin + 2, _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 2,
+                         _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4,
+                         _tMin + 6, _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 6,
+                         _tMin + 6, _tMin + 6, _tMin + 6, _tMin + 6, _tMin + 6};
+
+
+    } else { // TOLF dataset
+
+        _sIndicesRight = {_sMin, _sMin + 1, _sMin + 2, _sMin + 3, _sMin + 4,
+                          _sMin, _sMin + 1, _sMin + 2, _sMin + 3, _sMin + 4,
+                          _sMin, _sMin + 1, _sMin + 2, _sMin + 3, _sMin + 4,
+                          _sMin, _sMin + 1, _sMin + 2, _sMin + 3, _sMin + 4,
+                          _sMin, _sMin + 1, _sMin + 2, _sMin + 3, _sMin + 4};
+
+        _tIndicesRight = {_tMin, _tMin, _tMin, _tMin, _tMin,
+                          _tMin + 1, _tMin + 1, _tMin + 1, _tMin + 1, _tMin + 1,
+                          _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2,
+                          _tMin + 3, _tMin + 3, _tMin + 3, _tMin + 3, _tMin + 3,
+                          _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4};
+
+        _sIndicesLeft = {_sMin + 1, _sMin + 1, _sMin + 2, _sMin + 3, _sMin + 3,
+                         _sMin + 1, _sMin + 2, _sMin + 2, _sMin + 2, _sMin + 3,
+                         _sMin + 1, _sMin + 2, _sMin + 2, _sMin + 2, _sMin + 3,
+                         _sMin + 1, _sMin + 2, _sMin + 2, _sMin + 2, _sMin + 3,
+                         _sMin + 1, _sMin + 1, _sMin + 2, _sMin + 3, _sMin + 3};
+
+        _tIndicesLeft = {_tMin + 1, _tMin + 1, _tMin + 1, _tMin + 1, _tMin + 1,
+                         _tMin + 1, _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 1,
+                         _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2,
+                         _tMin + 3, _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 3,
+                         _tMin + 3, _tMin + 3, _tMin + 3, _tMin + 3, _tMin + 3};
+    }
 }
 
 LFScene::~LFScene() {
@@ -534,67 +623,46 @@ void LFScene::computePerPixelCorrespStarConfig(std::string flowAlg) {
 
 // run optical flow on custom config
 void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
-    
-    // custom configuration // HACK // TODO: class attribute
-    std::vector<int> sIndicesRight = {_sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8,
-                                      _sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8,
-                                      _sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8,
-                                      _sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8,
-                                      _sMin, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 8};
-    
-    std::vector<int> tIndicesRight = {_tMin, _tMin, _tMin, _tMin, _tMin,
-                                      _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2,
-                                      _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4,
-                                      _tMin + 6, _tMin + 6, _tMin + 6, _tMin + 6, _tMin + 6,
-                                      _tMin + 8, _tMin + 8, _tMin + 8, _tMin + 8, _tMin + 8};
-    
-    std::vector<int> sIndicesLeft = {_sMin + 2, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 6,
-                                     _sMin + 2, _sMin + 4, _sMin + 4, _sMin + 4, _sMin + 6,
-                                     _sMin + 2, _sMin + 4, _sMin + 4, _sMin + 4, _sMin + 6,
-                                     _sMin + 2, _sMin + 4, _sMin + 4, _sMin + 4, _sMin + 6,
-                                     _sMin + 2, _sMin + 2, _sMin + 4, _sMin + 6, _sMin + 6};
-    
-    std::vector<int> tIndicesLeft = {_tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2, _tMin + 2,
-                                     _tMin + 2, _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 2,
-                                     _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 4,
-                                     _tMin + 6, _tMin + 4, _tMin + 4, _tMin + 4, _tMin + 6,
-                                     _tMin + 6, _tMin + 6, _tMin + 6, _tMin + 6, _tMin + 6};
-    
-    /* (6,  6) -> (4, 4)
-     * (6,  6) -> (6, 4)
-     * (8,  6) -> (8, 4)
-     * (10, 6) -> (10, 4)
-     * (10, 6) -> (12, 4)
+
+    /* (1, 1) -> (0, 0)
+     * (1, 1) -> (1, 0)
+     * (2, 1) -> (2, 0)
+     * (3, 1) -> (3, 0)
+     * (3, 1) -> (4, 0)
      *
-     * (6,  6) -> (4, 6)
-     * (8,  8) -> (6, 6)
-     * (8,  8) -> (8, 6)
-     * (8,  8) -> (10, 6)
-     * (10, 6) -> (12, 6)
+     * (1, 1) -> (0, 1)
+     * (2, 2) -> (1, 1)
+     * (2, 2) -> (2, 1)
+     * (2, 2) -> (3, 1)
+     * (3, 1) -> (4, 1)
      *
-     * (6,  8) -> (4, 8)
-     * (8,  8) -> (6, 8)
+     * (1, 2) -> (0, 2)
+     * (2, 2) -> (1, 2)
      * central flow, don't count
-     * (8,  8) -> (10, 8)
-     * (10, 8) -> (12, 8)
+     * (2, 2) -> (3, 2)
+     * (3, 2) -> (4, 2)
      *
-     * (6, 10) -> (4, 10)
-     * (8,  8) -> (6, 10)
-     * (8,  8) -> (8, 10)
-     * (8,  8) -> (10, 10)
-     * (10, 10) -> (12, 10)
+     * (1, 3) -> (0, 3)
+     * (2, 2) -> (1, 3)
+     * (2, 2) -> (2, 3)
+     * (2, 2) -> (3, 3)
+     * (3, 3) -> (4, 3)
      *
-     * (6,  10) -> (4, 12)
-     * (6,  10) -> (6, 12)
-     * (8,  10) -> (8, 12)
-     * (10, 10) -> (10, 12)
-     * (10, 10) -> (12, 12)
+     * (1, 3) -> (0, 4)
+     * (1, 3) -> (1, 4)
+     * (2, 3) -> (2, 4)
+     * (3, 3) -> (3, 4)
+     * (3, 3) -> (4, 4)
      * */
+
+    uint range(0);
+    if(_stanfordConfig) { // HACK, TODO: stanford LF range as parameter
+        range = 17;
+    } else {
+        range = 5;
+    }
     
-    assert(sIndicesLeft.size() == tIndicesLeft.size());
-    assert(sIndicesRight.size() == tIndicesRight.size());
-    assert(sIndicesLeft.size() == sIndicesRight.size());
-    assert(_nbCameras == sIndicesLeft.size());
+    assert(_nbCameras == _sIndicesLeft.size());
     // nbFlows = _nbCameras - 1;
     
     std::string leftImageName = "";
@@ -615,18 +683,18 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
         flowLtoR[viewIndex].resize(imageSize);
         
         // stanford images
-        int sLeft = sIndicesLeft[viewIndex];
-        int tLeft = tIndicesLeft[viewIndex];
-        int sRight = sIndicesRight[viewIndex];
-        int tRight = tIndicesRight[viewIndex];
+        int sLeft = _sIndicesLeft[viewIndex];
+        int tLeft = _tIndicesLeft[viewIndex];
+        int sRight = _sIndicesRight[viewIndex];
+        int tRight = _tIndicesRight[viewIndex];
         
-        int mveIndexLeft = tLeft*17 + sLeft; // HACK, TODO: stanford LF range as parameter
+        int imageIndexLeft = tLeft*range + sLeft;
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), mveIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), imageIndexLeft );
         leftImageName = std::string(tempCharArray);
-        int mveIndexRight = tRight*17 + sRight; // HACK, TODO: stanford LF range as parameter
+        int imageIndexRight = tRight*range + sRight;
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), mveIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), imageIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view " << leftImageName << " and " << rightImageName << std::endl;
@@ -655,18 +723,18 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
         flowLtoR[viewIndex].resize(imageSize);
         
         // stanford images
-        int sLeft = sIndicesLeft[viewIndex];
-        int tLeft = tIndicesLeft[viewIndex];
-        int sRight = sIndicesRight[viewIndex];
-        int tRight = tIndicesRight[viewIndex];
+        int sLeft = _sIndicesLeft[viewIndex];
+        int tLeft = _tIndicesLeft[viewIndex];
+        int sRight = _sIndicesRight[viewIndex];
+        int tRight = _tIndicesRight[viewIndex];
         
-        int mveIndexLeft = tLeft*17 + sLeft; // HACK, TODO: stanford LF range as parameter
+        int imageIndexLeft = tLeft*range + sLeft;
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), mveIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), imageIndexLeft );
         leftImageName = std::string(tempCharArray);
-        int mveIndexRight = tRight*17 + sRight; // HACK, TODO: stanford LF range as parameter
+        int imageIndexRight = tRight*range + sRight;
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), mveIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), imageIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view " << leftImageName << " and " << rightImageName << std::endl;
@@ -690,18 +758,18 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
         flowLtoR[viewIndex].resize(imageSize);
         
         // stanford images
-        int sLeft = sIndicesLeft[viewIndex];
-        int tLeft = tIndicesLeft[viewIndex];
-        int sRight = sIndicesRight[viewIndex];
-        int tRight = tIndicesRight[viewIndex];
+        int sLeft = _sIndicesLeft[viewIndex];
+        int tLeft = _tIndicesLeft[viewIndex];
+        int sRight = _sIndicesRight[viewIndex];
+        int tRight = _tIndicesRight[viewIndex];
         
-        int mveIndexLeft = tLeft*17 + sLeft; // HACK, TODO: stanford LF range as parameter
+        int imageIndexLeft = tLeft*range + sLeft;
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), mveIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), imageIndexLeft );
         leftImageName = std::string(tempCharArray);
-        int mveIndexRight = tRight*17 + sRight; // HACK, TODO: stanford LF range as parameter
+        int imageIndexRight = tRight*range + sRight;
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), mveIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), imageIndexRight );
         rightImageName = std::string(tempCharArray);
         
         std::cout << "Computing flow between view " << leftImageName << " and " << rightImageName << std::endl;
@@ -726,18 +794,18 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
         }
         
         // stanford images
-        int sLeft = sIndicesLeft[viewIndex];
-        int tLeft = tIndicesLeft[viewIndex];
-        int sRight = sIndicesRight[viewIndex];
-        int tRight = tIndicesRight[viewIndex];
+        int sLeft = _sIndicesLeft[viewIndex];
+        int tLeft = _tIndicesLeft[viewIndex];
+        int sRight = _sIndicesRight[viewIndex];
+        int tRight = _tIndicesRight[viewIndex];
         
-        int mveIndexLeft = tLeft*17 + sLeft; // HACK, TODO: stanford LF range as parameter
+        int imageIndexLeft = tLeft*range + sLeft;
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), mveIndexLeft );
+        sprintf( tempCharArray, _imageName.c_str(), imageIndexLeft );
         leftImageName = std::string(tempCharArray);
-        int mveIndexRight = tRight*17 + sRight; // HACK, TODO: stanford LF range as parameter
+        int imageIndexRight = tRight*range + sRight;
         memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), mveIndexRight );
+        sprintf( tempCharArray, _imageName.c_str(), imageIndexRight );
         rightImageName = std::string(tempCharArray);
         
         memset(tempCharArray, 0, sizeof(tempCharArray));
