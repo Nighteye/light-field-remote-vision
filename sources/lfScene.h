@@ -74,6 +74,10 @@ public:
     // Read the camera matrices from INI file (MVE format)
     bool importCamParameters( char *cameraName );
 
+    // Import camera parameters (translation) and set fixed focal length (hack)
+    // Read the camera translation vectors from XML file (TOLF format)
+    bool importCamTranslations( char *cameraName, uint viewIndex );
+
     // getters
     PinholeCamera getPinholeCamera() const;
     const std::vector<cv::Point3f>& getTextureRGB() const;

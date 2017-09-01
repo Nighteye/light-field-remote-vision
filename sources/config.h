@@ -29,8 +29,8 @@ public:
 
     std::string _mve_name;
 
-    std::string _cameraName;
     std::string _imageName;
+    std::string _cameraName;
 
     std::string _flowAlg;
     int _computeFlow;

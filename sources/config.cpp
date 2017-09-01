@@ -18,8 +18,8 @@ Config_data::Config_data() {
     _t_max = 1;
     _t_rmv = -1;
     _mve_name = "";
-    _cameraName = "";
     _imageName = "";
+    _cameraName = "";
     _flowAlg = "";
     _computeFlow = 0;
     _lf_name = "";
@@ -83,8 +83,8 @@ void Config_data::parse_config( coco::config &cfg ) {
     cfg.get_switch( "t_max", _t_max );
     cfg.get_switch( "t_rmv", _t_rmv );
     cfg.get_switch( "mve_name", _mve_name );
-    cfg.get_switch( "cameraName", _cameraName );
     cfg.get_switch( "imageName", _imageName );
+    cfg.get_switch( "cameraName", _cameraName );
     cfg.get_switch( "flowAlg", _flowAlg );
     cfg.get_switch( "computeFlow", _computeFlow );
     cfg.get_switch( "lf_name", _lf_name );

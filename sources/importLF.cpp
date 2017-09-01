@@ -427,6 +427,59 @@ bool InputCam::importCamParameters( char *cameraName ) {
     }
 }
 
+// Import camera parameters (translation) and set fixed focal length (hack)
+// Read the camera translation vectors from XML file (TOLF format)
+bool InputCam::importCamTranslations( char *cameraName, uint viewIndex ) {
+
+    std::ifstream in( cameraName, std::ifstream::in );
+    assert( in.is_open() );
+    assert( in );
+
+    std::string tmp;
+
+    glm::mat3 R(1.0);
+    glm::vec3 t(0.0);
+    glm::mat3 K(0.0);
+    uint nbMaxWordsHeader = 100;
+
+    uint count = 0; // for safety
+    while( strcmp( "<data>", tmp.c_str() ) && strcmp( "[view]", tmp.c_str() ) && count < nbMaxWordsHeader ) {
+
+        in >> tmp;
+        ++count;
+    }
+
+    if( !strcmp( "</data>", tmp.c_str() ) || count >= nbMaxWordsHeader) {
+
+        // No camera parameter has been estimated by sfm
+        return false;
+
+    } else {
+
+        for(uint i = 0 ; i < viewIndex ; ++i) {
+
+            for(uint j = 0 ; j < 6 ; ++j) {
+                in >> tmp;
+            }
+        }
+
+        in >> tmp >> tmp >> tmp >> t[0] >> t[1] >> t[2];
+        in.close();
+
+        K[0][0] = 905.44060602527395;
+        K[1][1] = 907.68102844590101;
+        K[2][2] = 1.0;
+        K[2][0] = 308.29227330174598;
+        K[2][1] = 252.10539485267773;
+
+        _pinholeCamera = PinholeCamera( K, R, t, _W, _H );
+
+//        _pinholeCamera.display();
+
+        return true;
+    }
+}
+
 // load standford lightfield dataset (image and camera matrices)
 // camera matrices are obainted thank to openMVG calibration
 // MVE FORMAT (convert rows to rows and column)
@@ -592,7 +645,7 @@ void LFScene::importCustomTOLFViews() {
         if( v_k->importTexture(imageNameChar) ) {
 
             // Import camera parameters and load vbos
-            if( v_k->importCamParameters(cameraNameChar) ) {
+            if( v_k->importCamTranslations(cameraNameChar, viewIndex) ) {
 
                 _vCam.push_back( v_k );
 

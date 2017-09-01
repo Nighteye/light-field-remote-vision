@@ -190,7 +190,7 @@ int main( int argc, char **argv ) {
         config_data->_dpart_name = " ";
 
         // necessary parameters
-        const bool stanford = true; // TODO config param
+        const bool stanford = false; // TODO config param
         if(stanford) {
 
             assert(!config_data->_mve_name.empty());
@@ -237,6 +237,7 @@ int main( int argc, char **argv ) {
             std::cout << "Import TOLF views, TOLF format" << std::endl;
             lfScene.importCustomTOLFViews();
         }
+        return 0;
 
         if(config_data->_computeFlow != 0) {
             //                std::cout << "Compute optical flow" << std::endl;
