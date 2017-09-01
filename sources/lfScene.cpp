@@ -243,13 +243,14 @@ void LFScene::computeFlowedLightfield()
     //    uint nbInputViews = 0;
     uint nbInputFlows = 0;
     //    const bool verbose = false;
-    const bool backVisibility = false; // take backward visibility into account
+    const bool backVisibility = false; // load external backward visibility
     
     std::vector<std::vector<cv::Point2f> > flowLtoR;
     // visibilityMaskl : pixels of l view that are not visible from r view
     std::vector<std::vector<bool> > visibilityMaskl;
     
-    // loading optical flow and visibility masks
+    // loading optical flow and visibility masks (optional)
+    // counting the number of input OPTICAL FLOWS depending on whether we remove the target view or not
     for(int sl = _sMin ; sl < _sMax ; ++sl)
     {
         int sr = sl + 1;
@@ -285,25 +286,6 @@ void LFScene::computeFlowedLightfield()
         
         flowLtoR.push_back(currentFlowLtoR);
         visibilityMaskl.push_back(currentVisibilityMaskl);
-    }
-    
-    // counting the number of input OPTICAL FLOWS depending on whether we remove the target view or not
-    nbInputFlows = 0;
-    for(int sl = _sMin ; sl < _sMax ; ++sl)
-    {
-        int sr = sl + 1;
-        
-        // we ignore the view and take the next one to the right
-        if(sr == _sRmv) {
-            
-            ++sr;
-        }
-        
-        if(sl == _sRmv) {
-            
-            continue;
-        }
-        
         ++nbInputFlows;
     }
     
