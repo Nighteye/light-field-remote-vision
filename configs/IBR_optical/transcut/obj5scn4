@@ -1,0 +1,7 @@
+config 			./configs/IBR_optical/transcut/common_parameters
+
+# INPUT
+imageName		./in/transcut_dataset/obj5/scn4/images_25_629_469/%u_rect.ppm
+
+# OUTPUT
+outdir			out/IBR_optical/transcut/obj5_scn4

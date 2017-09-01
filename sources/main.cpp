@@ -253,8 +253,6 @@ int main( int argc, char **argv ) {
             std::cout << "Optical flow already computed" << std::endl;
         }
 
-        return 0;
-
         std::cout << "Compute flowed lightfield" << std::endl;
         //                lfScene.computeFlowedLFStarConfig();
         lfScene.computeFlowedLFCustomConfig();
