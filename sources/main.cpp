@@ -254,23 +254,23 @@ int main( int argc, char **argv ) {
         }
 
         std::cout << "Compute flowed lightfield" << std::endl;
-        //                lfScene.computeFlowedLFStarConfig();
+        //                lfScene.computeFlowedLFStarConfig(); // deprecated
         lfScene.computeFlowedLFCustomConfig();
 
-        std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
-        lfScene.curveFittingDLT();
+        //        std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
+        //        lfScene.curveFittingDLT();
 
         //                std::cout << "Fit position models to light flow samples, without DLT initialization" << std::endl;
         //                lfScene.curveFitting();
 
-        //                std::cout << "Fit color models to light flow samples" << std::endl;
-        //                lfScene.curveFittingColor();
+//        std::cout << "Fit color models to light flow samples" << std::endl;
+//        lfScene.curveFittingColor();
 
-        //                std::cout << "Render image by interpolating the light flow" << std::endl;
-        //                lfScene.renderLightFlow();
-        ////                lfScene.renderLightFlowLambertianModel();
-        ///
-        //                lfScene.bic();
+        std::cout << "Render image by interpolating the light flow" << std::endl;
+//        lfScene.renderLightFlow();
+        lfScene.renderLightFlowLambertianModel();
+
+        lfScene.bic();
 
         //                lfScene.renderLightFlowLambertianVideo();
 

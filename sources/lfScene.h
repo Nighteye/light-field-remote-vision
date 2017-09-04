@@ -174,8 +174,9 @@ public:
     void curveFittingColor();
 
     // import target camera parameters
-    void loadTargetView(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &targetC, std::string cameraName);
+    void loadTargetView(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &targetC, std::string targetCameraName);
     void loadTargetView(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &targetC);
+    void loadTargetTranslation(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &targetC);
 
     // compute the bayesian information criterion (BIC) for model selection
     void bic();

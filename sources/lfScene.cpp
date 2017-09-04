@@ -2065,11 +2065,11 @@ void projectSplat( int width, int height,
     }
 }
 
-void LFScene::loadTargetView(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &targetC, std::string cameraName) {
+void LFScene::loadTargetView(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &targetC, std::string targetCameraName) {
 
-    std::cout << "Loading view " << cameraName << std::endl;
+    std::cout << "Loading view " << targetCameraName << std::endl;
 
-    std::ifstream in( cameraName.c_str(), std::ifstream::in );
+    std::ifstream in( targetCameraName.c_str(), std::ifstream::in );
     assert( in.is_open() );
     assert( in );
 
@@ -2128,13 +2128,12 @@ void LFScene::loadTargetView(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &ta
 
 void LFScene::loadTargetView(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &targetC) {
     
-    std::string cameraName = _mveName + "/views" + "/view_%04i.mve" + "/meta.ini";
-    char cameraNameChar[500];
-    memset(cameraNameChar, 0, sizeof(cameraNameChar));
-    sprintf( cameraNameChar, cameraName.c_str(), _mveRdrIdx );
-    std::cout << "Loading view " << cameraNameChar << std::endl;
+    char targetCameraNameChar[500];
+    memset(targetCameraNameChar, 0, sizeof(targetCameraNameChar));
+    sprintf( targetCameraNameChar, _cameraName.c_str(), _mveRdrIdx );
+    std::cout << "Loading view " << targetCameraNameChar << std::endl;
     
-    std::ifstream in( cameraNameChar, std::ifstream::in );
+    std::ifstream in( targetCameraNameChar, std::ifstream::in );
     assert( in.is_open() );
     assert( in );
     
@@ -2191,21 +2190,79 @@ void LFScene::loadTargetView(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &ta
     targetC = cv::Point3f((float)C[0], (float)C[1], (float)C[2]);
 }
 
+// Import target camera parameters (translation) and set fixed focal length (hack)
+// Read the camera translation vectors from XML file (TOLF format)
+void LFScene::loadTargetTranslation(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &targetC) {
+
+    char targetCameraNameChar[500];
+    memset(targetCameraNameChar, 0, sizeof(targetCameraNameChar));
+    sprintf( targetCameraNameChar, _cameraName.c_str(), _mveRdrIdx );
+    std::cout << "Loading view " << targetCameraNameChar << std::endl;
+
+    std::ifstream in( targetCameraNameChar, std::ifstream::in );
+    assert( in.is_open() );
+    assert( in );
+
+    std::string tmp;
+
+    const uint viewIndex = 12; // HACK, TODO: variable for target view number
+
+    glm::mat3 R(1.0);
+    glm::vec3 t(0.0);
+    glm::mat3 K(0.0);
+    uint nbMaxWordsHeader = 100;
+
+    uint count = 0; // for safety
+    while( strcmp( "<data>", tmp.c_str() ) && strcmp( "[view]", tmp.c_str() ) && count < nbMaxWordsHeader ) {
+
+        in >> tmp;
+        ++count;
+    }
+
+    assert( strcmp( "</data>", tmp.c_str() ) && count < nbMaxWordsHeader);
+
+    for(uint i = 0 ; i < viewIndex ; ++i) {
+
+        for(uint j = 0 ; j < 6 ; ++j) {
+            in >> tmp;
+        }
+    }
+
+    in >> tmp >> tmp >> tmp >> t[0] >> t[1] >> t[2];
+    in.close();
+
+    K[0][0] = 905.44060602527395;
+    K[1][1] = 907.68102844590101;
+    K[2][2] = 1.0;
+    K[2][0] = 308.29227330174598;
+    K[2][1] = 252.10539485267773;
+
+    glm::vec3 C = -glm::transpose(R) * t;
+
+    targetK = (cv::Mat_<float>(3,3) << K[0][0], K[1][0], K[2][0],
+            K[0][1], K[1][1], K[2][1],
+            K[0][2], K[1][2], K[2][2]);
+    targetR = (cv::Mat_<float>(3,3) << R[0][0], R[1][0], R[2][0],
+            R[0][1], R[1][1], R[2][1],
+            R[0][2], R[1][2], R[2][2]);
+    targetC = cv::Point3f((float)C[0], (float)C[1], (float)C[2]);
+}
+
 void LFScene::bic() {
 
     const uint nbPixels = _camWidth*_camHeight;
 
     std::vector<float> finalCost3Map(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/finalCost3Map.pfm") << std::endl;
-    loadPFM(finalCost3Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost3Map.pfm"));
+    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost3MapDLT.pfm") << std::endl;
+    loadPFM(finalCost3Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost3MapDLT.pfm"));
 
     std::vector<float> finalCost4Map(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/finalCost4Map.pfm") << std::endl;
-    loadPFM(finalCost4Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost4Map.pfm"));
+    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost4MapDLT.pfm") << std::endl;
+    loadPFM(finalCost4Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost4MapDLT.pfm"));
 
     std::vector<float> finalCost6Map(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/finalCost6Map.pfm") << std::endl;
-    loadPFM(finalCost6Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost6Map.pfm"));
+    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost6MapDLT.pfm") << std::endl;
+    loadPFM(finalCost6Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost6MapDLT.pfm"));
 
     // OUTPUT BIC
 
@@ -2265,27 +2322,28 @@ void LFScene::renderLightFlow() {
     loadTargetView(targetK, targetR, targetC);
 
     // LOAD POSITION MODEL PARAMETERS
+    // DLT: with DLT, for initialization only (linear method THEN non-linear method)
     
     std::vector<cv::Point3f> map3param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter3Map.pfm") << std::endl;
-    loadPFM(map3param, _camWidth, _camHeight, std::string(_outdir + "/parameter3Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter3MapDLT.pfm") << std::endl;
+    loadPFM(map3param, _camWidth, _camHeight, std::string(_outdir + "/parameter3MapDLT.pfm"));
     
     std::vector<cv::Point2f> mapAlpha4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterAlpha2Map.pfm") << std::endl;
-    loadPFM(mapAlpha4param, _camWidth, _camHeight, std::string(_outdir + "/parameterAlpha2Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameterAlpha2MapDLT.pfm") << std::endl;
+    loadPFM(mapAlpha4param, _camWidth, _camHeight, std::string(_outdir + "/parameterAlpha2MapDLT.pfm"));
     std::vector<cv::Point2f> mapBeta4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterBeta2Map.pfm") << std::endl;
-    loadPFM(mapBeta4param, _camWidth, _camHeight, std::string(_outdir + "/parameterBeta2Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameterBeta2MapDLT.pfm") << std::endl;
+    loadPFM(mapBeta4param, _camWidth, _camHeight, std::string(_outdir + "/parameterBeta2MapDLT.pfm"));
     
     std::vector<cv::Point2f> mapAlphau6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphauMap.pfm") << std::endl;
-    loadPFM(mapAlphau6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphauMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphauMapDLT.pfm") << std::endl;
+    loadPFM(mapAlphau6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphauMapDLT.pfm"));
     std::vector<cv::Point2f> mapAlphav6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphavMap.pfm") << std::endl;
-    loadPFM(mapAlphav6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphavMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphavMapDLT.pfm") << std::endl;
+    loadPFM(mapAlphav6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphavMapDLT.pfm"));
     std::vector<cv::Point2f> mapBeta6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMap.pfm") << std::endl;
-    loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMapDLT.pfm") << std::endl;
+    loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMapDLT.pfm"));
 
     // LOAD COLOR MODEL PARAMETERS
 
@@ -2497,25 +2555,25 @@ void LFScene::renderLightFlowLambertianModel() {
     const uint nbPixels = _camWidth*_camHeight;
 
     std::vector<cv::Point3f> map3param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter3Map.pfm") << std::endl;
-    loadPFM(map3param, _camWidth, _camHeight, std::string(_outdir + "/parameter3Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter3MapDLT.pfm") << std::endl;
+    loadPFM(map3param, _camWidth, _camHeight, std::string(_outdir + "/parameter3MapDLT.pfm"));
 
     std::vector<cv::Point2f> mapAlpha4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterAlpha2Map.pfm") << std::endl;
-    loadPFM(mapAlpha4param, _camWidth, _camHeight, std::string(_outdir + "/parameterAlpha2Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameterAlpha2MapDLT.pfm") << std::endl;
+    loadPFM(mapAlpha4param, _camWidth, _camHeight, std::string(_outdir + "/parameterAlpha2MapDLT.pfm"));
     std::vector<cv::Point2f> mapBeta4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterBeta2Map.pfm") << std::endl;
-    loadPFM(mapBeta4param, _camWidth, _camHeight, std::string(_outdir + "/parameterBeta2Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameterBeta2MapDLT.pfm") << std::endl;
+    loadPFM(mapBeta4param, _camWidth, _camHeight, std::string(_outdir + "/parameterBeta2MapDLT.pfm"));
 
     std::vector<cv::Point2f> mapAlphau6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphauMap.pfm") << std::endl;
-    loadPFM(mapAlphau6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphauMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphauMapDLT.pfm") << std::endl;
+    loadPFM(mapAlphau6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphauMapDLT.pfm"));
     std::vector<cv::Point2f> mapAlphav6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphavMap.pfm") << std::endl;
-    loadPFM(mapAlphav6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphavMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphavMapDLT.pfm") << std::endl;
+    loadPFM(mapAlphav6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphavMapDLT.pfm"));
     std::vector<cv::Point2f> mapBeta6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMap.pfm") << std::endl;
-    loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMapDLT.pfm") << std::endl;
+    loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMapDLT.pfm"));
 
     // AVERAGE COLOR IMAGE
     // TODO: interpolate color like position
@@ -2563,7 +2621,11 @@ void LFScene::renderLightFlowLambertianModel() {
 
     cv::Mat targetR, targetK;
     cv::Point3f targetC;
-    loadTargetView(targetK, targetR, targetC);
+    if(_stanfordConfig) {
+        loadTargetView(targetK, targetR, targetC);
+    } else {
+        loadTargetTranslation(targetK, targetR, targetC);
+    }
 
     // OUTPUT IMAGE
 
@@ -2601,7 +2663,7 @@ void LFScene::renderLightFlowLambertianModel() {
             // 3 PARAMETERS
             cv::Point2f destPoint3param = cv::Point2f(0.0, 0.0);
             const cv::Point3f parameters = map3param[idx];
-
+std::cout << "parameters: " << parameters << std::endl;
             splatProjection3param(destPoint3param, parameters, targetK, targetR, targetC);
 
             // interpolation (splatting)
@@ -2702,25 +2764,25 @@ void LFScene::renderLightFlowVideo() {
     // LOAD POSITION MODEL PARAMETERS
 
     std::vector<cv::Point3f> map3param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter3Map.pfm") << std::endl;
-    loadPFM(map3param, _camWidth, _camHeight, std::string(_outdir + "/parameter3Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter3MapDLT.pfm") << std::endl;
+    loadPFM(map3param, _camWidth, _camHeight, std::string(_outdir + "/parameter3MapDLT.pfm"));
 
     std::vector<cv::Point2f> mapAlpha4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterAlpha2Map.pfm") << std::endl;
-    loadPFM(mapAlpha4param, _camWidth, _camHeight, std::string(_outdir + "/parameterAlpha2Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameterAlpha2MapDLT.pfm") << std::endl;
+    loadPFM(mapAlpha4param, _camWidth, _camHeight, std::string(_outdir + "/parameterAlpha2MapDLT.pfm"));
     std::vector<cv::Point2f> mapBeta4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterBeta2Map.pfm") << std::endl;
-    loadPFM(mapBeta4param, _camWidth, _camHeight, std::string(_outdir + "/parameterBeta2Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameterBeta2MapDLT.pfm") << std::endl;
+    loadPFM(mapBeta4param, _camWidth, _camHeight, std::string(_outdir + "/parameterBeta2MapDLT.pfm"));
 
     std::vector<cv::Point2f> mapAlphau6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphauMap.pfm") << std::endl;
-    loadPFM(mapAlphau6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphauMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphauMapDLT.pfm") << std::endl;
+    loadPFM(mapAlphau6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphauMapDLT.pfm"));
     std::vector<cv::Point2f> mapAlphav6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphavMap.pfm") << std::endl;
-    loadPFM(mapAlphav6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphavMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphavMapDLT.pfm") << std::endl;
+    loadPFM(mapAlphav6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphavMapDLT.pfm"));
     std::vector<cv::Point2f> mapBeta6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMap.pfm") << std::endl;
-    loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMapDLT.pfm") << std::endl;
+    loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMapDLT.pfm"));
 
     // LOAD COLOR MODEL PARAMETERS
 
@@ -2756,11 +2818,11 @@ void LFScene::renderLightFlowVideo() {
 
         // TARGET CAM PARAMETERS
 
-        std::string cameraName = _outdir + "/%08i.ini";
-        char cameraNameChar[500];
-        memset(cameraNameChar, 0, sizeof(cameraNameChar));
-        sprintf( cameraNameChar, cameraName.c_str(), frame );
-        loadTargetView(targetK, targetR, targetC, std::string(cameraNameChar));
+        std::string targetCameraName = _outdir + "/%08i.ini";
+        char targetCameraNameChar[500];
+        memset(targetCameraNameChar, 0, sizeof(targetCameraNameChar));
+        sprintf( targetCameraNameChar, targetCameraName.c_str(), frame );
+        loadTargetView(targetK, targetR, targetC, std::string(targetCameraNameChar));
         
         //        // update target camera
         //        float step = 100;
@@ -2923,25 +2985,25 @@ void LFScene::renderLightFlowLambertianVideo() {
     // LOAD POSITION MODEL PARAMETERS
 
     std::vector<cv::Point3f> map3param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter3Map.pfm") << std::endl;
-    loadPFM(map3param, _camWidth, _camHeight, std::string(_outdir + "/parameter3Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter3MapDLT.pfm") << std::endl;
+    loadPFM(map3param, _camWidth, _camHeight, std::string(_outdir + "/parameter3MapDLT.pfm"));
 
     std::vector<cv::Point2f> mapAlpha4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterAlpha2Map.pfm") << std::endl;
-    loadPFM(mapAlpha4param, _camWidth, _camHeight, std::string(_outdir + "/parameterAlpha2Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameterAlpha2MapDLT.pfm") << std::endl;
+    loadPFM(mapAlpha4param, _camWidth, _camHeight, std::string(_outdir + "/parameterAlpha2MapDLT.pfm"));
     std::vector<cv::Point2f> mapBeta4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterBeta2Map.pfm") << std::endl;
-    loadPFM(mapBeta4param, _camWidth, _camHeight, std::string(_outdir + "/parameterBeta2Map.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameterBeta2MapDLT.pfm") << std::endl;
+    loadPFM(mapBeta4param, _camWidth, _camHeight, std::string(_outdir + "/parameterBeta2MapDLT.pfm"));
 
     std::vector<cv::Point2f> mapAlphau6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphauMap.pfm") << std::endl;
-    loadPFM(mapAlphau6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphauMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphauMapDLT.pfm") << std::endl;
+    loadPFM(mapAlphau6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphauMapDLT.pfm"));
     std::vector<cv::Point2f> mapAlphav6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphavMap.pfm") << std::endl;
-    loadPFM(mapAlphav6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphavMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphavMapDLT.pfm") << std::endl;
+    loadPFM(mapAlphav6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphavMapDLT.pfm"));
     std::vector<cv::Point2f> mapBeta6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMap.pfm") << std::endl;
-    loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMap.pfm"));
+    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMapDLT.pfm") << std::endl;
+    loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMapDLT.pfm"));
 
     // AVERAGE COLOR IMAGE
     // TODO: interpolate color like position
@@ -3007,11 +3069,11 @@ void LFScene::renderLightFlowLambertianVideo() {
 
         // TARGET CAM PARAMETERS
 
-        //        std::string cameraName = _outdir + "/%08i.ini";
-        //        char cameraNameChar[500];
-        //        memset(cameraNameChar, 0, sizeof(cameraNameChar));
-        //        sprintf( cameraNameChar, cameraName.c_str(), frame );
-        //        loadTargetView(targetK, targetR, targetC, std::string(cameraNameChar));
+        //        std::string targetCameraName = _outdir + "/%08i.ini";
+        //        char targetCameraNameChar[500];
+        //        memset(targetCameraNameChar, 0, sizeof(targetCameraNameChar));
+        //        sprintf( targetCameraNameChar, targetCameraName.c_str(), frame );
+        //        loadTargetView(targetK, targetR, targetC, std::string(targetCameraNameChar));
 
         // update target camera
         float step = 100;
