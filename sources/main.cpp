@@ -257,8 +257,8 @@ int main( int argc, char **argv ) {
         //                lfScene.computeFlowedLFStarConfig(); // deprecated
         lfScene.computeFlowedLFCustomConfig();
 
-        //        std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
-        //        lfScene.curveFittingDLT();
+        std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
+        lfScene.curveFittingDLT();
 
         //                std::cout << "Fit position models to light flow samples, without DLT initialization" << std::endl;
         //                lfScene.curveFitting();

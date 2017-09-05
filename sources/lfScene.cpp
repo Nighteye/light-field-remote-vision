@@ -2663,7 +2663,7 @@ void LFScene::renderLightFlowLambertianModel() {
             // 3 PARAMETERS
             cv::Point2f destPoint3param = cv::Point2f(0.0, 0.0);
             const cv::Point3f parameters = map3param[idx];
-std::cout << "parameters: " << parameters << std::endl;
+
             splatProjection3param(destPoint3param, parameters, targetK, targetR, targetC);
 
             // interpolation (splatting)

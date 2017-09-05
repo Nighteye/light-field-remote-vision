@@ -431,18 +431,41 @@ bool InputCam::importCamParameters( char *cameraName ) {
 // Read the camera translation vectors from XML file (TOLF format)
 bool InputCam::importCamTranslations( char *cameraName, uint viewIndex ) {
 
-    std::ifstream in( cameraName, std::ifstream::in );
-    assert( in.is_open() );
-    assert( in );
-
     std::string tmp;
 
+    const uint referenceViewIndex = 12; // HACK, TODO: variable for reference view number
+
+    glm::vec3 r(0.0);
     glm::mat3 R(1.0);
     glm::vec3 t(0.0);
     glm::mat3 K(0.0);
     uint nbMaxWordsHeader = 100;
 
+    std::ifstream in( cameraName, std::ifstream::in );
+    assert( in.is_open() );
+    assert( in );
+
     uint count = 0; // for safety
+    while( strcmp( "<data>", tmp.c_str() ) && strcmp( "[view]", tmp.c_str() ) && count < nbMaxWordsHeader ) {
+
+        in >> tmp;
+        ++count;
+    }
+
+    assert( strcmp( "</data>", tmp.c_str() ) && count < nbMaxWordsHeader);
+
+    for(uint i = 0 ; i < referenceViewIndex ; ++i) {
+
+        for(uint j = 0 ; j < 6 ; ++j) {
+            in >> tmp;
+        }
+    }
+
+    // back to the beginning of the file
+    in.clear();
+    in.seekg(0, std::ios::beg);
+
+    count = 0; // for safety
     while( strcmp( "<data>", tmp.c_str() ) && strcmp( "[view]", tmp.c_str() ) && count < nbMaxWordsHeader ) {
 
         in >> tmp;
@@ -463,14 +486,37 @@ bool InputCam::importCamTranslations( char *cameraName, uint viewIndex ) {
             }
         }
 
-        in >> tmp >> tmp >> tmp >> t[0] >> t[1] >> t[2];
+        in >> r[0] >> r[1] >> r[2] >> t[0] >> t[1] >> t[2];
         in.close();
 
+        float theta = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+        if(theta > 0.0000001) {
+
+            r /= theta;
+            R[0][0] = cos(theta) + (1 - cos(theta))*r[0]*r[0];
+            R[1][0] = (1 - cos(theta))*r[0]*r[1] - sin(theta)*r[2];
+            R[2][0] = (1 - cos(theta))*r[0]*r[2] + sin(theta)*r[1];
+            R[0][1] = (1 - cos(theta))*r[1]*r[0] + sin(theta)*r[2];
+            R[1][1] = cos(theta) + (1 - cos(theta))*r[1]*r[1];
+            R[2][1] = (1 - cos(theta))*r[1]*r[2] - sin(theta)*r[0];
+            R[0][2] = (1 - cos(theta))*r[2]*r[0] - sin(theta)*r[1];
+            R[1][2] = (1 - cos(theta))*r[2]*r[1] + sin(theta)*r[0];
+            R[2][2] = cos(theta) + (1 - cos(theta))*r[2]*r[2];
+
+        } else {
+
+            R = glm::mat3(1.0);
+        }
+
+        // update the camera paramters with respect to the reference view
         K[0][0] = 905.44060602527395;
         K[1][1] = 907.68102844590101;
         K[2][2] = 1.0;
         K[2][0] = 308.29227330174598;
         K[2][1] = 252.10539485267773;
+        t = glm::transpose(R)*t;
+        R = glm::mat3(1.0); // the rotation is the rotation of the reference view, so the identity
+        // the center of projection remains the same
 
         _pinholeCamera = PinholeCamera( K, R, t, _W, _H );
 
