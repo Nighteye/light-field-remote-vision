@@ -16,28 +16,49 @@ static std::vector<cv::Point2f> testFlow = {cv::Point2f(500, 200),
 void splatProjection3param(cv::Point2f &imagePoint, const Point3f &parameters,
                            const cv::Mat &K, const cv::Mat &R, const cv::Point3f &C) {
 
-    // uv = A * st + B
-    // Ap -> lambertian point
-    // Ac -> pinhole camera
-    // Bp -> lambertian point
-    // Bc -> pinhole camera
-    // matrix M = Ap - Ac
-    // vector b = Bc - Bp
+    Mat x = (Mat_<float>(3, 1) << 0, 0, 0);
 
-    // Ap = ap * I2 (lambertian point)
-    // Ac = ac * I2, with ac = (c3 - 1)/c3 (behaves like lambertian)
-    // M = m * I2, with m = ap - ac
+    if(C.z > 0.0000001) { // the optical center of the target view is NOT located on the plane (s,t)
 
-    float m = parameters.x - (C.z - 1)/C.z;
-    Mat M = (Mat_<float>(2, 2) << m, 0, 0, m);
-    Mat M_inv = M.inv();
-    float buc = C.x/C.z;
-    float bvc = C.y/C.z;
-    Mat b = (Mat_<float>(2, 1) << buc - parameters.y, bvc - parameters.z);
-    Mat st = M_inv * b;
+        // uv = A * st + B
+        // Ap -> lambertian point
+        // Ac -> pinhole camera
+        // Bp -> lambertian point
+        // Bc -> pinhole camera
+        // matrix M = Ap - Ac
+        // vector b = Bc - Bp
 
-    Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
-    Mat x = K * R * X;
+        // Ap = ap * I2 (lambertian point)
+        // Ac = ac * I2, with ac = (c3 - 1)/c3 (behaves like lambertian)
+        // M = m * I2, with m = ap - ac
+
+        float m = parameters.x - (C.z - 1)/C.z;
+        Mat M = (Mat_<float>(2, 2) << m, 0, 0, m);
+        Mat M_inv = M.inv();
+        float buc = C.x/C.z;
+        float bvc = C.y/C.z;
+        Mat b = (Mat_<float>(2, 1) << buc - parameters.y, bvc - parameters.z);
+        Mat st = M_inv * b;
+
+        // we project the point (s,t,0)
+
+        Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
+        x = K * R * X;
+
+    } else {
+
+        // simplified rendering equations
+        Mat st = (Mat_<float>(2, 1) << C.x, C.y);
+
+        // we project the point (u,v,1)
+
+        Mat Ap = (Mat_<float>(2, 2) << parameters.x, 0, 0, parameters.x);
+        Mat Bp = (Mat_<float>(2, 1) << parameters.y, parameters.z);
+        Mat uv = Ap*st + Bp;
+
+        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, 1 - C.z);
+        x = K * R * X;
+    }
 
     imagePoint.x = x.at<float>(0, 0)/x.at<float>(2, 0);
     imagePoint.y = x.at<float>(1, 0)/x.at<float>(2, 0);
@@ -46,28 +67,47 @@ void splatProjection3param(cv::Point2f &imagePoint, const Point3f &parameters,
 void splatProjection4param(cv::Point2f &imagePoint, const cv::Point2f &alpha, const cv::Point2f &beta,
                            const cv::Mat &K, const cv::Mat &R, const cv::Point3f &C) {
 
-    // uv = A * st + B
-    // Ap -> lambertian point
-    // Ac -> pinhole camera
-    // Bp -> lambertian point
-    // Bc -> pinhole camera
-    // matrix M = Ap - Ac
-    // vector b = Bc - Bp
+    Mat x = (Mat_<float>(3, 1) << 0, 0, 0);
 
-    // Ap = [au, 0 ; 0, av]
-    // Ac = ac * I2, with ac = (c3 - 1)/c3 (behaves like lambertian)
-    // M = [au - ac, 0 ; 0, av - ac]
+    if(C.z > 0.0000001) { // the optical center of the target view is NOT located on the plane (s,t)
 
-    float ac = (C.z - 1)/C.z;
-    Mat M = (Mat_<float>(2, 2) << alpha.x - ac, 0, 0, alpha.y - ac);
-    Mat M_inv = M.inv();
-    float buc = C.x/C.z;
-    float bvc = C.y/C.z;
-    Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
-    Mat st = M_inv * b;
+        // uv = A * st + B
+        // Ap -> lambertian point
+        // Ac -> pinhole camera
+        // Bp -> lambertian point
+        // Bc -> pinhole camera
+        // matrix M = Ap - Ac
+        // vector b = Bc - Bp
 
-    Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
-    Mat x = K * R * X;
+        // Ap = [au, 0 ; 0, av]
+        // Ac = ac * I2, with ac = (c3 - 1)/c3 (behaves like lambertian)
+        // M = [au - ac, 0 ; 0, av - ac]
+
+        float ac = (C.z - 1)/C.z;
+        Mat M = (Mat_<float>(2, 2) << alpha.x - ac, 0, 0, alpha.y - ac);
+        Mat M_inv = M.inv();
+        float buc = C.x/C.z;
+        float bvc = C.y/C.z;
+        Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
+        Mat st = M_inv * b;
+
+        Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
+        x = K * R * X;
+
+    } else {
+
+        // simplified rendering equations
+        Mat st = (Mat_<float>(2, 1) << C.x, C.y);
+
+        // we project the point (u,v,1)
+
+        Mat Ap = (Mat_<float>(2, 2) << alpha.x, 0, 0, alpha.y);
+        Mat Bp = (Mat_<float>(2, 1) << beta.x, beta.y);
+        Mat uv = Ap*st + Bp;
+
+        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, 1 - C.z);
+        x = K * R * X;
+    }
 
     imagePoint.x = x.at<float>(0, 0)/x.at<float>(2, 0);
     imagePoint.y = x.at<float>(1, 0)/x.at<float>(2, 0);
@@ -76,28 +116,47 @@ void splatProjection4param(cv::Point2f &imagePoint, const cv::Point2f &alpha, co
 void splatProjection6param(cv::Point2f &imagePoint, const cv::Point2f &alphau, const cv::Point2f &alphav, const cv::Point2f &beta,
                            const cv::Mat &K, const cv::Mat &R, const cv::Point3f &C) {
 
-    // uv = A * st + B
-    // Ap -> lambertian point
-    // Ac -> pinhole camera
-    // Bp -> lambertian point
-    // Bc -> pinhole camera
-    // matrix M = Ap - Ac
-    // vector b = Bc - Bp
+    Mat x = (Mat_<float>(3, 1) << 0, 0, 0);
 
-    // Ap = [au, 0 ; 0, av]
-    // Ac = ac * I2, with ac = (c3 - 1)/c3 (behaves like lambertian)
-    // M = [aus - ac, aut ; avs, avt - ac]
+    if(C.z > 0.0000001) { // the optical center of the target view is NOT located on the plane (s,t)
 
-    float ac = (C.z - 1)/C.z;
-    Mat M = (Mat_<float>(2, 2) << alphau.x - ac, alphau.y, alphav.x, alphav.y - ac);
-    Mat M_inv = M.inv();
-    float buc = C.x/C.z;
-    float bvc = C.y/C.z;
-    Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
-    Mat st = M_inv * b;
+        // uv = A * st + B
+        // Ap -> lambertian point
+        // Ac -> pinhole camera
+        // Bp -> lambertian point
+        // Bc -> pinhole camera
+        // matrix M = Ap - Ac
+        // vector b = Bc - Bp
 
-    Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
-    Mat x = K * R * X;
+        // Ap = [au, 0 ; 0, av]
+        // Ac = ac * I2, with ac = (c3 - 1)/c3 (behaves like lambertian)
+        // M = [aus - ac, aut ; avs, avt - ac]
+
+        float ac = (C.z - 1)/C.z;
+        Mat M = (Mat_<float>(2, 2) << alphau.x - ac, alphau.y, alphav.x, alphav.y - ac);
+        Mat M_inv = M.inv();
+        float buc = C.x/C.z;
+        float bvc = C.y/C.z;
+        Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
+        Mat st = M_inv * b;
+
+        Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
+        x = K * R * X;
+
+    } else {
+
+        // simplified rendering equations
+        Mat st = (Mat_<float>(2, 1) << C.x, C.y);
+
+        // we project the point (u,v,1)
+
+        Mat Ap = (Mat_<float>(2, 2) << alphau.x, alphau.y, alphav.x, alphav.y);
+        Mat Bp = (Mat_<float>(2, 1) << beta.x, beta.y);
+        Mat uv = Ap*st + Bp;
+
+        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, 1 - C.z);
+        x = K * R * X;
+    }
 
     imagePoint.x = x.at<float>(0, 0)/x.at<float>(2, 0);
     imagePoint.y = x.at<float>(1, 0)/x.at<float>(2, 0);
@@ -698,7 +757,7 @@ void DLT(uint nbSamples,
 
         cv::SVD svd4(M4);
 
-//        assert(svd4.vt.at<float>(svd4.vt.rows-1, 3) > 0.00001);
+        //        assert(svd4.vt.at<float>(svd4.vt.rows-1, 3) > 0.00001);
         x[0] = svd4.vt.at<float>(svd4.vt.rows-1, 0)/svd4.vt.at<float>(svd4.vt.rows-1, 3);
         x[1] = svd4.vt.at<float>(svd4.vt.rows-1, 1)/svd4.vt.at<float>(svd4.vt.rows-1, 3);
         x[2] = svd4.vt.at<float>(svd4.vt.rows-1, 2)/svd4.vt.at<float>(svd4.vt.rows-1, 3);
@@ -718,7 +777,7 @@ void DLT(uint nbSamples,
 
         cv::SVD svd5(M5);
 
-//        assert(svd5.vt.at<float>(svd5.vt.rows-1, 4) > 0.00001);
+        //        assert(svd5.vt.at<float>(svd5.vt.rows-1, 4) > 0.00001);
         x[0] = svd5.vt.at<float>(svd5.vt.rows-1, 0)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
         x[1] = svd5.vt.at<float>(svd5.vt.rows-1, 1)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
         x[2] = svd5.vt.at<float>(svd5.vt.rows-1, 2)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
@@ -739,7 +798,7 @@ void DLT(uint nbSamples,
 
         cv::SVD svd7(M7);
 
-//        assert(svd7.vt.at<float>(svd7.vt.rows-1, 6) > 0.00001);
+        //        assert(svd7.vt.at<float>(svd7.vt.rows-1, 6) > 0.00001);
         x[0] = svd7.vt.at<float>(svd7.vt.rows-1, 0)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
         x[1] = svd7.vt.at<float>(svd7.vt.rows-1, 1)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
         x[2] = svd7.vt.at<float>(svd7.vt.rows-1, 2)/svd7.vt.at<float>(svd7.vt.rows-1, 6);

@@ -3005,6 +3005,11 @@ void LFScene::renderLightFlowLambertianVideo() {
     std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMapDLT.pfm") << std::endl;
     loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMapDLT.pfm"));
 
+    // for every light flow (set of parameters)
+    // compute the color map (constant weight average)
+    // compute the splat destination
+    // assign the splat destination the computed average color
+
     // AVERAGE COLOR IMAGE
     // TODO: interpolate color like position
 
@@ -3014,12 +3019,6 @@ void LFScene::renderLightFlowLambertianVideo() {
 
         colorMap[i] = cv::Point3f(0.0, 0.0, 0.0);
     }
-
-    std::cout << "RENDERING " << std::endl;
-    // for every light flow (set of parameters)
-    // compute the color map (constant weight average)
-    // compute the splat destination
-    // assign the splat destination the computed average color
 
     std::cout << "Compute color map (average) " << std::endl;
     for(uint y = _windowH1 ; y < _windowH2 ; ++y) {
@@ -3051,7 +3050,7 @@ void LFScene::renderLightFlowLambertianVideo() {
 
     std::vector<cv::Point3f> outputImage3param(nbPixels);
     std::vector<float> reprojError3param(nbPixels); // reprojection error of the central view
-    std::vector<float> weightMap3param(nbPixels); // splat contribution (for normalizatiNULLon)
+    std::vector<float> weightMap3param(nbPixels); // splat contribution (for normalization)
 
     std::vector<cv::Point3f> outputImage4param(nbPixels);
     std::vector<float> reprojError4param(nbPixels); // reprojection error of the central view
@@ -3064,7 +3063,7 @@ void LFScene::renderLightFlowLambertianVideo() {
     std::cout << "RENDERING " << std::endl;
 
     const int firstFrame = 0;
-    const int lastFrame = 10;
+    const int lastFrame = 0;
     for(int frame = firstFrame ; frame <= lastFrame ; ++frame) {
 
         // TARGET CAM PARAMETERS
@@ -3076,14 +3075,14 @@ void LFScene::renderLightFlowLambertianVideo() {
         //        loadTargetView(targetK, targetR, targetC, std::string(targetCameraNameChar));
 
         // update target camera
-        float step = 100;
-        PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 2]->getPinholeCamera();
-        PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 2]->getPinholeCamera();
+//        float step = 100;
+//        PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 2]->getPinholeCamera();
+//        PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 2]->getPinholeCamera();
 
         PinholeCamera targetCam = _vCam[_centralIndex]->getPinholeCamera(); // same K and R as central camera
         glm::mat3 glmTargetK = targetCam._K;
         glmTargetK[0][0] += (float)frame * 600.0f;
-        glmTargetK[1][1] = glmTargetK[0][0];
+        glmTargetK[1][1] += (float)frame * 600.0f;
         glm::mat3 glmTargetR = targetCam._R;
         //        glm::vec3 glmTargetC = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
         //        glm::vec3 glmTargetC = targetCam._C + (float)frame * 2.5f * glm::vec3(0, 0, 1) + (float)frame * 0.5f * glm::vec3(0, 1, 0);
@@ -3136,34 +3135,34 @@ void LFScene::renderLightFlowLambertianVideo() {
                     projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage3param, weightMap3param, destPoint3param);
                 }
 
-                //                // 4 PARAMETERS
-                //                cv::Point2f destPoint4param = cv::Point2f(0.0, 0.0);
-                //                const cv::Point2f alpha4param = mapAlpha4param[idx];
-                //                const cv::Point2f beta4param = mapBeta4param[idx];
+                // 4 PARAMETERS
+                cv::Point2f destPoint4param = cv::Point2f(0.0, 0.0);
+                const cv::Point2f alpha4param = mapAlpha4param[idx];
+                const cv::Point2f beta4param = mapBeta4param[idx];
 
-                //                splatProjection4param(destPoint4param, alpha4param, beta4param, targetK, targetR, targetC);
+                splatProjection4param(destPoint4param, alpha4param, beta4param, targetK, targetR, targetC);
 
-                //                // interpolation (splatting)
-                //                if(0.0 <= destPoint4param.x && destPoint4param.x < (float)_camWidth &&
-                //                        0.0 <= destPoint4param.y && destPoint4param.y < (float)_camHeight) {
+                // interpolation (splatting)
+                if(0.0 <= destPoint4param.x && destPoint4param.x < (float)_camWidth &&
+                        0.0 <= destPoint4param.y && destPoint4param.y < (float)_camHeight) {
 
-                //                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage4param, weightMap4param, destPoint4param);
-                //                }
+                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage4param, weightMap4param, destPoint4param);
+                }
 
-                //                // 6 PARAMETERS
-                //                cv::Point2f destPoint6param = cv::Point2f(0.0, 0.0);
-                //                const cv::Point2f alphau6param = mapAlphau6param[idx];
-                //                const cv::Point2f alphav6param = mapAlphav6param[idx];
-                //                const cv::Point2f beta6param = mapBeta6param[idx];
+                // 6 PARAMETERS
+                cv::Point2f destPoint6param = cv::Point2f(0.0, 0.0);
+                const cv::Point2f alphau6param = mapAlphau6param[idx];
+                const cv::Point2f alphav6param = mapAlphav6param[idx];
+                const cv::Point2f beta6param = mapBeta6param[idx];
 
-                //                splatProjection6param(destPoint6param, alphau6param, alphav6param, beta6param, targetK, targetR, targetC);
+                splatProjection6param(destPoint6param, alphau6param, alphav6param, beta6param, targetK, targetR, targetC);
 
-                //                // interpolation (splatting)
-                //                if(0.0 <= destPoint6param.x && destPoint6param.x < (float)_camWidth &&
-                //                        0.0 <= destPoint6param.y && destPoint6param.y < (float)_camHeight) {
+                // interpolation (splatting)
+                if(0.0 <= destPoint6param.x && destPoint6param.x < (float)_camWidth &&
+                        0.0 <= destPoint6param.y && destPoint6param.y < (float)_camHeight) {
 
-                //                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage6param, weightMap6param, destPoint6param);
-                //                }
+                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage6param, weightMap6param, destPoint6param);
+                }
             }
         }
 
@@ -3177,20 +3176,20 @@ void LFScene::renderLightFlowLambertianVideo() {
                     outputImage3param[idx] /= weightMap3param[idx];
                 }
 
-                //                if(weightMap4param[idx] != 0) {
-                //                    outputImage4param[idx] /= weightMap4param[idx];
-                //                }
+                if(weightMap4param[idx] != 0) {
+                    outputImage4param[idx] /= weightMap4param[idx];
+                }
 
-                //                if(weightMap6param[idx] != 0) {
-                //                    outputImage6param[idx] /= weightMap6param[idx];
-                //                }
+                if(weightMap6param[idx] != 0) {
+                    outputImage6param[idx] /= weightMap6param[idx];
+                }
             }
         }
 
         std::cout << "Hole filling" << std::endl;
         pushPull(_camWidth, _camHeight, outputImage3param, weightMap3param);
-        //        pushPull(_camWidth, _camHeight, outputImage4param, weightMap4param);
-        //        pushPull(_camWidth, _camHeight, outputImage6param, weightMap6param);
+        pushPull(_camWidth, _camHeight, outputImage4param, weightMap4param);
+        pushPull(_camWidth, _camHeight, outputImage6param, weightMap6param);
 
         // SAVE PNG OUTMUT FILES
 
@@ -3202,20 +3201,20 @@ void LFScene::renderLightFlowLambertianVideo() {
         std::string outputImage4paramName = _outdir + "/zoom4param_%02lu_%02lu_%03lu.png";
         std::string outputImage6paramName = _outdir + "/zoom6param_%02lu_%02lu_%03lu.png";
 
-        memset(tempCharArray, 0, sizeof(tempCharArray));
+        std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
         sprintf( tempCharArray, outputImage3paramName.c_str(), _sRmv, _tRmv, frame );
         std::cout << "Save output image " << tempCharArray << std::endl;
         savePNG(outputImage3param, _camWidth, _camHeight, tempCharArray);
 
-        //        memset(tempCharArray, 0, sizeof(tempCharArray));
-        //        sprintf( tempCharArray, outputImage4paramName.c_str(), _sRmv, _tRmv, frame );
-        //        std::cout << "Save output image " << tempCharArray << std::endl;
-        //        savePNG(outputImage4param, _camWidth, _camHeight, tempCharArray);
+        std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
+        sprintf( tempCharArray, outputImage4paramName.c_str(), _sRmv, _tRmv, frame );
+        std::cout << "Save output image " << tempCharArray << std::endl;
+        savePNG(outputImage4param, _camWidth, _camHeight, tempCharArray);
 
-        //        memset(tempCharArray, 0, sizeof(tempCharArray));
-        //        sprintf( tempCharArray, outputImage6paramName.c_str(), _sRmv, _tRmv, frame );
-        //        std::cout << "Save output image " << tempCharArray << std::endl;
-        //        savePNG(outputImage6param, _camWidth, _camHeight, tempCharArray);
+        std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
+        sprintf( tempCharArray, outputImage6paramName.c_str(), _sRmv, _tRmv, frame );
+        std::cout << "Save output image " << tempCharArray << std::endl;
+        savePNG(outputImage6param, _camWidth, _camHeight, tempCharArray);
     }
 }
 
