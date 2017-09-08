@@ -1,55 +1,33 @@
-./ULF -config configs/IBR_optical/transcut/obj1scn1
-./ULF -config configs/IBR_optical/transcut/obj2scn1
-./ULF -config configs/IBR_optical/transcut/obj3scn1
-./ULF -config configs/IBR_optical/transcut/obj4scn1
-./ULF -config configs/IBR_optical/transcut/obj5scn1
-./ULF -config configs/IBR_optical/transcut/obj6scn1
-./ULF -config configs/IBR_optical/transcut/obj7scn1
+# ESTIMATE MODELS AND RENDER NOVEL VIEWS
 
-./ULF -config configs/IBR_optical/transcut/obj1scn2
-./ULF -config configs/IBR_optical/transcut/obj2scn2
-./ULF -config configs/IBR_optical/transcut/obj3scn2
-./ULF -config configs/IBR_optical/transcut/obj4scn2
-./ULF -config configs/IBR_optical/transcut/obj5scn2
-./ULF -config configs/IBR_optical/transcut/obj6scn2
-./ULF -config configs/IBR_optical/transcut/obj7scn2
+for i in {1..7}
+do
+	for j in {1..7}
+	do
+		config_file='configs/IBR_optical/transcut/obj'$i'scn'$j
+		./ULF -config $config_file
+	done
+done
 
-./ULF -config configs/IBR_optical/transcut/obj1scn3
-./ULF -config configs/IBR_optical/transcut/obj2scn3
-./ULF -config configs/IBR_optical/transcut/obj3scn3
-./ULF -config configs/IBR_optical/transcut/obj4scn3
-./ULF -config configs/IBR_optical/transcut/obj5scn3
-./ULF -config configs/IBR_optical/transcut/obj6scn3
-./ULF -config configs/IBR_optical/transcut/obj7scn3
+# CONVERT IMAGE SEQUENCE TO VIDEO
 
-./ULF -config configs/IBR_optical/transcut/obj1scn4
-./ULF -config configs/IBR_optical/transcut/obj2scn4
-./ULF -config configs/IBR_optical/transcut/obj3scn4
-./ULF -config configs/IBR_optical/transcut/obj4scn4
-./ULF -config configs/IBR_optical/transcut/obj5scn4
-./ULF -config configs/IBR_optical/transcut/obj6scn4
-./ULF -config configs/IBR_optical/transcut/obj7scn4
+for i in {1..7}
+do
+	for j in {1..7}
+	do
+		ffmpeg -r 60 -f image2 -s 629x469 -i 'out/IBR_optical/transcut/obj'$i'_scn'$j'/panning3param_02_02_%03d.png' -vcodec libx264 -crf 15 'out/IBR_optical/transcut/obj'$i'_scn'$j'/panning3param_02_02.mp4'
+		ffmpeg -r 60 -f image2 -s 629x469 -i 'out/IBR_optical/transcut/obj'$i'_scn'$j'/panning4param_02_02_%03d.png' -vcodec libx264 -crf 15 'out/IBR_optical/transcut/obj'$i'_scn'$j'/panning4param_02_02.mp4'
+		ffmpeg -r 60 -f image2 -s 629x469 -i 'out/IBR_optical/transcut/obj'$i'_scn'$j'/panning6param_02_02_%03d.png' -vcodec libx264 -crf 15 'out/IBR_optical/transcut/obj'$i'_scn'$j'/panning6param_02_02.mp4'		
+	done
+done
 
-./ULF -config configs/IBR_optical/transcut/obj1scn5
-./ULF -config configs/IBR_optical/transcut/obj2scn5
-./ULF -config configs/IBR_optical/transcut/obj3scn5
-./ULF -config configs/IBR_optical/transcut/obj4scn5
-./ULF -config configs/IBR_optical/transcut/obj5scn5
-./ULF -config configs/IBR_optical/transcut/obj6scn5
-./ULF -config configs/IBR_optical/transcut/obj7scn5
 
-./ULF -config configs/IBR_optical/transcut/obj1scn6
-./ULF -config configs/IBR_optical/transcut/obj2scn6
-./ULF -config configs/IBR_optical/transcut/obj3scn6
-./ULF -config configs/IBR_optical/transcut/obj4scn6
-./ULF -config configs/IBR_optical/transcut/obj5scn6
-./ULF -config configs/IBR_optical/transcut/obj6scn6
-./ULF -config configs/IBR_optical/transcut/obj7scn6
 
-./ULF -config configs/IBR_optical/transcut/obj1scn7
-./ULF -config configs/IBR_optical/transcut/obj2scn7
-./ULF -config configs/IBR_optical/transcut/obj3scn7
-./ULF -config configs/IBR_optical/transcut/obj4scn7
-./ULF -config configs/IBR_optical/transcut/obj5scn7
-./ULF -config configs/IBR_optical/transcut/obj6scn7
-./ULF -config configs/IBR_optical/transcut/obj7scn7
+
+
+
+
+
+
+
+

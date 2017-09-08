@@ -255,24 +255,24 @@ int main( int argc, char **argv ) {
 
         std::cout << "Compute flowed lightfield" << std::endl;
         //                lfScene.computeFlowedLFStarConfig(); // deprecated
-        lfScene.computeFlowedLFCustomConfig();
+        lfScene.computeFlowedLFCustomConfig(); // OK
 
 //        std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
-//        lfScene.curveFittingDLT();
+//        lfScene.curveFittingDLT(); // OK
 
         //                std::cout << "Fit position models to light flow samples, without DLT initialization" << std::endl;
-        //                lfScene.curveFitting();
+        //                lfScene.curveFitting(); // OK
 
 //        std::cout << "Fit color models to light flow samples" << std::endl;
-//        lfScene.curveFittingColor();
+//        lfScene.curveFittingColor(); // NOT OK
 
         std::cout << "Render image by interpolating the light flow" << std::endl;
-//        lfScene.renderLightFlow();
-//        lfScene.renderLightFlowLambertianModel();
+//        lfScene.renderLightFlow(); // NOT OK
+//        lfScene.renderLightFlowLambertianModel(); // NOT OK
 
-//        lfScene.bic();
+        lfScene.bic(); // OK
 
-        lfScene.renderLightFlowLambertianVideo();
+        lfScene.renderLightFlowLambertianVideo(); // OK
 
         // DEPRECATED FUNCTIONS
 
