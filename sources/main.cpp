@@ -270,7 +270,7 @@ int main( int argc, char **argv ) {
 //        lfScene.renderLightFlow(); // NOT OK
 //        lfScene.renderLightFlowLambertianModel(); // NOT OK
 
-        lfScene.bic(); // OK
+//        lfScene.bic(); // OK
 
         lfScene.renderLightFlowLambertianVideo(); // OK
 
