@@ -425,7 +425,7 @@ void colorRegression(int nbSamples, const std::vector<cv::Point2f> &flow, const 
 
 void triangulationLF(int nbSamples, const std::vector<cv::Point2f> &flow,
                      const std::vector<cv::Mat> &K_inv, const std::vector<cv::Mat> &R_transp, const std::vector<cv::Point3f> &C,
-                     std::vector<float> &x, float &finalCost, bool verbose) {
+                     std::vector<float> &x, float &finalCost, float &conditionNumber, bool verbose) {
 
     // residual parameters
     std::vector<float> eigenVectors(nbSamples*8), eigenValues(nbSamples*2), samplePoint(nbSamples*4);
@@ -434,9 +434,9 @@ void triangulationLF(int nbSamples, const std::vector<cv::Point2f> &flow,
                               eigenVectors, eigenValues, samplePoint);
 
     // perform DLT to initialize optimization
-    DLT(nbSamples, samplePoint, x);
+    DLT(nbSamples, samplePoint, x, conditionNumber);
 
-    optimize(nbSamples, eigenVectors, eigenValues, samplePoint, x, finalCost, verbose);
+//    optimize(nbSamples, eigenVectors, eigenValues, samplePoint, x, finalCost, verbose);
 }
 
 void triangulationClassic(int nbSamples, const std::vector<cv::Point2f> &flow,
@@ -738,7 +738,8 @@ void printEigen(const std::vector<float>& eigenVectors,
 
 void DLT(uint nbSamples,
          const std::vector<float>& samplePoint,
-         std::vector<float> &x) {
+         std::vector<float> &x,
+         float& conditionNumber) {
 
     const uint nbParams = x.size();
 
@@ -761,6 +762,8 @@ void DLT(uint nbSamples,
         x[0] = svd4.vt.at<float>(svd4.vt.rows-1, 0)/svd4.vt.at<float>(svd4.vt.rows-1, 3);
         x[1] = svd4.vt.at<float>(svd4.vt.rows-1, 1)/svd4.vt.at<float>(svd4.vt.rows-1, 3);
         x[2] = svd4.vt.at<float>(svd4.vt.rows-1, 2)/svd4.vt.at<float>(svd4.vt.rows-1, 3);
+
+        conditionNumber = svd4.w.at<float>(0, 0)/svd4.w.at<float>(svd4.w.rows-1, 0);
     }
         break;
 
@@ -782,6 +785,8 @@ void DLT(uint nbSamples,
         x[1] = svd5.vt.at<float>(svd5.vt.rows-1, 1)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
         x[2] = svd5.vt.at<float>(svd5.vt.rows-1, 2)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
         x[3] = svd5.vt.at<float>(svd5.vt.rows-1, 3)/svd5.vt.at<float>(svd5.vt.rows-1, 4);
+
+        conditionNumber = svd5.w.at<float>(0, 0)/svd5.w.at<float>(svd5.w.rows-1, 0);
     }
         break;
 
@@ -805,6 +810,8 @@ void DLT(uint nbSamples,
         x[3] = svd7.vt.at<float>(svd7.vt.rows-1, 3)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
         x[4] = svd7.vt.at<float>(svd7.vt.rows-1, 4)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
         x[5] = svd7.vt.at<float>(svd7.vt.rows-1, 5)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
+
+        conditionNumber = svd7.w.at<float>(0, 0)/svd7.w.at<float>(svd7.w.rows-1, 0);
     }
         break;
 

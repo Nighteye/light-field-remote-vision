@@ -164,10 +164,6 @@ public:
 
     // fits a linear 4D ray model from light flow samples, with DLT initialization
     // flowed LF -> estimated model (triangulation)
-    void curveFittingDLT();
-
-    // fits a linear 4D ray model from light flow samples, without DLT initialization
-    // flowed LF -> estimated model (triangulation)
     void curveFitting();
 
     // fits a linear color model from light flow color samples

@@ -43,7 +43,7 @@ void colorRegression(int nbSamples, const std::vector<cv::Point2f> &flow, const 
 // compute model parameters from flowed LF by curve fitting
 void triangulationLF(int nbSamples, const std::vector<cv::Point2f> &flow,
                      const std::vector<cv::Mat> &K_inv, const std::vector<cv::Mat> &R_transp, const std::vector<cv::Point3f> &C,
-                     std::vector<float> &x, float &finalCost, bool verbose = false);
+                     std::vector<float> &x, float &finalCost, float &conditionNumber, bool verbose = false);
 
 // compute 3D point coordinates from flowed LF by classic triangulation
 void triangulationClassic(int nbSamples, const std::vector<cv::Point2f> &flow,
@@ -64,7 +64,8 @@ void printEigen(const std::vector<float>& eigenVectors, const std::vector<float>
 // perform DLT to initialize optimization
 void DLT(uint nbSamples,
          const std::vector<float>& samplePoint,
-         std::vector<float> &x);
+         std::vector<float> &x,
+         float& conditionNumber);
 
 // fit one set of sample with new LF model, polynome of degree 1
 void optimize(int kNumObservations,

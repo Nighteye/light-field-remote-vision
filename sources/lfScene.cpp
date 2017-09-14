@@ -1309,7 +1309,8 @@ void LFScene::testTriangulation(uint x, uint y) {
     
     std::vector<float> parameters(3);
     float finalCostLF(0.0);
-    triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters, finalCostLF);
+    float conditionNumber(0.0);
+    triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters, conditionNumber, finalCostLF);
     
     // compute 3D point
     std::vector<float> point3DLF(3);
@@ -1351,9 +1352,10 @@ void LFScene::testTriangulation(uint x, uint y) {
     assert(false);
 }
 
-void LFScene::curveFittingDLT() {
+void LFScene::curveFitting() {
 
     const bool verbose = false;
+    const bool validateTriangulation = false;
     const uint nbPixels = _camWidth*_camHeight;
 
     assert(_windowWidth > 0 && _windowHeight > 0);
@@ -1369,6 +1371,19 @@ void LFScene::curveFittingDLT() {
     std::vector<float> finalCost3Map(nbPixels);
     std::vector<float> finalCost4Map(nbPixels);
     std::vector<float> finalCost6Map(nbPixels);
+    std::vector<float> conditionNumber3Map(nbPixels);
+    std::vector<float> conditionNumber4Map(nbPixels);
+    std::vector<float> conditionNumber6Map(nbPixels);
+
+    // TRIANGULATION VALIDATION
+
+    std::vector<float> targetDepthMap(nbPixels);
+    std::vector<float> reprojErrorLFMap(nbPixels);
+    std::vector<float> reprojErrorClassicMap(nbPixels);
+    std::vector<float> finalCostClassicMap(nbPixels);
+
+    // point cloud (optional)
+    std::vector< std::vector<float> > points;
 
     for(uint y = 0 ; y < (uint)_camHeight ; ++y) {
 
@@ -1385,6 +1400,16 @@ void LFScene::curveFittingDLT() {
             finalCost3Map[idx] = 0.0;
             finalCost4Map[idx] = 0.0;
             finalCost6Map[idx] = 0.0;
+            conditionNumber3Map[idx] = 0.0;
+            conditionNumber4Map[idx] = 0.0;
+            conditionNumber6Map[idx] = 0.0;
+
+            // TRIANGULATION VALIDATION
+
+            targetDepthMap[idx] = 0.0;
+            reprojErrorLFMap[idx] = 0.0;
+            reprojErrorClassicMap[idx] = 0.0;
+            finalCostClassicMap[idx] = 0.0;
         }
     }
 
@@ -1457,15 +1482,19 @@ void LFScene::curveFittingDLT() {
             std::vector<float> parameters4(4); // (au, av, bu, bv)
             std::vector<float> parameters6(6); // (aus, aut, avs, avt, bu, bv)
             float finalCostLF(0.0);
+            float conditionNumber(0.0);
 
             if(nbSamples >= 2) {
 
-                triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters3, finalCostLF, verbose);
+                triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters3, finalCostLF, conditionNumber, verbose);
                 finalCost3Map[idx] = (float)finalCostLF;
-                triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters4, finalCostLF, verbose);
+                conditionNumber3Map[idx] = (float)conditionNumber;
+                triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters4, finalCostLF, conditionNumber, verbose);
                 finalCost4Map[idx] = (float)finalCostLF;
-                triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters6, finalCostLF, verbose);
+                conditionNumber4Map[idx] = (float)conditionNumber;
+                triangulationLF(nbSamples, flow, K_inv, R_transp, C, parameters6, finalCostLF, conditionNumber, verbose);
                 finalCost6Map[idx] = (float)finalCostLF;
+                conditionNumber6Map[idx] = (float)conditionNumber;
             }
 
             parameter3Map[idx].x = (float)parameters3[0]; // a
@@ -1483,6 +1512,45 @@ void LFScene::curveFittingDLT() {
             parameter6AlphavMap[idx].y = (float)parameters6[3]; // avt
             parameter6BetaMap[idx].x = (float)parameters6[4]; // bu
             parameter6BetaMap[idx].y = (float)parameters6[5]; // bv
+
+            if(validateTriangulation) {
+
+                std::vector<float> parameters3(3); // (a, bu, bv)
+                float finalCostLF(0.0);
+                float conditionNumber(0.0);
+                triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters3, finalCostLF, conditionNumber, verbose);
+
+                // LF TRIANGULATION VALIDATION
+                // comparing to classic triangulation
+                float finalCostClassic(0.0); // final cost value
+                float reprojErrorLF(0.0), reprojErrorClassic(0.0); // reprojection error
+                std::vector<float> point3DLF(3), point3DClassic(3);
+
+                triangulationClassic(flow.size(), flow, K, R, t, point3DClassic, finalCostClassic, verbose);
+                finalCostClassicMap[idx] = (float)finalCostClassic;
+
+                // compute 3D point for comparison with classic triangulation (reprojection error)
+                point3DLF[0] = parameters3[1]/(1 - parameters3[0]);
+                point3DLF[1] = parameters3[2]/(1 - parameters3[0]);
+                point3DLF[2] = 1.0/(1 - parameters3[0]);
+                cv::Mat point3D = (cv::Mat_<float>(3, 1) << point3DLF[0], point3DLF[1], point3DLF[2]);
+
+                if(verbose) {
+                    std::cout << "3D point with LF method: " << point3D << std::endl;
+                }
+
+                // compute reprojection error
+                reprojectionCompute(point3DLF, flow.size(), flow, K, R, t, reprojErrorLF);
+                reprojErrorLFMap[idx] = (float)reprojErrorLF;
+
+                reprojectionCompute(point3DClassic, flow.size(), flow, K, R, t, reprojErrorClassic);
+                reprojErrorClassicMap[idx] = (float)reprojErrorClassic;
+
+                //                // render 3D point (optional)
+                //                points.push_back(point3DLF); // to save 3D point cloud
+                //                cv::Mat point2D = targetK*(targetR*point3D + cv::Mat(targett));
+                //                targetDepthMap[idx] = (float)point2D.at<float>(2, 0);
+            }
         }
     }
 
@@ -1493,295 +1561,73 @@ void LFScene::curveFittingDLT() {
     std::cout << "elapsedTime: " << elapsedTime << std::endl;
 
     // SAVE PARAMETER MAPS
-    std::string parameter3MapName = _outdir + "/parameter3MapDLT.pfm";
-    std::cout << "Writing parameter map " << parameter3MapName  << std::endl;
-    savePFM(parameter3Map, _camWidth, _camHeight, parameter3MapName );
+//    std::string parameter3MapName = _outdir + "/parameter3MapDLT.pfm";
+//    std::cout << "Writing parameter map " << parameter3MapName  << std::endl;
+//    savePFM(parameter3Map, _camWidth, _camHeight, parameter3MapName );
 
-    std::string parameterAlpha2MapName = _outdir + "/parameterAlpha2MapDLT.pfm";
-    std::cout << "Writing alpha parameter map " << parameterAlpha2MapName << std::endl;
-    savePFM(parameterAlpha2Map, _camWidth, _camHeight, parameterAlpha2MapName);
-    std::string parameterBeta2MapName = _outdir + "/parameterBeta2MapDLT.pfm";
-    std::cout << "Writing beta parameter map " << parameterBeta2MapName << std::endl;
-    savePFM(parameterBeta2Map, _camWidth, _camHeight, parameterBeta2MapName);
+//    std::string parameterAlpha2MapName = _outdir + "/parameterAlpha2MapDLT.pfm";
+//    std::cout << "Writing alpha parameter map " << parameterAlpha2MapName << std::endl;
+//    savePFM(parameterAlpha2Map, _camWidth, _camHeight, parameterAlpha2MapName);
+//    std::string parameterBeta2MapName = _outdir + "/parameterBeta2MapDLT.pfm";
+//    std::cout << "Writing beta parameter map " << parameterBeta2MapName << std::endl;
+//    savePFM(parameterBeta2Map, _camWidth, _camHeight, parameterBeta2MapName);
 
-    std::string parameter6AlphauMapName = _outdir + "/parameter6AlphauMapDLT.pfm";
-    std::cout << "Writing alpha u parameter map " << parameter6AlphauMapName << std::endl;
-    savePFM(parameter6AlphauMap, _camWidth, _camHeight, parameter6AlphauMapName);
-    std::string parameter6AlphavMapName = _outdir + "/parameter6AlphavMapDLT.pfm";
-    std::cout << "Writing alpha v parameter map " << parameter6AlphavMapName << std::endl;
-    savePFM(parameter6AlphavMap, _camWidth, _camHeight, parameter6AlphavMapName);
-    std::string parameter6BetaMapName = _outdir + "/parameter6BetaMapDLT.pfm";
-    std::cout << "Writing beta parameter map " << parameter6BetaMapName << std::endl;
-    savePFM(parameter6BetaMap, _camWidth, _camHeight, parameter6BetaMapName);
+//    std::string parameter6AlphauMapName = _outdir + "/parameter6AlphauMapDLT.pfm";
+//    std::cout << "Writing alpha u parameter map " << parameter6AlphauMapName << std::endl;
+//    savePFM(parameter6AlphauMap, _camWidth, _camHeight, parameter6AlphauMapName);
+//    std::string parameter6AlphavMapName = _outdir + "/parameter6AlphavMapDLT.pfm";
+//    std::cout << "Writing alpha v parameter map " << parameter6AlphavMapName << std::endl;
+//    savePFM(parameter6AlphavMap, _camWidth, _camHeight, parameter6AlphavMapName);
+//    std::string parameter6BetaMapName = _outdir + "/parameter6BetaMapDLT.pfm";
+//    std::cout << "Writing beta parameter map " << parameter6BetaMapName << std::endl;
+//    savePFM(parameter6BetaMap, _camWidth, _camHeight, parameter6BetaMapName);
 
-    // SAVE FINAL COST MAPS
-    std::string finalCost3MapName = _outdir + "/finalCost3MapDLT.pfm";
-    std::cout << "Writing final cost (3 parameters) " << finalCost3MapName << std::endl;
-    savePFM(finalCost3Map, _camWidth, _camHeight, finalCost3MapName);
+//    // SAVE FINAL COST MAPS
+//    std::string finalCost3MapName = _outdir + "/finalCost3MapDLT.pfm";
+//    std::cout << "Writing final cost (3 parameters) " << finalCost3MapName << std::endl;
+//    savePFM(finalCost3Map, _camWidth, _camHeight, finalCost3MapName);
 
-    std::string finalCost4MapName = _outdir + "/finalCost4MapDLT.pfm";
-    std::cout << "Writing final cost (4 parameters) " << finalCost4MapName << std::endl;
-    savePFM(finalCost4Map, _camWidth, _camHeight, finalCost4MapName);
+//    std::string finalCost4MapName = _outdir + "/finalCost4MapDLT.pfm";
+//    std::cout << "Writing final cost (4 parameters) " << finalCost4MapName << std::endl;
+//    savePFM(finalCost4Map, _camWidth, _camHeight, finalCost4MapName);
 
-    std::string finalCost6MapName = _outdir + "/finalCost6MapDLT.pfm";
-    std::cout << "Writing final cost (6 parameters) " << finalCost6MapName << std::endl;
-    savePFM(finalCost6Map, _camWidth, _camHeight, finalCost6MapName);
-}
+//    std::string finalCost6MapName = _outdir + "/finalCost6MapDLT.pfm";
+//    std::cout << "Writing final cost (6 parameters) " << finalCost6MapName << std::endl;
+//    savePFM(finalCost6Map, _camWidth, _camHeight, finalCost6MapName);
 
-void LFScene::curveFitting() {
-    
-    const bool verbose = false;
-    const bool validateTriangulation = false;
-    const bool parameterEstimation = true;
-    const uint nbPixels = _camWidth*_camHeight;
-    
-    assert(_windowWidth > 0 && _windowHeight > 0);
-    
-    // INIT MAPS
-    
-    // PARAMETER ESTIMATION
-    
-    std::vector<cv::Point3f> parameter3Map(nbPixels);
-    std::vector<cv::Point2f> parameterAlpha2Map(nbPixels);
-    std::vector<cv::Point2f> parameterBeta2Map(nbPixels);
-    std::vector<cv::Point2f > parameter6AlphauMap(nbPixels);
-    std::vector<cv::Point2f > parameter6AlphavMap(nbPixels);
-    std::vector<cv::Point2f> parameter6BetaMap(nbPixels);
-    std::vector<float> finalCost3Map(nbPixels);
-    std::vector<float> finalCost4Map(nbPixels);
-    std::vector<float> finalCost6Map(nbPixels);
-    
-    // TRIANGULATION VALIDATION
-    
-    std::vector<float> targetDepthMap(nbPixels);
-    std::vector<float> reprojErrorLFMap(nbPixels);
-    std::vector<float> reprojErrorClassicMap(nbPixels);
-    std::vector<float> finalCostClassicMap(nbPixels);
-    
-    // point cloud (optional)
-    std::vector< std::vector<float> > points;
-    
-    for(uint y = 0 ; y < (uint)_camHeight ; ++y) {
-        
-        for(uint x = 0 ; x < (uint)_camWidth ; ++x) {
-            
-            const uint idx = y*_camWidth + x;
-            
-            parameter3Map[idx].x = 0.0; parameter3Map[idx].y = 0.0; parameter3Map[idx].z = 0.0;
-            parameterAlpha2Map[idx].x = 0.0; parameterAlpha2Map[idx].y = 0.0;
-            parameterBeta2Map[idx].x = 0.0; parameterBeta2Map[idx].y = 0.0;
-            parameter6AlphauMap[idx].x = 0.0; parameter6AlphauMap[idx].y = 0.0;
-            parameter6AlphavMap[idx].x = 0.0; parameter6AlphavMap[idx].y = 0.0;
-            parameter6BetaMap[idx].x = 0.0; parameter6BetaMap[idx].y = 0.0;
-            finalCost3Map[idx] = 0.0;
-            finalCost4Map[idx] = 0.0;
-            finalCost6Map[idx] = 0.0;
-            
-            targetDepthMap[idx] = 0.0;
-            reprojErrorLFMap[idx] = 0.0;
-            reprojErrorClassicMap[idx] = 0.0;
-            finalCostClassicMap[idx] = 0.0;
-        }
-    }
-    
-    //    Uint32 beginingLoop(0), endLoop(0), elapsedTime(0);
-    //    beginingLoop = SDL_GetTicks();
-    
-    std::cout << "[";
-    
-    for(uint y = _windowH1 ; y < _windowH2 ; ++y) {
-        
-        for(uint x = _windowW1 ; x < _windowW2 ; ++x) {
-            
-            if(verbose) {
-                if(x != 8*_camWidth/16 || y != 21*_camHeight/32) {
-                    continue;
-                }
-            }
-            
-            const uint idx = y*_camWidth + x;
-            std::vector<cv::Point2f> flow;
-            std::vector<cv::Mat> R, R_transp, K, K_inv;
-            std::vector<cv::Point3f> C, t;
-            
-            for(uint camIdx = 0 ; camIdx < _vCam.size() ; ++camIdx) {
-                
-                if(camIdx == _centralIndex) { // remove target view (central)
-                    
-                    continue;
-                }
-                
-                if(_flowedLightField[idx][camIdx].x >= 0 && _flowedLightField[idx][camIdx].y >= 0) {
-                    
-                    flow.push_back(_flowedLightField[idx][camIdx]);
-                    
-                    PinholeCamera v_k = _vCam[camIdx]->getPinholeCamera();
-                    glm::mat3 glmK = v_k._K;
-                    glm::mat3 glmR = v_k._R;
-                    glm::vec3 glmC = v_k._C;
-                    glm::vec3 glmt = v_k._t;
-                    K.push_back((cv::Mat_<float>(3,3) << glmK[0][0], glmK[1][0], glmK[2][0],
-                            glmK[0][1], glmK[1][1], glmK[2][1],
-                            glmK[0][2], glmK[1][2], glmK[2][2]));
-                    K_inv.push_back(K.back().inv());
-                    R.push_back((cv::Mat_<float>(3,3) << glmR[0][0], glmR[1][0], glmR[2][0],
-                            glmR[0][1], glmR[1][1], glmR[2][1],
-                            glmR[0][2], glmR[1][2], glmR[2][2]));
-                    R_transp.push_back((cv::Mat_<float>(3,3) << glmR[0][0], glmR[0][1], glmR[0][2],
-                            glmR[1][0], glmR[1][1], glmR[1][2],
-                            glmR[2][0], glmR[2][1], glmR[2][2]));
-                    C.push_back(cv::Point3f((float)glmC[0], (float)glmC[1], (float)glmC[2]));
-                    t.push_back(cv::Point3f((float)glmt[0], (float)glmt[1], (float)glmt[2]));
-                }
-            }
-            
-            //            assert(flow.size() >= 8);
-            assert(R.size() == R_transp.size()); // nb samples
-            assert(R_transp.size() == K.size());
-            assert(K.size() == K_inv.size());
-            assert(K_inv.size() == C.size());
-            assert(C.size() == t.size());
-            assert(t.size() == flow.size());
-            
-            //                if(x == 3363 && y == 15) {
-            //                    testTriangulation(x, y);
-            //                }
-            
-            if(parameterEstimation) {
-                
-                std::vector<float> parameters3(3); // (a, bu, bv)
-                std::vector<float> parameters4(4); // (au, av, bu, bv)
-                std::vector<float> parameters6(6); // (aus, aut, avs, avt, bu, bv)
-                float finalCostLF(0.0);
-                
-                triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters3, finalCostLF, verbose);
-                finalCost3Map[idx] = (float)finalCostLF;
-                triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters4, finalCostLF, verbose);
-                finalCost4Map[idx] = (float)finalCostLF;
-                triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters6, finalCostLF, verbose);
-                finalCost6Map[idx] = (float)finalCostLF;
-                
-                parameter3Map[idx].x = (float)parameters3[0]; // a
-                parameter3Map[idx].y = (float)parameters3[1]; // bu
-                parameter3Map[idx].z = (float)parameters3[2]; // bv
-                
-                parameterAlpha2Map[idx].x = (float)parameters4[0]; // au
-                parameterAlpha2Map[idx].y = (float)parameters4[1]; // av
-                parameterBeta2Map[idx].x = (float)parameters4[2]; // bu
-                parameterBeta2Map[idx].y = (float)parameters4[3]; // bv
-                
-                parameter6AlphauMap[idx].x = (float)parameters6[0]; // aus
-                parameter6AlphauMap[idx].y = (float)parameters6[1]; // aut
-                parameter6AlphavMap[idx].x = (float)parameters6[2]; // avs
-                parameter6AlphavMap[idx].y = (float)parameters6[3]; // avt
-                parameter6BetaMap[idx].x = (float)parameters6[4]; // bu
-                parameter6BetaMap[idx].y = (float)parameters6[5]; // bv
-            }
-            
-            if(validateTriangulation) {
-                
-                std::vector<float> parameters3(3); // (a, bu, bv)
-                float finalCostLF(0.0);
-                triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters3, finalCostLF, verbose);
-                
-                // LF TRIANGULATION VALIDATION
-                // comparing to classic triangulation
-                float finalCostClassic(0.0); // final cost value
-                float reprojErrorLF(0.0), reprojErrorClassic(0.0); // reprojection error
-                std::vector<float> point3DLF(3), point3DClassic(3);
-                
-                triangulationClassic(flow.size(), flow, K, R, t, point3DClassic, finalCostClassic, verbose);
-                finalCostClassicMap[idx] = (float)finalCostClassic;
-                
-                // compute 3D point for comparison with classic triangulation (reprojection error)
-                point3DLF[0] = parameters3[1]/(1 - parameters3[0]);
-                point3DLF[1] = parameters3[2]/(1 - parameters3[0]);
-                point3DLF[2] = 1.0/(1 - parameters3[0]);
-                cv::Mat point3D = (cv::Mat_<float>(3, 1) << point3DLF[0], point3DLF[1], point3DLF[2]);
-                
-                if(verbose) {
-                    std::cout << "3D point with LF method: " << point3D << std::endl;
-                }
-                
-                // compute reprojection error
-                reprojectionCompute(point3DLF, flow.size(), flow, K, R, t, reprojErrorLF);
-                reprojErrorLFMap[idx] = (float)reprojErrorLF;
-                
-                reprojectionCompute(point3DClassic, flow.size(), flow, K, R, t, reprojErrorClassic);
-                reprojErrorClassicMap[idx] = (float)reprojErrorClassic;
-                
-                //                // render 3D point (optional)
-                //                points.push_back(point3DLF); // to save 3D point cloud
-                //                cv::Mat point2D = targetK*(targetR*point3D + cv::Mat(targett));
-                //                targetDepthMap[idx] = (float)point2D.at<float>(2, 0);
-            }
-        }
-    }
-    
-    std::cout << "]";
-    
-    //    endLoop = SDL_GetTicks();
-    //    elapsedTime = endLoop - beginingLoop;
-    //    std::cout << "elapsedTime: " << elapsedTime << std::endl;
-    
-    if(parameterEstimation) {
-        
-        // SAVE PARAMETER MAPS
-        std::string parameter3MapName = _outdir + "/parameter3Map.pfm";
-        std::cout << "Writing parameter map " << parameter3MapName  << std::endl;
-        savePFM(parameter3Map, _camWidth, _camHeight, parameter3MapName );
-        
-        std::string parameterAlpha2MapName = _outdir + "/parameterAlpha2Map.pfm";
-        std::cout << "Writing alpha parameter map " << parameterAlpha2MapName << std::endl;
-        savePFM(parameterAlpha2Map, _camWidth, _camHeight, parameterAlpha2MapName);
-        std::string parameterBeta2MapName = _outdir + "/parameterBeta2Map.pfm";
-        std::cout << "Writing beta parameter map " << parameterBeta2MapName << std::endl;
-        savePFM(parameterBeta2Map, _camWidth, _camHeight, parameterBeta2MapName);
-        
-        std::string parameter6AlphauMapName = _outdir + "/parameter6AlphauMap.pfm";
-        std::cout << "Writing alpha u parameter map " << parameter6AlphauMapName << std::endl;
-        savePFM(parameter6AlphauMap, _camWidth, _camHeight, parameter6AlphauMapName);
-        std::string parameter6AlphavMapName = _outdir + "/parameter6AlphavMap.pfm";
-        std::cout << "Writing alpha v parameter map " << parameter6AlphavMapName << std::endl;
-        savePFM(parameter6AlphavMap, _camWidth, _camHeight, parameter6AlphavMapName);
-        std::string parameter6BetaMapName = _outdir + "/parameter6BetaMap.pfm";
-        std::cout << "Writing beta parameter map " << parameter6BetaMapName << std::endl;
-        savePFM(parameter6BetaMap, _camWidth, _camHeight, parameter6BetaMapName);
-        
-        // SAVE FINAL COST MAPS
-        std::string finalCost3MapName = _outdir + "/finalCost3Map.pfm";
-        std::cout << "Writing final cost (3 parameters) " << finalCost3MapName << std::endl;
-        savePFM(finalCost3Map, _camWidth, _camHeight, finalCost3MapName);
-        
-        std::string finalCost4MapName = _outdir + "/finalCost4Map.pfm";
-        std::cout << "Writing final cost (4 parameters) " << finalCost4MapName << std::endl;
-        savePFM(finalCost4Map, _camWidth, _camHeight, finalCost4MapName);
-        
-        std::string finalCost6MapName = _outdir + "/finalCost6Map.pfm";
-        std::cout << "Writing final cost (6 parameters) " << finalCost6MapName << std::endl;
-        savePFM(finalCost6Map, _camWidth, _camHeight, finalCost6MapName);
-    }
-    
+    // SAVE CONDITION NUMBER MAPS
+    std::string conditionNumber3MapName = _outdir + "/conditionNumber3MapDLT.pfm";
+    std::cout << "Writing condition number (3 parameters) " << conditionNumber3MapName << std::endl;
+    savePFM(conditionNumber3Map, _camWidth, _camHeight, conditionNumber3MapName);
+
+    std::string conditionNumber4MapName = _outdir + "/conditionNumber4MapDLT.pfm";
+    std::cout << "Writing condition number (4 parameters) " << conditionNumber4MapName << std::endl;
+    savePFM(conditionNumber4Map, _camWidth, _camHeight, conditionNumber4MapName);
+
+    std::string conditionNumber6MapName = _outdir + "/conditionNumber6MapDLT.pfm";
+    std::cout << "Writing condition number (6 parameters) " << conditionNumber6MapName << std::endl;
+    savePFM(conditionNumber6Map, _camWidth, _camHeight, conditionNumber6MapName);
+
     if(validateTriangulation) {
-        
+
         // save target depth map
         std::string targetDepthMapName = _outdir + "/targetDepthMap.pfm";
         std::cout << "Writing target depth map " << targetDepthMapName << std::endl;
         savePFM(targetDepthMap, _camWidth, _camHeight, targetDepthMapName);
-        
+
         // save reprojection error maps (LF and classic)
         std::string reprojErrorLFMapName = _outdir + "/reprojErrorLFMap.pfm";
         std::cout << "Writing reprojection error map (curve fitting method) " << reprojErrorLFMapName << std::endl;
         savePFM(reprojErrorLFMap, _camWidth, _camHeight, reprojErrorLFMapName);
-        
+
         std::string reprojErrorClassicMapName = _outdir + "/reprojErrorClassicMap.pfm";
         std::cout << "Writing reprojection error map (classic triangulation method) " << reprojErrorClassicMapName << std::endl;
         savePFM(reprojErrorClassicMap, _camWidth, _camHeight, reprojErrorClassicMapName);
-        
+
         std::string finalCostClassicMapName = _outdir + "/finalCostClassicMap.pfm";
         std::cout << "Writing parameter map (classic triangulation method) " << finalCostClassicMapName << std::endl;
         savePFM(finalCostClassicMap, _camWidth, _camHeight, finalCostClassicMapName);
-        
+
         // save point cloud
         std::string plyName = _outdir + "/point_cloud.ply";
         std::cout << "Writing ply file in " << plyName << std::endl;
