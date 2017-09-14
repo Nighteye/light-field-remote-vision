@@ -67,6 +67,12 @@ void DLT(uint nbSamples,
          std::vector<float> &x,
          float& conditionNumber);
 
+// perform inhomogeneous method to initialize optimization
+void IHM(uint nbSamples,
+         const std::vector<float>& samplePoint,
+         std::vector<float> &x,
+         float& conditionNumber);
+
 // fit one set of sample with new LF model, polynome of degree 1
 void optimize(int kNumObservations,
               const std::vector<float>& eigenVectors,

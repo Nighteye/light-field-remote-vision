@@ -7,6 +7,8 @@
 using namespace ceres;
 using namespace cv;
 
+static const float dist = 1000.0; // distance between the two planes
+
 static std::vector<cv::Point2f> testFlow = {cv::Point2f(500, 200),
                                             cv::Point2f(534.76953, 217.84976),
                                             cv::Point2f(576.31268, 191.77184),
@@ -50,13 +52,13 @@ void splatProjection3param(cv::Point2f &imagePoint, const Point3f &parameters,
         // simplified rendering equations
         Mat st = (Mat_<float>(2, 1) << C.x, C.y);
 
-        // we project the point (u,v,1)
+        // we project the point (u,v,dist)
 
         Mat Ap = (Mat_<float>(2, 2) << parameters.x, 0, 0, parameters.x);
         Mat Bp = (Mat_<float>(2, 1) << parameters.y, parameters.z);
         Mat uv = Ap*st + Bp;
 
-        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, 1 - C.z);
+        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, dist - C.z);
         x = K * R * X;
     }
 
@@ -99,13 +101,13 @@ void splatProjection4param(cv::Point2f &imagePoint, const cv::Point2f &alpha, co
         // simplified rendering equations
         Mat st = (Mat_<float>(2, 1) << C.x, C.y);
 
-        // we project the point (u,v,1)
+        // we project the point (u,v,dist)
 
         Mat Ap = (Mat_<float>(2, 2) << alpha.x, 0, 0, alpha.y);
         Mat Bp = (Mat_<float>(2, 1) << beta.x, beta.y);
         Mat uv = Ap*st + Bp;
 
-        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, 1 - C.z);
+        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, dist - C.z);
         x = K * R * X;
     }
 
@@ -148,13 +150,13 @@ void splatProjection6param(cv::Point2f &imagePoint, const cv::Point2f &alphau, c
         // simplified rendering equations
         Mat st = (Mat_<float>(2, 1) << C.x, C.y);
 
-        // we project the point (u,v,1)
+        // we project the point (u,v,dist)
 
         Mat Ap = (Mat_<float>(2, 2) << alphau.x, alphau.y, alphav.x, alphav.y);
         Mat Bp = (Mat_<float>(2, 1) << beta.x, beta.y);
         Mat uv = Ap*st + Bp;
 
-        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, 1 - C.z);
+        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, dist - C.z);
         x = K * R * X;
     }
 
@@ -260,8 +262,8 @@ void computeResidualParameters(int nbSamples, const std::vector<cv::Point2f> &fl
         Mat a = (Mat_<float>(2, 1) << ray.at<float>(0, 0)/ray.at<float>(2, 0),
                  ray.at<float>(1, 0)/ray.at<float>(2, 0));
 
-        samplePoint[4*k+0] = Ck.x + a.at<float>(0, 0)*(1 - Ck.z);
-        samplePoint[4*k+1] = Ck.y + a.at<float>(1, 0)*(1 - Ck.z);
+        samplePoint[4*k+0] = Ck.x + a.at<float>(0, 0)*(dist - Ck.z);
+        samplePoint[4*k+1] = Ck.y + a.at<float>(1, 0)*(dist - Ck.z);
         samplePoint[4*k+2] = Ck.x + a.at<float>(0, 0)*(-Ck.z);
         samplePoint[4*k+3] = Ck.y + a.at<float>(1, 0)*(-Ck.z);
 
@@ -279,9 +281,9 @@ void computeResidualParameters(int nbSamples, const std::vector<cv::Point2f> &fl
         S = S * Ja_transp;
 
         Mat sigmaSS = (-Ck.z)*(-Ck.z)*S;
-        Mat sigmaUU = (1 - Ck.z)*(1 - Ck.z)*S;
-        Mat sigmaUS = (-Ck.z)*(1 - Ck.z)*S;
-        Mat sigmaSU = (-Ck.z)*(1 - Ck.z)*S;
+        Mat sigmaUU = (dist - Ck.z)*(dist - Ck.z)*S;
+        Mat sigmaUS = (-Ck.z)*(dist - Ck.z)*S;
+        Mat sigmaSU = (-Ck.z)*(dist - Ck.z)*S;
 
         Mat H1 = (Mat_<float>(2, 2) << 0, 0, 0, 0);
         Mat H2 = (Mat_<float>(2, 2) << 0, 0, 0, 0);
@@ -433,10 +435,14 @@ void triangulationLF(int nbSamples, const std::vector<cv::Point2f> &flow,
     computeResidualParameters(nbSamples, flow, K_inv, R_transp, C,
                               eigenVectors, eigenValues, samplePoint);
 
-    // perform DLT to initialize optimization
-    DLT(nbSamples, samplePoint, x, conditionNumber);
+//    // perform DLT to initialize optimization
+//    DLT(nbSamples, samplePoint, x, conditionNumber);
 
-//    optimize(nbSamples, eigenVectors, eigenValues, samplePoint, x, finalCost, verbose);
+    // perform inhomogeneous method to initialize optimization
+    IHM(nbSamples, samplePoint, x, conditionNumber);
+
+    // main optimization (non-linear least square)
+    optimize(nbSamples, eigenVectors, eigenValues, samplePoint, x, finalCost, verbose);
 }
 
 void triangulationClassic(int nbSamples, const std::vector<cv::Point2f> &flow,
@@ -812,6 +818,112 @@ void DLT(uint nbSamples,
         x[5] = svd7.vt.at<float>(svd7.vt.rows-1, 5)/svd7.vt.at<float>(svd7.vt.rows-1, 6);
 
         conditionNumber = svd7.w.at<float>(0, 0)/svd7.w.at<float>(svd7.w.rows-1, 0);
+    }
+        break;
+
+    default:
+        assert(false);
+        break;
+    }
+}
+
+void IHM(uint nbSamples,
+         const std::vector<float>& samplePoint,
+         std::vector<float> &x,
+         float& conditionNumber) {
+
+    const uint nbParams = x.size();
+
+    switch(nbParams) {
+
+    case 3:
+    {
+        cv::Mat M3 = cv::Mat::zeros(2*nbSamples, 3, CV_32FC1); // 3g (inhomogeneous)
+        cv::Mat b3 = cv::Mat::zeros(2*nbSamples, 1, CV_32FC1);
+
+        // fill system matrix
+        for(uint k(0) ; k < nbSamples ; ++k) {
+
+            M3.at<float>(2*k + 0, 0) = samplePoint[4*k+2]; M3.at<float>(2*k + 0, 1) = 1; M3.at<float>(2*k + 0, 2) = 0;
+            M3.at<float>(2*k + 1, 0) = samplePoint[4*k+3]; M3.at<float>(2*k + 1, 1) = 0; M3.at<float>(2*k + 1, 2) = 1;
+            b3.at<float>(2*k + 0, 0) = samplePoint[4*k+0];
+            b3.at<float>(2*k + 1, 0) = samplePoint[4*k+1];
+        }
+
+        cv::Mat M3t = cv::Mat::zeros(2*nbSamples, 3, CV_32FC1);
+        cv::transpose(M3, M3t);
+        cv::Mat M3tM3 = M3t * M3;
+        cv::Mat M3tM3_inv = cv::Mat::zeros(2*nbSamples, 3, CV_32FC1);
+        cv::invert(M3tM3, M3tM3_inv);
+        cv::Mat res3 = M3tM3_inv * (M3t * b3);
+        x[0] = res3.at<float>(0, 0);
+        x[1] = res3.at<float>(1, 0);
+        x[2] = res3.at<float>(2, 0);
+
+        cv::SVD svd3(M3);
+        conditionNumber = svd3.w.at<float>(0, 0)/svd3.w.at<float>(svd3.w.rows-1, 0);
+    }
+        break;
+
+    case 4:
+    {
+        cv::Mat M4 = cv::Mat::zeros(2*nbSamples, 4, CV_32FC1); // 4g (inhomogeneous)
+        cv::Mat b4 = cv::Mat::zeros(2*nbSamples, 1, CV_32FC1);
+
+        // fill system matrix
+        for(uint k(0) ; k < nbSamples ; ++k) {
+
+            M4.at<float>(2*k + 0, 0) = samplePoint[4*k+2]; M4.at<float>(2*k + 0, 1) = 0; M4.at<float>(2*k + 0, 2) = 1; M4.at<float>(2*k + 0, 3) = 0;
+            M4.at<float>(2*k + 1, 0) = 0; M4.at<float>(2*k + 1, 1) = samplePoint[4*k+3]; M4.at<float>(2*k + 1, 2) = 0; M4.at<float>(2*k + 1, 3) = 1;
+            b4.at<float>(2*k + 0, 0) = samplePoint[4*k+0];
+            b4.at<float>(2*k + 1, 0) = samplePoint[4*k+1];
+        }
+
+        cv::Mat M4t = cv::Mat::zeros(2*nbSamples, 4, CV_32FC1);
+        cv::transpose(M4, M4t);
+        cv::Mat M4tM4 = M4t * M4;
+        cv::Mat M4tM4_inv = cv::Mat::zeros(2*nbSamples, 4, CV_32FC1);
+        cv::invert(M4tM4, M4tM4_inv);
+        cv::Mat res4 = M4tM4_inv * (M4t * b4);
+        x[0] = res4.at<float>(0, 0);
+        x[1] = res4.at<float>(1, 0);
+        x[2] = res4.at<float>(2, 0);
+        x[3] = res4.at<float>(3, 0);
+
+        cv::SVD svd4(M4);
+        conditionNumber = svd4.w.at<float>(0, 0)/svd4.w.at<float>(svd4.w.rows-1, 0);
+    }
+        break;
+
+    case 6:
+    {
+        cv::Mat M6 = cv::Mat::zeros(2*nbSamples, 6, CV_32FC1); // 6g (inhomogeneous)
+        cv::Mat b6 = cv::Mat::zeros(2*nbSamples, 1, CV_32FC1);
+
+        // fill system matrix
+        for(uint k(0) ; k < nbSamples ; ++k) {
+
+            M6.at<float>(2*k + 0, 0) = samplePoint[4*k+2]; M6.at<float>(2*k + 0, 1) = samplePoint[4*k+3]; M6.at<float>(2*k + 0, 2) = 0; M6.at<float>(2*k + 0, 3) = 0; M6.at<float>(2*k + 0, 4) = 1; M6.at<float>(2*k + 0, 5) = 0;
+            M6.at<float>(2*k + 1, 0) = 0; M6.at<float>(2*k + 1, 1) = 0; M6.at<float>(2*k + 1, 2) = samplePoint[4*k+2]; M6.at<float>(2*k + 1, 3) = samplePoint[4*k+3]; M6.at<float>(2*k + 1, 4) = 0; M6.at<float>(2*k + 1, 5) = 1;
+            b6.at<float>(2*k + 0, 0) = samplePoint[4*k+0];
+            b6.at<float>(2*k + 1, 0) = samplePoint[4*k+1];
+        }
+
+        cv::Mat M6t = cv::Mat::zeros(2*nbSamples, 6, CV_32FC1);
+        cv::transpose(M6, M6t);
+        cv::Mat M6tM6 = M6t * M6;
+        cv::Mat M6tM6_inv = cv::Mat::zeros(2*nbSamples, 6, CV_32FC1);
+        cv::invert(M6tM6, M6tM6_inv);
+        cv::Mat res6 = M6tM6_inv * (M6t * b6);
+        x[0] = res6.at<float>(0, 0);
+        x[1] = res6.at<float>(1, 0);
+        x[2] = res6.at<float>(2, 0);
+        x[3] = res6.at<float>(3, 0);
+        x[4] = res6.at<float>(4, 0);
+        x[5] = res6.at<float>(5, 0);
+
+        cv::SVD svd6(M6);
+        conditionNumber = svd6.w.at<float>(0, 0)/svd6.w.at<float>(svd6.w.rows-1, 0);
     }
         break;
 

@@ -515,6 +515,7 @@ bool InputCam::importCamTranslations( char *cameraName, uint viewIndex ) {
         K[2][0] = 308.29227330174598;
         K[2][1] = 252.10539485267773;
         t = glm::transpose(R)*t;
+//        t.z += 10; // HACK
         R = glm::mat3(1.0); // the rotation is the rotation of the reference view, so the identity
         // the center of projection remains the same
 
