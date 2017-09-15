@@ -31,14 +31,14 @@ void splatProjection3param(cv::Point2f &imagePoint, const Point3f &parameters,
         // vector b = Bc - Bp
 
         // Ap = ap * I2 (lambertian point)
-        // Ac = ac * I2, with ac = (c3 - 1)/c3 (behaves like lambertian)
+        // Ac = ac * I2, with ac = (c3 - dist)/c3 (behaves like lambertian)
         // M = m * I2, with m = ap - ac
 
-        float m = parameters.x - (C.z - 1)/C.z;
+        float m = parameters.x - (C.z - dist)/C.z;
         Mat M = (Mat_<float>(2, 2) << m, 0, 0, m);
         Mat M_inv = M.inv();
-        float buc = C.x/C.z;
-        float bvc = C.y/C.z;
+        float buc = dist*C.x/C.z;
+        float bvc = dist*C.y/C.z;
         Mat b = (Mat_<float>(2, 1) << buc - parameters.y, bvc - parameters.z);
         Mat st = M_inv * b;
 
@@ -82,14 +82,14 @@ void splatProjection4param(cv::Point2f &imagePoint, const cv::Point2f &alpha, co
         // vector b = Bc - Bp
 
         // Ap = [au, 0 ; 0, av]
-        // Ac = ac * I2, with ac = (c3 - 1)/c3 (behaves like lambertian)
+        // Ac = ac * I2, with ac = (c3 - dist)/c3 (behaves like lambertian)
         // M = [au - ac, 0 ; 0, av - ac]
 
-        float ac = (C.z - 1)/C.z;
+        float ac = (C.z - dist)/C.z;
         Mat M = (Mat_<float>(2, 2) << alpha.x - ac, 0, 0, alpha.y - ac);
         Mat M_inv = M.inv();
-        float buc = C.x/C.z;
-        float bvc = C.y/C.z;
+        float buc = dist*C.x/C.z;
+        float bvc = dist*C.y/C.z;
         Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
         Mat st = M_inv * b;
 
@@ -134,11 +134,11 @@ void splatProjection6param(cv::Point2f &imagePoint, const cv::Point2f &alphau, c
         // Ac = ac * I2, with ac = (c3 - 1)/c3 (behaves like lambertian)
         // M = [aus - ac, aut ; avs, avt - ac]
 
-        float ac = (C.z - 1)/C.z;
+        float ac = (C.z - dist)/C.z;
         Mat M = (Mat_<float>(2, 2) << alphau.x - ac, alphau.y, alphav.x, alphav.y - ac);
         Mat M_inv = M.inv();
-        float buc = C.x/C.z;
-        float bvc = C.y/C.z;
+        float buc = dist*C.x/C.z;
+        float bvc = dist*C.y/C.z;
         Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
         Mat st = M_inv * b;
 

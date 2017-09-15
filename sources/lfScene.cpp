@@ -2957,7 +2957,7 @@ void LFScene::renderLightFlowLambertianVideo() {
     std::cout << "RENDERING " << std::endl;
 
     const int firstFrame = 0;
-    const int lastFrame = 24;
+    const int lastFrame = 50;
     for(int frame = firstFrame ; frame <= lastFrame ; ++frame) {
 
         // TARGET CAM PARAMETERS
@@ -2970,31 +2970,28 @@ void LFScene::renderLightFlowLambertianVideo() {
 
 
         // INPUT VIEWS
-        PinholeCamera targetCam = _vCam[frame]->getPinholeCamera();
-        glm::mat3 glmTargetK = targetCam._K;
-        glm::mat3 glmTargetR = targetCam._R;
-        glm::vec3 glmTargetC = targetCam._C;
+//        PinholeCamera targetCam = _vCam[frame]->getPinholeCamera();
 
         // ZOOM
-        //        glmTargetK[0][0] += (float)frame * 600.0f;
-        //        glmTargetK[1][1] += (float)frame * 600.0f;
+//        PinholeCamera targetCam = _vCam[12]->getPinholeCamera();
+        //        targetCam._K[0][0] += (float)frame * 600.0f;
+        //        targetCam._K[1][1] += (float)frame * 600.0f;
 
         // PANNING
-//        float step = 50;
-//        PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 2]->getPinholeCamera();
-//        PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 2]->getPinholeCamera();
-//        glmTargetC = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
-//        glmTargetC = targetCam._C + (float)frame * 2.5f * glm::vec3(0, 0, 1) + (float)frame * 0.5f * glm::vec3(0, 1, 0);
+        PinholeCamera targetCam = _vCam[12]->getPinholeCamera();
+        float step = 50;
+        PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 2]->getPinholeCamera();
+        PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 2]->getPinholeCamera();
+        targetCam._C = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
+        targetCam._C = targetCam._C + (float)frame * 2.5f * glm::vec3(0, 0, 1) + (float)frame * 0.5f * glm::vec3(0, 1, 0);
 
-        targetK = (cv::Mat_<float>(3,3) << glmTargetK[0][0], glmTargetK[1][0], glmTargetK[2][0],
-                glmTargetK[0][1], glmTargetK[1][1], glmTargetK[2][1],
-                glmTargetK[0][2], glmTargetK[1][2], glmTargetK[2][2]);
-        targetR = (cv::Mat_<float>(3,3) << glmTargetR[0][0], glmTargetR[1][0], glmTargetR[2][0],
-                glmTargetR[0][1], glmTargetR[1][1], glmTargetR[2][1],
-                glmTargetR[0][2], glmTargetR[1][2], glmTargetR[2][2]);
-        targetC = cv::Point3f((float)glmTargetC[0], (float)glmTargetC[1], (float)glmTargetC[2]);
-
-        std::cout << "targetC: " << targetC << std::endl;
+        targetK = (cv::Mat_<float>(3,3) << targetCam._K[0][0], targetCam._K[1][0], targetCam._K[2][0],
+                targetCam._K[0][1], targetCam._K[1][1], targetCam._K[2][1],
+                targetCam._K[0][2], targetCam._K[1][2], targetCam._K[2][2]);
+        targetR = (cv::Mat_<float>(3,3) << targetCam._R[0][0], targetCam._R[1][0], targetCam._R[2][0],
+                targetCam._R[0][1], targetCam._R[1][1], targetCam._R[2][1],
+                targetCam._R[0][2], targetCam._R[1][2], targetCam._R[2][2]);
+        targetC = cv::Point3f((float)targetCam._C[0], (float)targetCam._C[1], (float)targetCam._C[2]);
 
 //        targetC.z = 0.0;
 
