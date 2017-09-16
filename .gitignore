@@ -9,6 +9,8 @@ obj
 *.o
 *.a
 
+configs/IBR_optical/transcut/obj*
+
 cocolib/Makefile
 cocolib/cocolib/Makefile
 cocolib/cocolib/anisotropic_diffusion/makefile
