@@ -14,7 +14,7 @@ dt_beta			0.5
 dsf			1
 pyramidHeight		8
 flowAlg			pixflow_ultra
-computeFlow		0
+computeFlow		1
 # IMAGE SIZE
 width			629
 height			469

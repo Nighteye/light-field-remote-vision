@@ -2147,16 +2147,16 @@ void LFScene::bic() {
     const uint nbPixels = _camWidth*_camHeight;
 
     std::vector<float> finalCost3Map(nbPixels);
-    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost3MapDLT.pfm") << std::endl;
-    loadPFM(finalCost3Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost3MapDLT.pfm"));
+    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost3MapIHM.pfm") << std::endl;
+    loadPFM(finalCost3Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost3MapIHM.pfm"));
 
     std::vector<float> finalCost4Map(nbPixels);
-    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost4MapDLT.pfm") << std::endl;
-    loadPFM(finalCost4Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost4MapDLT.pfm"));
+    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost4MapIHM.pfm") << std::endl;
+    loadPFM(finalCost4Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost4MapIHM.pfm"));
 
     std::vector<float> finalCost6Map(nbPixels);
-    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost6MapDLT.pfm") << std::endl;
-    loadPFM(finalCost6Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost6MapDLT.pfm"));
+    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost6MapIHM.pfm") << std::endl;
+    loadPFM(finalCost6Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost6MapIHM.pfm"));
 
     // OUTPUT BIC
 
