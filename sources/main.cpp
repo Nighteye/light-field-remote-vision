@@ -266,7 +266,7 @@ int main( int argc, char **argv ) {
         }
 
         std::cout << "Fit color models to light flow samples" << std::endl;
-        lfScene.curveFittingColor(); // NOT OK
+        lfScene.curveFittingColor();
 
         if(!lfScene.checkExistence(config_data->_outdir + "/outputBIC3param.pfm") ||
            !lfScene.checkExistence(config_data->_outdir + "/outputBIC4param.pfm") ||
