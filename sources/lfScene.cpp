@@ -1689,10 +1689,10 @@ void LFScene::curveFittingColor() {
 
     const uint nbPixels = _camWidth*_camHeight;
 
-    std::vector<cv::Point3f> parameterSMap(nbPixels);
-    std::vector<cv::Point3f> parameterTMap(nbPixels);
-    std::vector<cv::Point3f> parameter0Map(nbPixels);
-    std::vector<float> finalCostIntensityMap(nbPixels);
+    std::vector<cv::Point3f> parameterS9pMap(nbPixels);
+    std::vector<cv::Point3f> parameterT9pMap(nbPixels);
+    std::vector<cv::Point3f> parameter09pMap(nbPixels);
+    std::vector<float> finalCost9pMap(nbPixels);
     const bool verbose = false;
 
     // C = [rs, rt ; gs, gt ; bs, bt]
@@ -1706,10 +1706,10 @@ void LFScene::curveFittingColor() {
 
             const uint idx = y*_camWidth + x;
 
-            parameterSMap[idx] = cv::Point3f(0.0f, 0.0f, 0.0f); // [rs, gs, bs]
-            parameterTMap[idx] = cv::Point3f(0.0f, 0.0f, 0.0f); // [rt, gt, bt]
-            parameter0Map[idx] = cv::Point3f(0.0f, 0.0f, 0.0f); // [r0, g0, b0]
-            finalCostIntensityMap[idx] = 0.0;
+            parameterS9pMap[idx] = cv::Point3f(0.0f, 0.0f, 0.0f); // [rs, gs, bs]
+            parameterT9pMap[idx] = cv::Point3f(0.0f, 0.0f, 0.0f); // [rt, gt, bt]
+            parameter09pMap[idx] = cv::Point3f(0.0f, 0.0f, 0.0f); // [r0, g0, b0]
+            finalCost9pMap[idx] = 0.0;
         }
     }
 
@@ -1768,43 +1768,39 @@ void LFScene::curveFittingColor() {
                 }
             }
 
-            //                if(x == 3363 && y == 15) {
-            //                    testTriangulation(x, y);
-            //                }
-
             std::vector<float> parameter(9); // [rs, rt, r0 ; gs, gt, g0 ; bs, bt, b0]
-            float finalCostIntensity(0.0);
+            float finalCost9p(0.0);
 
-            colorRegression(flow.size(), flow, colorSampleSet, K_inv, R_transp, C, parameter, finalCostIntensity, verbose);
-            finalCostIntensityMap[idx] = (float)finalCostIntensity;
+            colorRegression(flow.size(), flow, colorSampleSet, K_inv, R_transp, C, parameter, finalCost9p, verbose);
+            finalCost9pMap[idx] = (float)finalCost9p;
 
-            parameterSMap[idx].x = (float)parameter[0]; // rs
-            parameterSMap[idx].y = (float)parameter[3]; // gs
-            parameterSMap[idx].z = (float)parameter[6]; // bs
-            parameterTMap[idx].x = (float)parameter[1]; // rt
-            parameterTMap[idx].y = (float)parameter[4]; // gt
-            parameterTMap[idx].z = (float)parameter[7]; // bt
-            parameter0Map[idx].x = (float)parameter[2]; // r0
-            parameter0Map[idx].y = (float)parameter[5]; // g0
-            parameter0Map[idx].z = (float)parameter[8]; // b0
+            parameterS9pMap[idx].x = (float)parameter[0]; // rs
+            parameterS9pMap[idx].y = (float)parameter[3]; // gs
+            parameterS9pMap[idx].z = (float)parameter[6]; // bs
+            parameterT9pMap[idx].x = (float)parameter[1]; // rt
+            parameterT9pMap[idx].y = (float)parameter[4]; // gt
+            parameterT9pMap[idx].z = (float)parameter[7]; // bt
+            parameter09pMap[idx].x = (float)parameter[2]; // r0
+            parameter09pMap[idx].y = (float)parameter[5]; // g0
+            parameter09pMap[idx].z = (float)parameter[8]; // b0
         }
     }
 
     // SAVE PARAMETER MAPS
-    std::string parameterSName = _outdir + "/parameterSMap.pfm";
-    std::cout << "Writing rs, gs, bs parameter map " << parameterSName << std::endl;
-    savePFM(parameterSMap, _camWidth, _camHeight, parameterSName);
-    std::string parameterTName = _outdir + "/parameterTMap.pfm";
-    std::cout << "Writing rt, gt, bt parameter map " << parameterTName << std::endl;
-    savePFM(parameterTMap, _camWidth, _camHeight, parameterTName);
-    std::string parameter0Name = _outdir + "/parameter0Map.pfm";
-    std::cout << "Writing r0, g0, b0 parameter map " << parameter0Name << std::endl;
-    savePFM(parameter0Map, _camWidth, _camHeight, parameter0Name);
+    std::string parameterS9pName = _outdir + "/parameterS9pMap.pfm";
+    std::cout << "Writing rs, gs, bs parameter map " << parameterS9pName << std::endl;
+    savePFM(parameterS9pMap, _camWidth, _camHeight, parameterS9pName);
+    std::string parameterT9pName = _outdir + "/parameterT9pMap.pfm";
+    std::cout << "Writing rt, gt, bt parameter map " << parameterT9pName << std::endl;
+    savePFM(parameterT9pMap, _camWidth, _camHeight, parameterT9pName);
+    std::string parameter09pName = _outdir + "/parameter09pMap.pfm";
+    std::cout << "Writing r0, g0, b0 parameter map " << parameter09pName << std::endl;
+    savePFM(parameter09pMap, _camWidth, _camHeight, parameter09pName);
 
     // SAVE FINAL COST MAPS
-    std::string finalCostIntensityName = _outdir + "/finalCostIntensityMap.pfm";
-    std::cout << "Writing final color cost " << finalCostIntensityName << std::endl;
-    savePFM(finalCostIntensityMap, _camWidth, _camHeight, finalCostIntensityName);
+    std::string finalCost9pName = _outdir + "/finalCost9pMap.pfm";
+    std::cout << "Writing final color cost " << finalCost9pName << std::endl;
+    savePFM(finalCost9pMap, _camWidth, _camHeight, finalCost9pName);
 }
 
 // backward warping of one view, accumulate in outputImage and weight
