@@ -624,6 +624,8 @@ void LFScene::computePerPixelCorrespStarConfig(std::string flowAlg) {
 // run optical flow on custom config
 void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
 
+    // STAR CONFIG EXAMPLE
+
     /* (1, 1) -> (0, 0)
      * (1, 1) -> (1, 0)
      * (2, 1) -> (2, 0)
@@ -1148,7 +1150,7 @@ void LFScene::computeFlowedLFCustomConfig() {
             continue;
         }
         
-        memset(flowLtoRNameChar, 0, sizeof(flowLtoRNameChar));
+        std::fill_n(flowLtoRNameChar, 500, 0.0);
         sprintf( flowLtoRNameChar, flowLtoRName.c_str(), viewIndex );
         std::cout << "Loading flow " << flowLtoRNameChar << std::endl;
         std::vector<cv::Point2f> currentFlowLtoR(imageSize);

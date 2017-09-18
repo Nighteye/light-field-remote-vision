@@ -21,7 +21,6 @@ Config_data::Config_data() {
     _imageName = "";
     _cameraName = "";
     _flowAlg = "";
-    _computeFlow = 0;
     _lf_name = "";
     _init_name = "";
     _tau_name = "";
@@ -86,7 +85,6 @@ void Config_data::parse_config( coco::config &cfg ) {
     cfg.get_switch( "imageName", _imageName );
     cfg.get_switch( "cameraName", _cameraName );
     cfg.get_switch( "flowAlg", _flowAlg );
-    cfg.get_switch( "computeFlow", _computeFlow );
     cfg.get_switch( "lf_name", _lf_name );
     cfg.get_switch( "init_name", _init_name );
     cfg.get_switch( "tau_name", _tau_name );

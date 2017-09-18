@@ -239,13 +239,7 @@ int main( int argc, char **argv ) {
             lfScene.importCustomTOLFViews();
         }
 
-        if(config_data->_computeFlow != 0) {
-            //                std::cout << "Compute optical flow" << std::endl;
-            //                if(band) { // was there to test band config
-            //                    lfScene.computePerPixelCorrespBandConfig(config_data->_flowAlg);
-            //                } else {
-            //                    lfScene.computePerPixelCorrespStarConfig(config_data->_flowAlg);
-            //                }
+        if(!lfScene.checkExistenceAllViews(config_data->_outdir + "/flow%02lu.pfm")) {
 
             lfScene.computePerPixelCorrespCustomConfig(config_data->_flowAlg);
 
@@ -254,21 +248,43 @@ int main( int argc, char **argv ) {
         }
 
         std::cout << "Compute flowed lightfield" << std::endl;
-        //                lfScene.computeFlowedLFStarConfig(); // deprecated
-        lfScene.computeFlowedLFCustomConfig(); // OK
+        lfScene.computeFlowedLFCustomConfig();
 
-        std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
-        lfScene.curveFitting(); // OK
+        if(!lfScene.checkExistence(config_data->_outdir + "/parameter3MapIHM.pfm") ||
+           !lfScene.checkExistence(config_data->_outdir + "/parameterAlpha2MapIHM.pfm") ||
+           !lfScene.checkExistence(config_data->_outdir + "/parameterBeta2MapIHM.pfm") ||
+           !lfScene.checkExistence(config_data->_outdir + "/parameter6AlphauMapIHM.pfm") ||
+           !lfScene.checkExistence(config_data->_outdir + "/parameter6AlphavMapIHM.pfm") ||
+           !lfScene.checkExistence(config_data->_outdir + "/parameter6BetaMapIHM.pfm")) {
+
+            std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
+            lfScene.curveFitting(); // OK
+
+        } else {
+
+            std::cout << "Geometric parameters already estimated" << std::endl;
+        }
 
 //        std::cout << "Fit color models to light flow samples" << std::endl;
 //        lfScene.curveFittingColor(); // NOT OK
 
+        if(!lfScene.checkExistence(config_data->_outdir + "/outputBIC3param.pfm") ||
+           !lfScene.checkExistence(config_data->_outdir + "/outputBIC4param.pfm") ||
+           !lfScene.checkExistence(config_data->_outdir + "/outputBIC6param.pfm") ||
+           !lfScene.checkExistence(config_data->_outdir + "/selectedModel.pfm")) {
+
+            std::cout << "Perform model selection via BIC" << std::endl;
+            lfScene.bic();
+
+        } else {
+
+            std::cout << "Model selection already done" << std::endl;
+        }
+
         std::cout << "Render image by interpolating the light flow" << std::endl;
+
 //        lfScene.renderLightFlow(); // NOT OK
 //        lfScene.renderLightFlowLambertianModel(); // NOT OK
-
-        lfScene.bic(); // OK
-
         lfScene.renderLightFlowLambertianVideo(); // OK
 
         // DEPRECATED FUNCTIONS

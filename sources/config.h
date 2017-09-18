@@ -33,7 +33,6 @@ public:
     std::string _cameraName;
 
     std::string _flowAlg;
-    int _computeFlow;
 
     // lightfield name (complete path)
     std::string _lf_name;

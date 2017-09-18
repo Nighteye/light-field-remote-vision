@@ -2,6 +2,7 @@
 #include <cocolib/cocolib/common/debug.h>
 #include <iostream>
 #include <vector>
+#include <sys/stat.h>
 
 #define cimg_display 0
 #define cimg_use_tiff
@@ -515,16 +516,42 @@ bool InputCam::importCamTranslations( char *cameraName, uint viewIndex ) {
         K[2][0] = 308.29227330174598;
         K[2][1] = 252.10539485267773;
         t = glm::transpose(R)*t;
-//        t.z += 10; // HACK
+        //        t.z += 10; // HACK
         R = glm::mat3(1.0); // the rotation is the rotation of the reference view, so the identity
         // the center of projection remains the same
 
         _pinholeCamera = PinholeCamera( K, R, t, _W, _H );
 
-//        _pinholeCamera.display();
+        //        _pinholeCamera.display();
 
         return true;
     }
+}
+
+bool LFScene::checkExistence(const std::string& name) {
+
+    struct stat buffer;
+    return (stat (name.c_str(), &buffer) == 0);
+}
+
+bool LFScene::checkExistenceAllViews(const std::string& name) {
+
+    bool exists = true;
+
+    for(uint viewIndex = 0 ; viewIndex < _nbCameras ; ++viewIndex) {
+
+        if(viewIndex == _nbCameras/2) {
+            continue;
+        }
+
+        char temp[500];
+        std::fill_n(temp, 500, 0.0);
+        sprintf( temp, name.c_str(), viewIndex );
+        struct stat buffer;
+        exists &= (stat (temp, &buffer) == 0);
+    }
+
+    return exists;
 }
 
 // load standford lightfield dataset (image and camera matrices)

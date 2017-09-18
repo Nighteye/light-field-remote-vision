@@ -109,6 +109,12 @@ public:
     // IMPORT_LF
     // ---------------------------------------------------------------------------------------------------------- //
 
+    // check existence of file given its name
+    bool checkExistence(const std::string& name);
+
+    // check existence of a sequence of files for all views, except central view, given a format name
+    bool checkExistenceAllViews(const std::string& name);
+
     // load standford lightfield dataset (image and camera matrices)
     // camera matrices are obainted thank to openMVG calibration
     // MVE FORMAT (convert rows to rows and column)
