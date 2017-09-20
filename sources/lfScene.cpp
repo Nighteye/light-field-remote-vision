@@ -209,6 +209,60 @@ LFScene::~LFScene() {
     }
 }
 
+void LFScene::print1fMap(const std::vector<float>& map, const std::string& name, int arg1) {
+
+    char temp[500];
+    std::fill_n(temp, 500, 0);
+    sprintf( temp, name.c_str(), arg1 );
+    std::cout << "Writing map " << temp << std::endl;
+    savePFM(map, _camWidth, _camHeight, temp);
+}
+
+void LFScene::print2fMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1) {
+
+    char temp[500];
+    std::fill_n(temp, 500, 0);
+    sprintf( temp, name.c_str(), arg1 );
+    std::cout << "Writing map " << temp << std::endl;
+    savePFM(map, _camWidth, _camHeight, temp);
+}
+
+void LFScene::print3fMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1) {
+
+    char temp[500];
+    std::fill_n(temp, 500, 0);
+    sprintf( temp, name.c_str(), arg1 );
+    std::cout << "Writing map " << temp << std::endl;
+    savePFM(map, _camWidth, _camHeight, temp);
+}
+
+void LFScene::load1fMap(std::vector<float>& map, const std::string& name, int arg1) {
+
+    char temp[500];
+    std::fill_n(temp, 500, 0);
+    sprintf( temp, name.c_str(), arg1 );
+    std::cout << "Loading map " << temp << std::endl;
+    loadPFM(map, _camWidth, _camHeight, std::string(temp));
+}
+
+void LFScene::load2fMap(std::vector<cv::Point2f>& map, const std::string& name, int arg1) {
+
+    char temp[500];
+    std::fill_n(temp, 500, 0);
+    sprintf( temp, name.c_str(), arg1 );
+    std::cout << "Loading map " << temp << std::endl;
+    loadPFM(map, _camWidth, _camHeight, std::string(temp));
+}
+
+void LFScene::load3fMap(std::vector<cv::Point3f>& map, const std::string& name, int arg1) {
+
+    char temp[500];
+    std::fill_n(temp, 500, 0);
+    sprintf( temp, name.c_str(), arg1 );
+    std::cout << "Loading map " << temp << std::endl;
+    loadPFM(map, _camWidth, _camHeight, std::string(temp));
+}
+
 void LFScene::computeVisibilityMask(std::vector<cv::Point2f>& flowLtoR, std::vector<cv::Point2f>& flowRtoL,
                                     std::vector<bool>& visibilityMask)
 {
@@ -1354,10 +1408,63 @@ void LFScene::testTriangulation(uint x, uint y) {
     assert(false);
 }
 
+//    std::vector<float> parameters3(3); // (a, bu, bv)
+//    float finalCostLF(0.0);
+//    float conditionNumber(0.0);
+//    triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters3, finalCostLF, conditionNumber, verbose);
+
+//    // LF TRIANGULATION VALIDATION
+//    // comparing to classic triangulation
+//    std::vector<float> point3DLF(3), point3DClassic(3);
+
+//    triangulationClassic(flow.size(), flow, K, R, t, point3DClassic, finalCostClassic, verbose);
+
+//    // compute 3D point for comparison with classic triangulation (reprojection error)
+//    point3DLF[0] = parameters3[1]/(1 - parameters3[0]);
+//    point3DLF[1] = parameters3[2]/(1 - parameters3[0]);
+//    point3DLF[2] = 1.0/(1 - parameters3[0]);
+//    cv::Mat point3D = (cv::Mat_<float>(3, 1) << point3DLF[0], point3DLF[1], point3DLF[2]);
+
+//    if(verbose) {
+//        std::cout << "3D point with LF method: " << point3D << std::endl;
+//    }
+
+//    // compute reprojection error
+//    reprojectionCompute(point3DLF, flow.size(), flow, K, R, t, reprojErrorLF);
+
+//    reprojectionCompute(point3DClassic, flow.size(), flow, K, R, t, reprojErrorClassic);
+
+//    // render 3D point (optional)
+//    points.push_back(point3DLF); // to save 3D point cloud
+//    cv::Mat point2D = targetK*(targetR*point3D + cv::Mat(targett));
+//    targetDepth = (double)point2D.at<float>(2, 0);
+
+//    // save target depth map
+//    std::string targetDepthMapName = _outdir + "/targetDepthMap.pfm";
+//    std::cout << "Writing target depth map " << targetDepthMapName << std::endl;
+//    savePFM(targetDepthMap, _camWidth, _camHeight, targetDepthMapName);
+
+//    // save reprojection error maps (LF and classic)
+//    std::string reprojErrorLFMapName = _outdir + "/reprojErrorLFMap.pfm";
+//    std::cout << "Writing reprojection error map (curve fitting method) " << reprojErrorLFMapName << std::endl;
+//    savePFM(reprojErrorLFMap, _camWidth, _camHeight, reprojErrorLFMapName);
+
+//    std::string reprojErrorClassicMapName = _outdir + "/reprojErrorClassicMap.pfm";
+//    std::cout << "Writing reprojection error map (classic triangulation method) " << reprojErrorClassicMapName << std::endl;
+//    savePFM(reprojErrorClassicMap, _camWidth, _camHeight, reprojErrorClassicMapName);
+
+//    std::string finalCostClassicMapName = _outdir + "/finalCostClassicMap.pfm";
+//    std::cout << "Writing parameter map (classic triangulation method) " << finalCostClassicMapName << std::endl;
+//    savePFM(finalCostClassicMap, _camWidth, _camHeight, finalCostClassicMapName);
+
+//    // save point cloud
+//    std::string plyName = _outdir + "/point_cloud.ply";
+//    std::cout << "Writing ply file in " << plyName << std::endl;
+//    writePly(plyName.c_str(), points);
+
 void LFScene::curveFitting() {
 
     const bool verbose = false;
-    const bool validateTriangulation = false;
     const uint nbPixels = _camWidth*_camHeight;
 
     assert(_windowWidth > 0 && _windowHeight > 0);
@@ -1377,16 +1484,6 @@ void LFScene::curveFitting() {
     std::vector<float> conditionNumber4Map(nbPixels);
     std::vector<float> conditionNumber6Map(nbPixels);
 
-    // TRIANGULATION VALIDATION
-
-    std::vector<float> targetDepthMap(nbPixels);
-    std::vector<float> reprojErrorLFMap(nbPixels);
-    std::vector<float> reprojErrorClassicMap(nbPixels);
-    std::vector<float> finalCostClassicMap(nbPixels);
-
-    // point cloud (optional)
-    std::vector< std::vector<float> > points;
-
     for(uint y = 0 ; y < (uint)_camHeight ; ++y) {
 
         for(uint x = 0 ; x < (uint)_camWidth ; ++x) {
@@ -1405,13 +1502,6 @@ void LFScene::curveFitting() {
             conditionNumber3Map[idx] = 0.0;
             conditionNumber4Map[idx] = 0.0;
             conditionNumber6Map[idx] = 0.0;
-
-            // TRIANGULATION VALIDATION
-
-            targetDepthMap[idx] = 0.0;
-            reprojErrorLFMap[idx] = 0.0;
-            reprojErrorClassicMap[idx] = 0.0;
-            finalCostClassicMap[idx] = 0.0;
         }
     }
 
@@ -1435,10 +1525,11 @@ void LFScene::curveFitting() {
             std::vector<cv::Mat> R, R_transp, K, K_inv;
             std::vector<cv::Point3f> C, t;
 
-            for(uint camIdx = 0 ; camIdx < _vCam.size() ; ++camIdx) {
+            for(int camIdx = 0 ; camIdx < (int)_vCam.size() ; ++camIdx) {
 
-                if(camIdx == _centralIndex) { // remove target view (central)
+                if(camIdx == _renderIndex) { // remove target view (custom)
 
+                    std::cout << "Remove samples from re-rendered input cam " << _renderIndex << std::endl;
                     continue;
                 }
 
@@ -1514,45 +1605,6 @@ void LFScene::curveFitting() {
             parameter6AlphavMap[idx].y = (float)parameters6[3]; // avt
             parameter6BetaMap[idx].x = (float)parameters6[4]; // bu
             parameter6BetaMap[idx].y = (float)parameters6[5]; // bv
-
-            if(validateTriangulation) {
-
-                std::vector<float> parameters3(3); // (a, bu, bv)
-                float finalCostLF(0.0);
-                float conditionNumber(0.0);
-                triangulationLF(flow.size(), flow, K_inv, R_transp, C, parameters3, finalCostLF, conditionNumber, verbose);
-
-                // LF TRIANGULATION VALIDATION
-                // comparing to classic triangulation
-                float finalCostClassic(0.0); // final cost value
-                float reprojErrorLF(0.0), reprojErrorClassic(0.0); // reprojection error
-                std::vector<float> point3DLF(3), point3DClassic(3);
-
-                triangulationClassic(flow.size(), flow, K, R, t, point3DClassic, finalCostClassic, verbose);
-                finalCostClassicMap[idx] = (float)finalCostClassic;
-
-                // compute 3D point for comparison with classic triangulation (reprojection error)
-                point3DLF[0] = parameters3[1]/(1 - parameters3[0]);
-                point3DLF[1] = parameters3[2]/(1 - parameters3[0]);
-                point3DLF[2] = 1.0/(1 - parameters3[0]);
-                cv::Mat point3D = (cv::Mat_<float>(3, 1) << point3DLF[0], point3DLF[1], point3DLF[2]);
-
-                if(verbose) {
-                    std::cout << "3D point with LF method: " << point3D << std::endl;
-                }
-
-                // compute reprojection error
-                reprojectionCompute(point3DLF, flow.size(), flow, K, R, t, reprojErrorLF);
-                reprojErrorLFMap[idx] = (float)reprojErrorLF;
-
-                reprojectionCompute(point3DClassic, flow.size(), flow, K, R, t, reprojErrorClassic);
-                reprojErrorClassicMap[idx] = (float)reprojErrorClassic;
-
-                //                // render 3D point (optional)
-                //                points.push_back(point3DLF); // to save 3D point cloud
-                //                cv::Mat point2D = targetK*(targetR*point3D + cv::Mat(targett));
-                //                targetDepthMap[idx] = (float)point2D.at<float>(2, 0);
-            }
         }
     }
 
@@ -1562,126 +1614,43 @@ void LFScene::curveFitting() {
     elapsedTime = endLoop - beginingLoop;
     std::cout << "elapsedTime: " << elapsedTime << std::endl;
 
-//    // SAVE PARAMETER MAPS (DLT METHOD)
-//    std::string parameter3MapName = _outdir + "/parameter3MapDLT.pfm";
-//    std::cout << "Writing parameter map " << parameter3MapName  << std::endl;
-//    savePFM(parameter3Map, _camWidth, _camHeight, parameter3MapName );
+    if(_renderIndex >= 0) {
 
-//    std::string parameterAlpha2MapName = _outdir + "/parameterAlpha2MapDLT.pfm";
-//    std::cout << "Writing alpha parameter map " << parameterAlpha2MapName << std::endl;
-//    savePFM(parameterAlpha2Map, _camWidth, _camHeight, parameterAlpha2MapName);
-//    std::string parameterBeta2MapName = _outdir + "/parameterBeta2MapDLT.pfm";
-//    std::cout << "Writing beta parameter map " << parameterBeta2MapName << std::endl;
-//    savePFM(parameterBeta2Map, _camWidth, _camHeight, parameterBeta2MapName);
+        print3fMap(parameter3Map, _outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex);
+        print2fMap(parameterAlpha2Map, _outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex);
+        print2fMap(parameterBeta2Map, _outdir + "/model_4g_IHM_%02lu_b.pfm", _renderIndex);
+        print2fMap(parameter6AlphauMap, _outdir + "/model_6g_IHM_%02lu_au.pfm", _renderIndex);
+        print2fMap(parameter6AlphavMap, _outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex);
+        print2fMap(parameter6BetaMap, _outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex);
 
-//    std::string parameter6AlphauMapName = _outdir + "/parameter6AlphauMapDLT.pfm";
-//    std::cout << "Writing alpha u parameter map " << parameter6AlphauMapName << std::endl;
-//    savePFM(parameter6AlphauMap, _camWidth, _camHeight, parameter6AlphauMapName);
-//    std::string parameter6AlphavMapName = _outdir + "/parameter6AlphavMapDLT.pfm";
-//    std::cout << "Writing alpha v parameter map " << parameter6AlphavMapName << std::endl;
-//    savePFM(parameter6AlphavMap, _camWidth, _camHeight, parameter6AlphavMapName);
-//    std::string parameter6BetaMapName = _outdir + "/parameter6BetaMapDLT.pfm";
-//    std::cout << "Writing beta parameter map " << parameter6BetaMapName << std::endl;
-//    savePFM(parameter6BetaMap, _camWidth, _camHeight, parameter6BetaMapName);
+        // SAVE FINAL COST MAPS
+        print1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_%02lu.pfm", _renderIndex);
+        print1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_%02lu.pfm", _renderIndex);
+        print1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_%02lu.pfm", _renderIndex);
 
-//    // SAVE FINAL COST MAPS
-//    std::string finalCost3MapName = _outdir + "/finalCost3MapDLT.pfm";
-//    std::cout << "Writing final cost (3 parameters) " << finalCost3MapName << std::endl;
-//    savePFM(finalCost3Map, _camWidth, _camHeight, finalCost3MapName);
+        // SAVE CONDITION NUMBER MAPS
+        print1fMap(conditionNumber3Map, _outdir + "/conditionNumber_3g_IHM_%02lu.pfm", _renderIndex);
+        print1fMap(conditionNumber4Map, _outdir + "/conditionNumber_4g_IHM_%02lu.pfm", _renderIndex);
+        print1fMap(conditionNumber6Map, _outdir + "/conditionNumber_6g_IHM_%02lu.pfm", _renderIndex);
 
-//    std::string finalCost4MapName = _outdir + "/finalCost4MapDLT.pfm";
-//    std::cout << "Writing final cost (4 parameters) " << finalCost4MapName << std::endl;
-//    savePFM(finalCost4Map, _camWidth, _camHeight, finalCost4MapName);
+    } else {
 
-//    std::string finalCost6MapName = _outdir + "/finalCost6MapDLT.pfm";
-//    std::cout << "Writing final cost (6 parameters) " << finalCost6MapName << std::endl;
-//    savePFM(finalCost6Map, _camWidth, _camHeight, finalCost6MapName);
+        print3fMap(parameter3Map, _outdir + "/model_3g_IHM_allViews.pfm", _renderIndex);
+        print2fMap(parameterAlpha2Map, _outdir + "/model_4g_IHM_allViews_a.pfm", _renderIndex);
+        print2fMap(parameterBeta2Map, _outdir + "/model_4g_IHM_allViews_b.pfm", _renderIndex);
+        print2fMap(parameter6AlphauMap, _outdir + "/model_6g_IHM_allViews_au.pfm", _renderIndex);
+        print2fMap(parameter6AlphavMap, _outdir + "/model_6g_IHM_allViews_av.pfm", _renderIndex);
+        print2fMap(parameter6BetaMap, _outdir + "/model_6g_IHM_allViews_b.pfm", _renderIndex);
 
-//    // SAVE CONDITION NUMBER MAPS
-//    std::string conditionNumber3MapName = _outdir + "/conditionNumber3MapDLT.pfm";
-//    std::cout << "Writing condition number (3 parameters) " << conditionNumber3MapName << std::endl;
-//    savePFM(conditionNumber3Map, _camWidth, _camHeight, conditionNumber3MapName);
+        // SAVE FINAL COST MAPS
+        print1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
+        print1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_allViews.pfm", _renderIndex);
+        print1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_allViews.pfm", _renderIndex);
 
-//    std::string conditionNumber4MapName = _outdir + "/conditionNumber4MapDLT.pfm";
-//    std::cout << "Writing condition number (4 parameters) " << conditionNumber4MapName << std::endl;
-//    savePFM(conditionNumber4Map, _camWidth, _camHeight, conditionNumber4MapName);
-
-//    std::string conditionNumber6MapName = _outdir + "/conditionNumber6MapDLT.pfm";
-//    std::cout << "Writing condition number (6 parameters) " << conditionNumber6MapName << std::endl;
-//    savePFM(conditionNumber6Map, _camWidth, _camHeight, conditionNumber6MapName);
-
-    // SAVE PARAMETER MAPS (INHOMOGENEOUS METHOD)
-    std::string parameter3MapName = _outdir + "/parameter3MapIHM.pfm";
-    std::cout << "Writing parameter map " << parameter3MapName  << std::endl;
-    savePFM(parameter3Map, _camWidth, _camHeight, parameter3MapName );
-
-    std::string parameterAlpha2MapName = _outdir + "/parameterAlpha2MapIHM.pfm";
-    std::cout << "Writing alpha parameter map " << parameterAlpha2MapName << std::endl;
-    savePFM(parameterAlpha2Map, _camWidth, _camHeight, parameterAlpha2MapName);
-    std::string parameterBeta2MapName = _outdir + "/parameterBeta2MapIHM.pfm";
-    std::cout << "Writing beta parameter map " << parameterBeta2MapName << std::endl;
-    savePFM(parameterBeta2Map, _camWidth, _camHeight, parameterBeta2MapName);
-
-    std::string parameter6AlphauMapName = _outdir + "/parameter6AlphauMapIHM.pfm";
-    std::cout << "Writing alpha u parameter map " << parameter6AlphauMapName << std::endl;
-    savePFM(parameter6AlphauMap, _camWidth, _camHeight, parameter6AlphauMapName);
-    std::string parameter6AlphavMapName = _outdir + "/parameter6AlphavMapIHM.pfm";
-    std::cout << "Writing alpha v parameter map " << parameter6AlphavMapName << std::endl;
-    savePFM(parameter6AlphavMap, _camWidth, _camHeight, parameter6AlphavMapName);
-    std::string parameter6BetaMapName = _outdir + "/parameter6BetaMapIHM.pfm";
-    std::cout << "Writing beta parameter map " << parameter6BetaMapName << std::endl;
-    savePFM(parameter6BetaMap, _camWidth, _camHeight, parameter6BetaMapName);
-
-    // SAVE FINAL COST MAPS
-    std::string finalCost3MapName = _outdir + "/finalCost3MapIHM.pfm";
-    std::cout << "Writing final cost (3 parameters) " << finalCost3MapName << std::endl;
-    savePFM(finalCost3Map, _camWidth, _camHeight, finalCost3MapName);
-
-    std::string finalCost4MapName = _outdir + "/finalCost4MapIHM.pfm";
-    std::cout << "Writing final cost (4 parameters) " << finalCost4MapName << std::endl;
-    savePFM(finalCost4Map, _camWidth, _camHeight, finalCost4MapName);
-
-    std::string finalCost6MapName = _outdir + "/finalCost6MapIHM.pfm";
-    std::cout << "Writing final cost (6 parameters) " << finalCost6MapName << std::endl;
-    savePFM(finalCost6Map, _camWidth, _camHeight, finalCost6MapName);
-
-    // SAVE CONDITION NUMBER MAPS
-    std::string conditionNumber3MapName = _outdir + "/conditionNumber3MapIHM.pfm";
-    std::cout << "Writing condition number (3 parameters) " << conditionNumber3MapName << std::endl;
-    savePFM(conditionNumber3Map, _camWidth, _camHeight, conditionNumber3MapName);
-
-    std::string conditionNumber4MapName = _outdir + "/conditionNumber4MapIHM.pfm";
-    std::cout << "Writing condition number (4 parameters) " << conditionNumber4MapName << std::endl;
-    savePFM(conditionNumber4Map, _camWidth, _camHeight, conditionNumber4MapName);
-
-    std::string conditionNumber6MapName = _outdir + "/conditionNumber6MapIHM.pfm";
-    std::cout << "Writing condition number (6 parameters) " << conditionNumber6MapName << std::endl;
-    savePFM(conditionNumber6Map, _camWidth, _camHeight, conditionNumber6MapName);
-
-    if(validateTriangulation) {
-
-        // save target depth map
-        std::string targetDepthMapName = _outdir + "/targetDepthMap.pfm";
-        std::cout << "Writing target depth map " << targetDepthMapName << std::endl;
-        savePFM(targetDepthMap, _camWidth, _camHeight, targetDepthMapName);
-
-        // save reprojection error maps (LF and classic)
-        std::string reprojErrorLFMapName = _outdir + "/reprojErrorLFMap.pfm";
-        std::cout << "Writing reprojection error map (curve fitting method) " << reprojErrorLFMapName << std::endl;
-        savePFM(reprojErrorLFMap, _camWidth, _camHeight, reprojErrorLFMapName);
-
-        std::string reprojErrorClassicMapName = _outdir + "/reprojErrorClassicMap.pfm";
-        std::cout << "Writing reprojection error map (classic triangulation method) " << reprojErrorClassicMapName << std::endl;
-        savePFM(reprojErrorClassicMap, _camWidth, _camHeight, reprojErrorClassicMapName);
-
-        std::string finalCostClassicMapName = _outdir + "/finalCostClassicMap.pfm";
-        std::cout << "Writing parameter map (classic triangulation method) " << finalCostClassicMapName << std::endl;
-        savePFM(finalCostClassicMap, _camWidth, _camHeight, finalCostClassicMapName);
-
-        // save point cloud
-        std::string plyName = _outdir + "/point_cloud.ply";
-        std::cout << "Writing ply file in " << plyName << std::endl;
-        writePly(plyName.c_str(), points);
+        // SAVE CONDITION NUMBER MAPS
+        print1fMap(conditionNumber3Map, _outdir + "/conditionNumber_3g_IHM_allViews.pfm", _renderIndex);
+        print1fMap(conditionNumber4Map, _outdir + "/conditionNumber_4g_IHM_allViews.pfm", _renderIndex);
+        print1fMap(conditionNumber6Map, _outdir + "/conditionNumber_6g_IHM_allViews.pfm", _renderIndex);
     }
 }
 
@@ -1732,10 +1701,11 @@ void LFScene::curveFittingColor() {
             std::vector<cv::Point3f> C, t;
 
             // fill the flow, the color sample set and the camera parameters of the set
-            for(uint k = 0 ; k < _vCam.size() ; ++k) {
+            for(int k = 0 ; k < (int)_vCam.size() ; ++k) {
 
-                if(k == _centralIndex) { // remove target view (central)
+                if(k == _renderIndex) { // remove target view (custom)
 
+                    std::cout << "Remove samples from re-rendered input cam " << _renderIndex << std::endl;
                     continue;
                 }
 
@@ -1786,21 +1756,26 @@ void LFScene::curveFittingColor() {
         }
     }
 
-    // SAVE PARAMETER MAPS
-    std::string parameterS9pName = _outdir + "/parameterS9pMap.pfm";
-    std::cout << "Writing rs, gs, bs parameter map " << parameterS9pName << std::endl;
-    savePFM(parameterS9pMap, _camWidth, _camHeight, parameterS9pName);
-    std::string parameterT9pName = _outdir + "/parameterT9pMap.pfm";
-    std::cout << "Writing rt, gt, bt parameter map " << parameterT9pName << std::endl;
-    savePFM(parameterT9pMap, _camWidth, _camHeight, parameterT9pName);
-    std::string parameter09pName = _outdir + "/parameter09pMap.pfm";
-    std::cout << "Writing r0, g0, b0 parameter map " << parameter09pName << std::endl;
-    savePFM(parameter09pMap, _camWidth, _camHeight, parameter09pName);
+    if(_renderIndex >= 0) {
 
-    // SAVE FINAL COST MAPS
-    std::string finalCost9pName = _outdir + "/finalCost9pMap.pfm";
-    std::cout << "Writing final color cost " << finalCost9pName << std::endl;
-    savePFM(finalCost9pMap, _camWidth, _camHeight, finalCost9pName);
+        // SAVE PARAMETER MAPS (LINEAR METHOD ONLY)
+        print3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
+        print3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
+        print3fMap(parameter09pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
+
+        // SAVE FINAL COST MAPS
+        print1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_%02lu.pfm", _renderIndex);
+
+    } else {
+
+        // SAVE PARAMETER MAPS (LINEAR METHOD ONLY)
+        print3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
+        print3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
+        print3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
+
+        // SAVE FINAL COST MAPS
+        print1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
+    }
 }
 
 // backward warping of one view, accumulate in outputImage and weight
@@ -2024,7 +1999,7 @@ void LFScene::loadTargetView(cv::Mat &targetK, cv::Mat &targetR, cv::Point3f &ta
     memset(targetCameraNameChar, 0, sizeof(targetCameraNameChar));
     sprintf( targetCameraNameChar, _cameraName.c_str(), _mveRdrIdx );
     std::cout << "Loading view " << targetCameraNameChar << std::endl;
-    
+
     std::ifstream in( targetCameraNameChar, std::ifstream::in );
     assert( in.is_open() );
     assert( in );
@@ -2145,16 +2120,23 @@ void LFScene::bic() {
     const uint nbPixels = _camWidth*_camHeight;
 
     std::vector<float> finalCost3Map(nbPixels);
-    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost3MapIHM.pfm") << std::endl;
-    loadPFM(finalCost3Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost3MapIHM.pfm"));
-
     std::vector<float> finalCost4Map(nbPixels);
-    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost4MapIHM.pfm") << std::endl;
-    loadPFM(finalCost4Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost4MapIHM.pfm"));
-
     std::vector<float> finalCost6Map(nbPixels);
-    std::cout << "Load final cost values from " << std::string(_outdir + "/finalCost6MapIHM.pfm") << std::endl;
-    loadPFM(finalCost6Map, _camWidth, _camHeight, std::string(_outdir + "/finalCost6MapIHM.pfm"));
+
+    if(_renderIndex >= 0) {
+
+        // LOAD FINAL COST MAPS
+        load1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_%02lu.pfm", _renderIndex);
+        load1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_%02lu.pfm", _renderIndex);
+        load1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_%02lu.pfm", _renderIndex);
+
+    } else {
+
+        // LOAD FINAL COST MAPS
+        load1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
+        load1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_allViews.pfm", _renderIndex);
+        load1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_allViews.pfm", _renderIndex);
+    }
 
     // OUTPUT BIC
 
@@ -2183,24 +2165,14 @@ void LFScene::bic() {
         }
     }
 
-    // SAVE PNG OUTMUT FILES
+    if(_renderIndex >= 0) {
 
-    std::string outputBIC3paramName = _outdir + "/outputBIC3param.pfm";
-    std::string outputBIC4paramName = _outdir + "/outputBIC4param.pfm";
-    std::string outputBIC6paramName = _outdir + "/outputBIC6param.pfm";
-    std::string selectedModelName = _outdir + "/selectedModel.pfm";
+        print1fMap(selectedModel, _outdir + "/selectedModel_g_IHM_%02lu.pfm", _renderIndex);
 
-    std::cout << "Save output BIC 3 params " << outputBIC3paramName << std::endl;
-    savePFM(outputBIC3param, _camWidth, _camHeight, outputBIC3paramName);
+    } else {
 
-    std::cout << "Save output BIC 4 params " << outputBIC4paramName << std::endl;
-    savePFM(outputBIC4param, _camWidth, _camHeight, outputBIC4paramName);
-
-    std::cout << "Save output BIC 6 params " << outputBIC6paramName << std::endl;
-    savePFM(outputBIC6param, _camWidth, _camHeight, outputBIC6paramName);
-
-    std::cout << "Save output model selection " << selectedModelName << std::endl;
-    savePFM(selectedModel, _camWidth, _camHeight, selectedModelName);
+        print1fMap(selectedModel, _outdir + "/selectedModel_g_IHM_allViews.pfm", _renderIndex);
+    }
 }
 
 void LFScene::renderLightFlow() {
@@ -2877,25 +2849,30 @@ void LFScene::renderLightFlowLambertianVideo() {
     // LOAD POSITION MODEL PARAMETERS
 
     std::vector<cv::Point3f> map3param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter3MapIHM.pfm") << std::endl;
-    loadPFM(map3param, _camWidth, _camHeight, std::string(_outdir + "/parameter3MapIHM.pfm"));
-
     std::vector<cv::Point2f> mapAlpha4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterAlpha2MapIHM.pfm") << std::endl;
-    loadPFM(mapAlpha4param, _camWidth, _camHeight, std::string(_outdir + "/parameterAlpha2MapIHM.pfm"));
     std::vector<cv::Point2f> mapBeta4param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameterBeta2MapIHM.pfm") << std::endl;
-    loadPFM(mapBeta4param, _camWidth, _camHeight, std::string(_outdir + "/parameterBeta2MapIHM.pfm"));
-
     std::vector<cv::Point2f> mapAlphau6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphauMapIHM.pfm") << std::endl;
-    loadPFM(mapAlphau6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphauMapIHM.pfm"));
     std::vector<cv::Point2f> mapAlphav6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6AlphavMapIHM.pfm") << std::endl;
-    loadPFM(mapAlphav6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6AlphavMapIHM.pfm"));
     std::vector<cv::Point2f> mapBeta6param(nbPixels);
-    std::cout << "Load parameters from " << std::string(_outdir + "/parameter6BetaMapIHM.pfm") << std::endl;
-    loadPFM(mapBeta6param, _camWidth, _camHeight, std::string(_outdir + "/parameter6BetaMapIHM.pfm"));
+
+    if(_renderIndex >= 0) {
+
+        load3fMap(map3param, _outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex);
+        load2fMap(mapAlpha4param, _outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex);
+        load2fMap(mapBeta4param, _outdir + "/model_4g_IHM_%02lu_b.pfm", _renderIndex);
+        load2fMap(mapAlphau6param, _outdir + "/model_6g_IHM_%02lu_au.pfm", _renderIndex);
+        load2fMap(mapAlphav6param, _outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex);
+        load2fMap(mapBeta6param, _outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex);
+
+    } else {
+
+        load3fMap(map3param, _outdir + "/model_3g_IHM_allViews.pfm", _renderIndex);
+        load2fMap(mapAlpha4param, _outdir + "/model_4g_IHM_allViews_a.pfm", _renderIndex);
+        load2fMap(mapBeta4param, _outdir + "/model_4g_IHM_allViews_b.pfm", _renderIndex);
+        load2fMap(mapAlphau6param, _outdir + "/model_6g_IHM_allViews_au.pfm", _renderIndex);
+        load2fMap(mapAlphav6param, _outdir + "/model_6g_IHM_allViews_av.pfm", _renderIndex);
+        load2fMap(mapBeta6param, _outdir + "/model_6g_IHM_allViews_b.pfm", _renderIndex);
+    }
 
     // for every light flow (set of parameters)
     // compute the color map (constant weight average)
@@ -2941,21 +2918,21 @@ void LFScene::renderLightFlowLambertianVideo() {
     // OUTPUT IMAGE
 
     std::vector<cv::Point3f> outputImage3param(nbPixels);
-    std::vector<float> reprojError3param(nbPixels); // reprojection error of the central view
     std::vector<float> weightMap3param(nbPixels); // splat contribution (for normalization)
 
     std::vector<cv::Point3f> outputImage4param(nbPixels);
-    std::vector<float> reprojError4param(nbPixels); // reprojection error of the central view
     std::vector<float> weightMap4param(nbPixels); // splat contribution (for normalization)
 
     std::vector<cv::Point3f> outputImage6param(nbPixels);
-    std::vector<float> reprojError6param(nbPixels); // reprojection error of the central view
     std::vector<float> weightMap6param(nbPixels); // splat contribution (for normalization)
 
     std::cout << "RENDERING " << std::endl;
 
     const int firstFrame = 0;
-    const int lastFrame = 50;
+    int lastFrame = 50;
+    if(_renderIndex >= 0) {
+        lastFrame = 0;
+    }
     for(int frame = firstFrame ; frame <= lastFrame ; ++frame) {
 
         // TARGET CAM PARAMETERS
@@ -2976,8 +2953,16 @@ void LFScene::renderLightFlowLambertianVideo() {
         //        targetCam._K[1][1] += (float)frame * 600.0f;
 
         // PANNING
-        PinholeCamera targetCam = _vCam[12]->getPinholeCamera();
-        float step = 50;
+        if(_renderIndex >= 0) {
+
+            PinholeCamera targetCam = _vCam[_renderIndex]->getPinholeCamera();
+            // TODOOOOOO
+        } else {
+
+
+        }
+        PinholeCamera targetCam = _vCam[_renderIndex]->getPinholeCamera();
+        const float step = 50;
         PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 2]->getPinholeCamera();
         PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 2]->getPinholeCamera();
         targetCam._C = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
@@ -2997,15 +2982,12 @@ void LFScene::renderLightFlowLambertianVideo() {
         for(uint i = 0 ; i < outputImage3param.size() ; ++i) {
 
             outputImage3param[i] = cv::Point3f(0.0, 0.0, 0.0);
-            reprojError3param[i] = 0.0;
             weightMap3param[i] = 0.0;
 
             outputImage4param[i] = cv::Point3f(0.0, 0.0, 0.0);
-            reprojError4param[i] = 0.0;
             weightMap4param[i] = 0.0;
 
             outputImage6param[i] = cv::Point3f(0.0, 0.0, 0.0);
-            reprojError6param[i] = 0.0;
             weightMap6param[i] = 0.0;
         }
 
@@ -3091,27 +3073,53 @@ void LFScene::renderLightFlowLambertianVideo() {
         // SAVE PNG OUTMUT FILES
 
         char tempCharArray[500];
-        std::string outputImage3paramName = _outdir + "/panning3param_%02lu_%02lu_%03lu.png";
-        std::string outputImage4paramName = _outdir + "/panning4param_%02lu_%02lu_%03lu.png";
-        std::string outputImage6paramName = _outdir + "/panning6param_%02lu_%02lu_%03lu.png";
-//        std::string outputImage3paramName = _outdir + "/zoom3param_%02lu_%02lu_%03lu.png";
-//        std::string outputImage4paramName = _outdir + "/zoom4param_%02lu_%02lu_%03lu.png";
-//        std::string outputImage6paramName = _outdir + "/zoom6param_%02lu_%02lu_%03lu.png";
 
-        std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
-        sprintf( tempCharArray, outputImage3paramName.c_str(), _sRmv, _tRmv, frame );
-        std::cout << "Save output image " << tempCharArray << std::endl;
-        savePNG(outputImage3param, _camWidth, _camHeight, tempCharArray);
 
-        std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
-        sprintf( tempCharArray, outputImage4paramName.c_str(), _sRmv, _tRmv, frame );
-        std::cout << "Save output image " << tempCharArray << std::endl;
-        savePNG(outputImage4param, _camWidth, _camHeight, tempCharArray);
+        if(_renderIndex >= 0) {
 
-        std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
-        sprintf( tempCharArray, outputImage6paramName.c_str(), _sRmv, _tRmv, frame );
-        std::cout << "Save output image " << tempCharArray << std::endl;
-        savePNG(outputImage6param, _camWidth, _camHeight, tempCharArray);
+            std::string outputImage3paramName = _outdir + "/3g_IBR_%02lu_%02lu.png";
+            std::string outputImage4paramName = _outdir + "/4g_IBR_%02lu_%02lu.png";
+            std::string outputImage6paramName = _outdir + "/6g_IBR_%02lu_%02lu.png";
+
+            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
+            sprintf( tempCharArray, outputImage3paramName.c_str(), _renderIndex );
+            std::cout << "Save output image " << tempCharArray << std::endl;
+            savePNG(outputImage3param, _camWidth, _camHeight, tempCharArray);
+
+            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
+            sprintf( tempCharArray, outputImage4paramName.c_str(), _renderIndex );
+            std::cout << "Save output image " << tempCharArray << std::endl;
+            savePNG(outputImage4param, _camWidth, _camHeight, tempCharArray);
+
+            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
+            sprintf( tempCharArray, outputImage6paramName.c_str(), _renderIndex );
+            std::cout << "Save output image " << tempCharArray << std::endl;
+            savePNG(outputImage6param, _camWidth, _camHeight, tempCharArray);
+
+        } else {
+
+            std::string outputImage3paramName = _outdir + "/3g_IBR_panning_%03lu.png";
+            std::string outputImage4paramName = _outdir + "/4g_IBR_panning_%03lu.png";
+            std::string outputImage6paramName = _outdir + "/6g_IBR_panning_%03lu.png";
+    //        std::string outputImage3paramName = _outdir + "/3g_IBR_zooming_%03lu.png";
+    //        std::string outputImage4paramName = _outdir + "/4g_IBR_zooming_%03lu.png";
+    //        std::string outputImage6paramName = _outdir + "/6g_IBR_zooming_%03lu.png";
+
+            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
+            sprintf( tempCharArray, outputImage3paramName.c_str(), _sRmv, _tRmv, frame );
+            std::cout << "Save output image " << tempCharArray << std::endl;
+            savePNG(outputImage3param, _camWidth, _camHeight, tempCharArray);
+
+            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
+            sprintf( tempCharArray, outputImage4paramName.c_str(), _sRmv, _tRmv, frame );
+            std::cout << "Save output image " << tempCharArray << std::endl;
+            savePNG(outputImage4param, _camWidth, _camHeight, tempCharArray);
+
+            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
+            sprintf( tempCharArray, outputImage6paramName.c_str(), _sRmv, _tRmv, frame );
+            std::cout << "Save output image " << tempCharArray << std::endl;
+            savePNG(outputImage6param, _camWidth, _camHeight, tempCharArray);
+        }
     }
 }
 

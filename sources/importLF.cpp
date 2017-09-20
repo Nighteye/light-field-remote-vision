@@ -117,9 +117,9 @@ void loadPFM(std::vector<bool>& output,
     }
 }
 
-void savePFM(std::vector<std::vector<float> >& input,
+void savePFM(const std::vector<std::vector<float> >& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip)
 {
     cimg_library::CImg<float> image;
@@ -151,9 +151,9 @@ void savePFM(std::vector<std::vector<float> >& input,
 // bool* arr;
 
 // bool (*arrt)[] = arr
-void savePFM(std::vector<bool>& input,
+void savePFM(const std::vector<bool>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip)
 {
     cimg_library::CImg<float> image;
@@ -180,9 +180,9 @@ void savePFM(std::vector<bool>& input,
     }
 }
 
-void savePFM(std::vector<float>& input,
+void savePFM(const std::vector<float>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip)
 {
     cimg_library::CImg<float> image;
@@ -209,9 +209,9 @@ void savePFM(std::vector<float>& input,
     }
 }
 
-void savePFM(std::vector<cv::Point2f>& input,
+void savePFM(const std::vector<cv::Point2f>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip)
 {
     cimg_library::CImg<float> image;
@@ -240,9 +240,9 @@ void savePFM(std::vector<cv::Point2f>& input,
     }
 }
 
-void savePFM(std::vector<cv::Point3f>& input,
+void savePFM(const std::vector<cv::Point3f>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip)
 {
     cimg_library::CImg<float> image;
@@ -273,9 +273,9 @@ void savePFM(std::vector<cv::Point3f>& input,
     }
 }
 
-void savePNG(std::vector<cv::Point3f>& input,
+void savePNG(const std::vector<cv::Point3f>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip) {
 
     cimg_library::CImg<unsigned char> image;
@@ -528,10 +528,13 @@ bool InputCam::importCamTranslations( char *cameraName, uint viewIndex ) {
     }
 }
 
-bool LFScene::checkExistence(const std::string& name) {
+bool LFScene::checkExistence(const std::string& name, int arg1) {
 
+    char temp[500];
+    std::fill_n(temp, 500, 0.0);
+    sprintf( temp, name.c_str(), arg1 );
     struct stat buffer;
-    return (stat (name.c_str(), &buffer) == 0);
+    return (stat (temp, &buffer) == 0);
 }
 
 bool LFScene::checkExistenceAllViews(const std::string& name) {

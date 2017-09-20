@@ -24,29 +24,29 @@ void loadPFM(std::vector<bool>& output,
              std::string name,
              bool flip = false);
 
-void savePFM(std::vector<std::vector<float> >& input,
+void savePFM(const std::vector<std::vector<float> >& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip = false);
-void savePFM(std::vector<bool>& input,
+void savePFM(const std::vector<bool>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip = false);
-void savePFM(std::vector<float>& input,
+void savePFM(const std::vector<float>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip = false);
-void savePFM(std::vector<cv::Point2f>& input,
+void savePFM(const std::vector<cv::Point2f>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip = false);
-void savePFM(std::vector<cv::Point3f>& input,
+void savePFM(const std::vector<cv::Point3f>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip = false);
-void savePNG(std::vector<cv::Point3f>& input,
+void savePNG(const std::vector<cv::Point3f>& input,
              int width, int height,
-             std::string name,
+             const std::string& name,
              bool flip = false);
 
 // backward warping of one view, bilinear interpolation
@@ -110,7 +110,7 @@ public:
     // ---------------------------------------------------------------------------------------------------------- //
 
     // check existence of file given its name
-    bool checkExistence(const std::string& name);
+    bool checkExistence(const std::string& name, int arg1);
 
     // check existence of a sequence of files for all views, except central view, given a format name
     bool checkExistenceAllViews(const std::string& name);
@@ -136,6 +136,14 @@ public:
 
     // IBR_optical
     // ---------------------------------------------------------------------------------------------------------- //
+
+    void print1fMap(const std::vector<float>& map, const std::string& name, int arg1);
+    void print2fMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1);
+    void print3fMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1);
+    void load1fMap(std::vector<float>& map, const std::string& name, int arg1);
+    void load2fMap(std::vector<cv::Point2f>& map, const std::string& name, int arg1);
+    void load3fMap(std::vector<cv::Point3f>& map, const std::string& name, int arg1);
+
     void computeVisibilityMask(std::vector<cv::Point2f>& flowLtoR, std::vector<cv::Point2f>& flowRtoL,
                                std::vector<bool>& visibilityMask);
 
@@ -206,7 +214,7 @@ private:
     int _S, _T; // LF angular range
     int _centralS, _centralT; // central view angular coordinates
     uint _nbCameras;
-    uint _renderIndex;
+    int _renderIndex;
     uint _centralIndex; // index of the central view (for optical flow)
     std::vector<InputCam*> _vCam;
     std::vector<std::vector<cv::Point2f> > _flowedLightField;
