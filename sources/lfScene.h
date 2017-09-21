@@ -44,6 +44,14 @@ void savePFM(const std::vector<cv::Point3f>& input,
              int width, int height,
              const std::string& name,
              bool flip = false);
+void savePNG(const std::vector<float>& input,
+             int width, int height,
+             const std::string& name,
+             bool flip = false);
+void savePNG(const std::vector<cv::Point2f>& input,
+             int width, int height,
+             const std::string& name,
+             bool flip = false);
 void savePNG(const std::vector<cv::Point3f>& input,
              int width, int height,
              const std::string& name,
@@ -141,6 +149,8 @@ public:
     void save1fMap(const std::vector<float>& map, const std::string& name, int arg1);
     void save2fMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1);
     void save3fMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1);
+    void save1uMap(const std::vector<float>& map, const std::string& name, int arg1);
+    void save2uMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1);
     void save3uMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1);
     void load1fMap(std::vector<float>& map, const std::string& name, int arg1);
     void load2fMap(std::vector<cv::Point2f>& map, const std::string& name, int arg1);

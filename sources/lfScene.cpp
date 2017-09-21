@@ -238,6 +238,24 @@ void LFScene::save3fMap(const std::vector<cv::Point3f>& map, const std::string& 
     savePFM(map, _camWidth, _camHeight, temp);
 }
 
+void LFScene::save1uMap(const std::vector<float>& map, const std::string& name, int arg1) {
+
+    char temp[500];
+    std::fill_n(temp, 500, 0);
+    sprintf( temp, name.c_str(), arg1 );
+    std::cout << "Saving map " << temp << std::endl;
+    savePNG(map, _camWidth, _camHeight, temp);
+}
+
+void LFScene::save2uMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1) {
+
+    char temp[500];
+    std::fill_n(temp, 500, 0);
+    sprintf( temp, name.c_str(), arg1 );
+    std::cout << "Saving map " << temp << std::endl;
+    savePNG(map, _camWidth, _camHeight, temp);
+}
+
 void LFScene::save3uMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1) {
 
     char temp[500];
@@ -853,6 +871,7 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
     
     delete opticalFlow;
     
+    // SAVE ALL OPTICAL FLOWS
     for(uint viewIndex = 0 ; viewIndex < 25 ; ++viewIndex) {
         
         if(viewIndex == _nbCameras/2) {
@@ -865,19 +884,8 @@ void LFScene::computePerPixelCorrespCustomConfig(std::string flowAlg) {
         int tLeft = _tIndicesLeft[viewIndex];
         int sRight = _sIndicesRight[viewIndex];
         int tRight = _tIndicesRight[viewIndex];
-        
-        int imageIndexLeft = tLeft*range + sLeft;
-        memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), imageIndexLeft );
-        leftImageName = std::string(tempCharArray);
-        int imageIndexRight = tRight*range + sRight;
-        memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, _imageName.c_str(), imageIndexRight );
-        rightImageName = std::string(tempCharArray);
-        
-        memset(tempCharArray, 0, sizeof(tempCharArray));
-        sprintf( tempCharArray, flowLtoRName.c_str(), viewIndex );
-        savePFM(flowLtoR[viewIndex], _camWidth, _camHeight, std::string(tempCharArray));
+
+        save2fMap(flowLtoR[viewIndex], flowLtoRName, viewIndex);
         std::cout << "Save flow left to right between (" << sLeft << ", " << tLeft << ") and (" << sRight << ", " << tRight << ") in " << tempCharArray << std::endl;
     }
 }
@@ -1540,7 +1548,6 @@ void LFScene::curveFitting() {
 
                 if(camIdx == _renderIndex) { // remove target view (custom)
 
-                    std::cout << "Remove samples from re-rendered input cam " << _renderIndex << std::endl;
                     continue;
                 }
 
@@ -1716,7 +1723,6 @@ void LFScene::curveFittingColor() {
 
                 if(k == _renderIndex) { // remove target view (custom)
 
-                    std::cout << "Remove samples from re-rendered input cam " << _renderIndex << std::endl;
                     continue;
                 }
 
@@ -1767,24 +1773,21 @@ void LFScene::curveFittingColor() {
         }
     }
 
+    // SAVE PARAMETER MAPS (LINEAR METHOD ONLY) AND FINAL COST MAPS
     if(_renderIndex >= 0) {
 
-        // SAVE PARAMETER MAPS (LINEAR METHOD ONLY)
         save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
         save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
         save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
 
-        // SAVE FINAL COST MAPS
         save1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_%02lu.pfm", _renderIndex);
 
     } else {
 
-        // SAVE PARAMETER MAPS (LINEAR METHOD ONLY)
         save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
         save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
         save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
 
-        // SAVE FINAL COST MAPS
         save1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
     }
 }
@@ -2963,10 +2966,10 @@ void LFScene::renderLightFlowLambertianVideo() {
             //        loadTargetView(targetK, targetR, targetC, std::string(targetCameraNameChar));
 
             // INPUT VIEWS
-    //        targetCam = _vCam[frame]->getPinholeCamera();
+            //        targetCam = _vCam[frame]->getPinholeCamera();
 
             // ZOOM
-    //        targetCam = _vCam[12]->getPinholeCamera();
+            //        targetCam = _vCam[12]->getPinholeCamera();
             //        targetCam._K[0][0] += (float)frame * 600.0f;
             //        targetCam._K[1][1] += (float)frame * 600.0f;
 
@@ -2987,7 +2990,7 @@ void LFScene::renderLightFlowLambertianVideo() {
                 targetCam._R[0][2], targetCam._R[1][2], targetCam._R[2][2]);
         targetC = cv::Point3f((float)targetCam._C[0], (float)targetCam._C[1], (float)targetCam._C[2]);
 
-//        targetC.z = 0.0;
+        //        targetC.z = 0.0;
 
         // init buffers
         for(uint i = 0 ; i < outputImage3param.size() ; ++i) {
@@ -3093,9 +3096,9 @@ void LFScene::renderLightFlowLambertianVideo() {
             save3uMap(outputImage4param, _outdir + "/4g_IBR_panning_%03lu.png", frame);
             save3uMap(outputImage6param, _outdir + "/6g_IBR_panning_%03lu.png", frame);
 
-//            save3uMap(outputImage3param, _outdir + "/3g_IBR_zooming_%03lu.png", frame);
-//            save3uMap(outputImage4param, _outdir + "/4g_IBR_zooming_%03lu.png", frame);
-//            save3uMap(outputImage6param, _outdir + "/6g_IBR_zooming_%03lu.png", frame);
+            //            save3uMap(outputImage3param, _outdir + "/3g_IBR_zooming_%03lu.png", frame);
+            //            save3uMap(outputImage4param, _outdir + "/4g_IBR_zooming_%03lu.png", frame);
+            //            save3uMap(outputImage6param, _outdir + "/6g_IBR_zooming_%03lu.png", frame);
         }
     }
 }

@@ -273,6 +273,64 @@ void savePFM(const std::vector<cv::Point3f>& input,
     }
 }
 
+void savePNG(const std::vector<float>& input,
+             int width, int height,
+             const std::string& name,
+             bool flip) {
+
+    cimg_library::CImg<unsigned char> image;
+
+    image.resize(width, height, 1, 3);
+
+    for(size_t i = 0 ; i < input.size() ; ++i) {
+
+        uchar x = (uchar)(input[i] * 255.0f);
+        *(((uchar*)(&image(0,0,0,0))) + i) = x;
+        uchar y = 0;
+        *(((uchar*)(&image(0,0,0,1))) + i) = y;
+        uchar z = 0;
+        *(((uchar*)(&image(0,0,0,2))) + i) = z;
+    }
+
+    if(flip) {
+        image.mirror('y');
+    }
+    try {
+        image.save(name.c_str());
+    } catch (cimg_library::CImgIOException) {
+        printf("Exception COUGHT: file not saved\n");
+    }
+}
+
+void savePNG(const std::vector<cv::Point2f>& input,
+             int width, int height,
+             const std::string& name,
+             bool flip) {
+
+    cimg_library::CImg<unsigned char> image;
+
+    image.resize(width, height, 1, 3);
+
+    for(size_t i = 0 ; i < input.size() ; ++i) {
+
+        uchar x = (uchar)(input[i].x * 255.0f);
+        *(((uchar*)(&image(0,0,0,0))) + i) = x;
+        uchar y = (uchar)(input[i].y * 255.0f);
+        *(((uchar*)(&image(0,0,0,1))) + i) = y;
+        uchar z = 0;
+        *(((uchar*)(&image(0,0,0,2))) + i) = z;
+    }
+
+    if(flip) {
+        image.mirror('y');
+    }
+    try {
+        image.save(name.c_str());
+    } catch (cimg_library::CImgIOException) {
+        printf("Exception COUGHT: file not saved\n");
+    }
+}
+
 void savePNG(const std::vector<cv::Point3f>& input,
              int width, int height,
              const std::string& name,
