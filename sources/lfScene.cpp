@@ -1780,7 +1780,7 @@ void LFScene::curveFittingColor() {
         save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
         save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
 
-        save1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_%02lu.pfm", _renderIndex);
+        save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_LIN_%02lu.pfm", _renderIndex);
 
     } else {
 
@@ -1788,7 +1788,7 @@ void LFScene::curveFittingColor() {
         save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
         save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
 
-        save1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_LIN_allViews.pfm", _renderIndex);
     }
 }
 
