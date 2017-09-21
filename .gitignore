@@ -9,6 +9,8 @@ obj
 *.o
 *.a
 
+psnr/psnr
+
 configs/IBR_optical/transcut/obj*
 
 cocolib/Makefile
