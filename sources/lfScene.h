@@ -96,7 +96,8 @@ class LFScene {
 
 public:
 
-    LFScene(std::string outdir,
+    LFScene(bool unitTest,
+            std::string outdir,
             std::string winTitle,
             std::string mveName, std::string imageName, std::string cameraName,
             int windowW1, int windowW2, int windowH1, int windowH2,
@@ -137,9 +138,10 @@ public:
     // IBR_optical
     // ---------------------------------------------------------------------------------------------------------- //
 
-    void print1fMap(const std::vector<float>& map, const std::string& name, int arg1);
-    void print2fMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1);
-    void print3fMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1);
+    void save1fMap(const std::vector<float>& map, const std::string& name, int arg1);
+    void save2fMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1);
+    void save3fMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1);
+    void save3uMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1);
     void load1fMap(std::vector<float>& map, const std::string& name, int arg1);
     void load2fMap(std::vector<cv::Point2f>& map, const std::string& name, int arg1);
     void load3fMap(std::vector<cv::Point3f>& map, const std::string& name, int arg1);
@@ -199,6 +201,7 @@ public:
 
 private:
 
+    int _unitTest;
     std::string _outdir;
     std::string _windowTitle;
     std::string _mveName;

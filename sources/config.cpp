@@ -10,6 +10,7 @@ using namespace std;
 // Set data configuration to default values
 Config_data::Config_data() {
 
+    _unitTest = 0;
     _nviews = 0;
     _s_min = -1;
     _s_max = -1;
@@ -75,6 +76,7 @@ void Config_data::parse_config( coco::config &cfg ) {
     cfg.get_switch( "outfile", _outfile );
     _outfile = _outdir + _outfile;
 
+    cfg.get_switch( "unitTest", _unitTest );
     cfg.get_switch( "s_min", _s_min );
     cfg.get_switch( "s_max", _s_max );
     cfg.get_switch( "s_rmv", _s_rmv );

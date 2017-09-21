@@ -17,6 +17,8 @@ public:
     // Parse configuration data
     void parse_config( coco::config &cfg );
 
+    int _unitTest;
+
     size_t _nviews; // number of input views
     int _s_min; // index of first view
     int _s_max; // index of last view

@@ -73,7 +73,8 @@ PinholeCamera InputCam::getPinholeCamera() const {
     return _pinholeCamera;
 }
 
-LFScene::LFScene(std::string outdir,
+LFScene::LFScene(bool unitTest,
+                 std::string outdir,
                  std::string winTitle,
                  std::string mveName, std::string imageName, std::string cameraName,
                  int windowW1, int windowW2, int windowH1, int windowH2,
@@ -82,6 +83,7 @@ LFScene::LFScene(std::string outdir,
                  int tMin, int tMax, int tRmv,
                  bool stanfordConfig) :
     
+    _unitTest(unitTest),
     _outdir(outdir),
     _windowTitle(winTitle),
     _mveName(mveName), _imageName(imageName), _cameraName(cameraName),
@@ -209,31 +211,40 @@ LFScene::~LFScene() {
     }
 }
 
-void LFScene::print1fMap(const std::vector<float>& map, const std::string& name, int arg1) {
+void LFScene::save1fMap(const std::vector<float>& map, const std::string& name, int arg1) {
 
     char temp[500];
     std::fill_n(temp, 500, 0);
     sprintf( temp, name.c_str(), arg1 );
-    std::cout << "Writing map " << temp << std::endl;
+    std::cout << "Saving map " << temp << std::endl;
     savePFM(map, _camWidth, _camHeight, temp);
 }
 
-void LFScene::print2fMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1) {
+void LFScene::save2fMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1) {
 
     char temp[500];
     std::fill_n(temp, 500, 0);
     sprintf( temp, name.c_str(), arg1 );
-    std::cout << "Writing map " << temp << std::endl;
+    std::cout << "Saving map " << temp << std::endl;
     savePFM(map, _camWidth, _camHeight, temp);
 }
 
-void LFScene::print3fMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1) {
+void LFScene::save3fMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1) {
 
     char temp[500];
     std::fill_n(temp, 500, 0);
     sprintf( temp, name.c_str(), arg1 );
-    std::cout << "Writing map " << temp << std::endl;
+    std::cout << "Saving map " << temp << std::endl;
     savePFM(map, _camWidth, _camHeight, temp);
+}
+
+void LFScene::save3uMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1) {
+
+    char temp[500];
+    std::fill_n(temp, 500, 0);
+    sprintf( temp, name.c_str(), arg1 );
+    std::cout << "Saving map " << temp << std::endl;
+    savePNG(map, _camWidth, _camHeight, temp);
 }
 
 void LFScene::load1fMap(std::vector<float>& map, const std::string& name, int arg1) {
@@ -1616,41 +1627,41 @@ void LFScene::curveFitting() {
 
     if(_renderIndex >= 0) {
 
-        print3fMap(parameter3Map, _outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex);
-        print2fMap(parameterAlpha2Map, _outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex);
-        print2fMap(parameterBeta2Map, _outdir + "/model_4g_IHM_%02lu_b.pfm", _renderIndex);
-        print2fMap(parameter6AlphauMap, _outdir + "/model_6g_IHM_%02lu_au.pfm", _renderIndex);
-        print2fMap(parameter6AlphavMap, _outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex);
-        print2fMap(parameter6BetaMap, _outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex);
+        save3fMap(parameter3Map, _outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex);
+        save2fMap(parameterAlpha2Map, _outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex);
+        save2fMap(parameterBeta2Map, _outdir + "/model_4g_IHM_%02lu_b.pfm", _renderIndex);
+        save2fMap(parameter6AlphauMap, _outdir + "/model_6g_IHM_%02lu_au.pfm", _renderIndex);
+        save2fMap(parameter6AlphavMap, _outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex);
+        save2fMap(parameter6BetaMap, _outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex);
 
         // SAVE FINAL COST MAPS
-        print1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_%02lu.pfm", _renderIndex);
-        print1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_%02lu.pfm", _renderIndex);
-        print1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_%02lu.pfm", _renderIndex);
+        save1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_%02lu.pfm", _renderIndex);
+        save1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_%02lu.pfm", _renderIndex);
+        save1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_%02lu.pfm", _renderIndex);
 
         // SAVE CONDITION NUMBER MAPS
-        print1fMap(conditionNumber3Map, _outdir + "/conditionNumber_3g_IHM_%02lu.pfm", _renderIndex);
-        print1fMap(conditionNumber4Map, _outdir + "/conditionNumber_4g_IHM_%02lu.pfm", _renderIndex);
-        print1fMap(conditionNumber6Map, _outdir + "/conditionNumber_6g_IHM_%02lu.pfm", _renderIndex);
+        save1fMap(conditionNumber3Map, _outdir + "/conditionNumber_3g_IHM_%02lu.pfm", _renderIndex);
+        save1fMap(conditionNumber4Map, _outdir + "/conditionNumber_4g_IHM_%02lu.pfm", _renderIndex);
+        save1fMap(conditionNumber6Map, _outdir + "/conditionNumber_6g_IHM_%02lu.pfm", _renderIndex);
 
     } else {
 
-        print3fMap(parameter3Map, _outdir + "/model_3g_IHM_allViews.pfm", _renderIndex);
-        print2fMap(parameterAlpha2Map, _outdir + "/model_4g_IHM_allViews_a.pfm", _renderIndex);
-        print2fMap(parameterBeta2Map, _outdir + "/model_4g_IHM_allViews_b.pfm", _renderIndex);
-        print2fMap(parameter6AlphauMap, _outdir + "/model_6g_IHM_allViews_au.pfm", _renderIndex);
-        print2fMap(parameter6AlphavMap, _outdir + "/model_6g_IHM_allViews_av.pfm", _renderIndex);
-        print2fMap(parameter6BetaMap, _outdir + "/model_6g_IHM_allViews_b.pfm", _renderIndex);
+        save3fMap(parameter3Map, _outdir + "/model_3g_IHM_allViews.pfm", _renderIndex);
+        save2fMap(parameterAlpha2Map, _outdir + "/model_4g_IHM_allViews_a.pfm", _renderIndex);
+        save2fMap(parameterBeta2Map, _outdir + "/model_4g_IHM_allViews_b.pfm", _renderIndex);
+        save2fMap(parameter6AlphauMap, _outdir + "/model_6g_IHM_allViews_au.pfm", _renderIndex);
+        save2fMap(parameter6AlphavMap, _outdir + "/model_6g_IHM_allViews_av.pfm", _renderIndex);
+        save2fMap(parameter6BetaMap, _outdir + "/model_6g_IHM_allViews_b.pfm", _renderIndex);
 
         // SAVE FINAL COST MAPS
-        print1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
-        print1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_allViews.pfm", _renderIndex);
-        print1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_allViews.pfm", _renderIndex);
 
         // SAVE CONDITION NUMBER MAPS
-        print1fMap(conditionNumber3Map, _outdir + "/conditionNumber_3g_IHM_allViews.pfm", _renderIndex);
-        print1fMap(conditionNumber4Map, _outdir + "/conditionNumber_4g_IHM_allViews.pfm", _renderIndex);
-        print1fMap(conditionNumber6Map, _outdir + "/conditionNumber_6g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(conditionNumber3Map, _outdir + "/conditionNumber_3g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(conditionNumber4Map, _outdir + "/conditionNumber_4g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(conditionNumber6Map, _outdir + "/conditionNumber_6g_IHM_allViews.pfm", _renderIndex);
     }
 }
 
@@ -1759,22 +1770,22 @@ void LFScene::curveFittingColor() {
     if(_renderIndex >= 0) {
 
         // SAVE PARAMETER MAPS (LINEAR METHOD ONLY)
-        print3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
-        print3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
-        print3fMap(parameter09pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
+        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
+        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
+        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
 
         // SAVE FINAL COST MAPS
-        print1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_%02lu.pfm", _renderIndex);
+        save1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_%02lu.pfm", _renderIndex);
 
     } else {
 
         // SAVE PARAMETER MAPS (LINEAR METHOD ONLY)
-        print3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
-        print3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
-        print3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
+        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
+        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
+        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
 
         // SAVE FINAL COST MAPS
-        print1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(finalCost9pMap, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
     }
 }
 
@@ -2167,11 +2178,11 @@ void LFScene::bic() {
 
     if(_renderIndex >= 0) {
 
-        print1fMap(selectedModel, _outdir + "/selectedModel_g_IHM_%02lu.pfm", _renderIndex);
+        save1fMap(selectedModel, _outdir + "/selectedModel_g_IHM_%02lu.pfm", _renderIndex);
 
     } else {
 
-        print1fMap(selectedModel, _outdir + "/selectedModel_g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(selectedModel, _outdir + "/selectedModel_g_IHM_allViews.pfm", _renderIndex);
     }
 }
 
@@ -2935,38 +2946,38 @@ void LFScene::renderLightFlowLambertianVideo() {
     }
     for(int frame = firstFrame ; frame <= lastFrame ; ++frame) {
 
-        // TARGET CAM PARAMETERS
+        PinholeCamera targetCam;
 
-        //        std::string targetCameraName = _outdir + "/%08i.ini";
-        //        char targetCameraNameChar[500];
-        //        memset(targetCameraNameChar, 0, sizeof(targetCameraNameChar));
-        //        sprintf( targetCameraNameChar, targetCameraName.c_str(), frame );
-        //        loadTargetView(targetK, targetR, targetC, std::string(targetCameraNameChar));
-
-
-        // INPUT VIEWS
-//        PinholeCamera targetCam = _vCam[frame]->getPinholeCamera();
-
-        // ZOOM
-//        PinholeCamera targetCam = _vCam[12]->getPinholeCamera();
-        //        targetCam._K[0][0] += (float)frame * 600.0f;
-        //        targetCam._K[1][1] += (float)frame * 600.0f;
-
-        // PANNING
         if(_renderIndex >= 0) {
 
-            PinholeCamera targetCam = _vCam[_renderIndex]->getPinholeCamera();
-            // TODOOOOOO
+            targetCam = _vCam[_renderIndex]->getPinholeCamera();
+
         } else {
 
+            // TARGET CAM PARAMETERS
 
+            //        std::string targetCameraName = _outdir + "/%08i.ini";
+            //        char targetCameraNameChar[500];
+            //        memset(targetCameraNameChar, 0, sizeof(targetCameraNameChar));
+            //        sprintf( targetCameraNameChar, targetCameraName.c_str(), frame );
+            //        loadTargetView(targetK, targetR, targetC, std::string(targetCameraNameChar));
+
+            // INPUT VIEWS
+    //        targetCam = _vCam[frame]->getPinholeCamera();
+
+            // ZOOM
+    //        targetCam = _vCam[12]->getPinholeCamera();
+            //        targetCam._K[0][0] += (float)frame * 600.0f;
+            //        targetCam._K[1][1] += (float)frame * 600.0f;
+
+            // PANNING
+            targetCam = _vCam[_centralIndex]->getPinholeCamera();
+            const float step = 50;
+            PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 2]->getPinholeCamera();
+            PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 2]->getPinholeCamera();
+            targetCam._C = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
+            targetCam._C = targetCam._C + (float)frame * 2.5f * glm::vec3(0, 0, 1) + (float)frame * 0.5f * glm::vec3(0, 1, 0);
         }
-        PinholeCamera targetCam = _vCam[_renderIndex]->getPinholeCamera();
-        const float step = 50;
-        PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 2]->getPinholeCamera();
-        PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 2]->getPinholeCamera();
-        targetCam._C = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
-        targetCam._C = targetCam._C + (float)frame * 2.5f * glm::vec3(0, 0, 1) + (float)frame * 0.5f * glm::vec3(0, 1, 0);
 
         targetK = (cv::Mat_<float>(3,3) << targetCam._K[0][0], targetCam._K[1][0], targetCam._K[2][0],
                 targetCam._K[0][1], targetCam._K[1][1], targetCam._K[2][1],
@@ -2990,8 +3001,6 @@ void LFScene::renderLightFlowLambertianVideo() {
             outputImage6param[i] = cv::Point3f(0.0, 0.0, 0.0);
             weightMap6param[i] = 0.0;
         }
-
-        // TODO: handle visibility (compute z-buffer)
 
         std::cout << "Blending step" << std::endl;
         for(uint y = _windowH1 ; y < _windowH2 ; ++y) {
@@ -3072,53 +3081,21 @@ void LFScene::renderLightFlowLambertianVideo() {
 
         // SAVE PNG OUTMUT FILES
 
-        char tempCharArray[500];
-
-
         if(_renderIndex >= 0) {
 
-            std::string outputImage3paramName = _outdir + "/3g_IBR_%02lu_%02lu.png";
-            std::string outputImage4paramName = _outdir + "/4g_IBR_%02lu_%02lu.png";
-            std::string outputImage6paramName = _outdir + "/6g_IBR_%02lu_%02lu.png";
-
-            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
-            sprintf( tempCharArray, outputImage3paramName.c_str(), _renderIndex );
-            std::cout << "Save output image " << tempCharArray << std::endl;
-            savePNG(outputImage3param, _camWidth, _camHeight, tempCharArray);
-
-            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
-            sprintf( tempCharArray, outputImage4paramName.c_str(), _renderIndex );
-            std::cout << "Save output image " << tempCharArray << std::endl;
-            savePNG(outputImage4param, _camWidth, _camHeight, tempCharArray);
-
-            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
-            sprintf( tempCharArray, outputImage6paramName.c_str(), _renderIndex );
-            std::cout << "Save output image " << tempCharArray << std::endl;
-            savePNG(outputImage6param, _camWidth, _camHeight, tempCharArray);
+            save3uMap(outputImage3param, _outdir + "/3g_IBR_%02lu_%02lu.png", frame);
+            save3uMap(outputImage4param, _outdir + "/4g_IBR_%02lu_%02lu.png", frame);
+            save3uMap(outputImage6param, _outdir + "/6g_IBR_%02lu_%02lu.png", frame);
 
         } else {
 
-            std::string outputImage3paramName = _outdir + "/3g_IBR_panning_%03lu.png";
-            std::string outputImage4paramName = _outdir + "/4g_IBR_panning_%03lu.png";
-            std::string outputImage6paramName = _outdir + "/6g_IBR_panning_%03lu.png";
-    //        std::string outputImage3paramName = _outdir + "/3g_IBR_zooming_%03lu.png";
-    //        std::string outputImage4paramName = _outdir + "/4g_IBR_zooming_%03lu.png";
-    //        std::string outputImage6paramName = _outdir + "/6g_IBR_zooming_%03lu.png";
+            save3uMap(outputImage3param, _outdir + "/3g_IBR_panning_%03lu.png", frame);
+            save3uMap(outputImage4param, _outdir + "/4g_IBR_panning_%03lu.png", frame);
+            save3uMap(outputImage6param, _outdir + "/6g_IBR_panning_%03lu.png", frame);
 
-            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
-            sprintf( tempCharArray, outputImage3paramName.c_str(), _sRmv, _tRmv, frame );
-            std::cout << "Save output image " << tempCharArray << std::endl;
-            savePNG(outputImage3param, _camWidth, _camHeight, tempCharArray);
-
-            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
-            sprintf( tempCharArray, outputImage4paramName.c_str(), _sRmv, _tRmv, frame );
-            std::cout << "Save output image " << tempCharArray << std::endl;
-            savePNG(outputImage4param, _camWidth, _camHeight, tempCharArray);
-
-            std::fill(std::begin(tempCharArray), std::end(tempCharArray), 0);
-            sprintf( tempCharArray, outputImage6paramName.c_str(), _sRmv, _tRmv, frame );
-            std::cout << "Save output image " << tempCharArray << std::endl;
-            savePNG(outputImage6param, _camWidth, _camHeight, tempCharArray);
+//            save3uMap(outputImage3param, _outdir + "/3g_IBR_zooming_%03lu.png", frame);
+//            save3uMap(outputImage4param, _outdir + "/4g_IBR_zooming_%03lu.png", frame);
+//            save3uMap(outputImage6param, _outdir + "/6g_IBR_zooming_%03lu.png", frame);
         }
     }
 }

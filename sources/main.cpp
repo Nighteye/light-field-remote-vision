@@ -217,7 +217,8 @@ int main( int argc, char **argv ) {
         std::cout << "Window height: from " << config_data->_windowH1 << " to " << config_data->_windowH2 << std::endl;
 
         // load lfScene
-        LFScene lfScene(config_data->_outdir,
+        LFScene lfScene(config_data->_unitTest,
+                        config_data->_outdir,
                         "Plenoptic Space Linearization",
                         config_data->_mve_name, config_data->_imageName, config_data->_cameraName,
                         config_data->_windowW1, config_data->_windowW2,
