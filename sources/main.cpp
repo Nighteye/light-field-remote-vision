@@ -216,6 +216,8 @@ int main( int argc, char **argv ) {
         std::cout << "Window width: from " << config_data->_windowW1 << " to " << config_data->_windowW2 << std::endl;
         std::cout << "Window height: from " << config_data->_windowH1 << " to " << config_data->_windowH2 << std::endl;
 
+        std::cout << "Remove view (" << config_data->_s_rmv << " , " << config_data->_t_rmv << ")" << std::endl;
+
         // load lfScene
         LFScene lfScene(config_data->_unitTest,
                         config_data->_outdir,
@@ -258,7 +260,7 @@ int main( int argc, char **argv ) {
         //           !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex) ||
         //           !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex))
 
-        std::cout << "Fit position models to light flow samples, with DLT initialization" << std::endl;
+        std::cout << "Fit position models to light flow samples, with inhomogeneous method (IHM) initialization" << std::endl;
         lfScene.curveFitting(); // OK
 
         std::cout << "Fit color models to light flow samples" << std::endl;
