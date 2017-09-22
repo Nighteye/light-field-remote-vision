@@ -20,8 +20,6 @@ height			469
 # VIEW RANGE
 s_min			0
 s_max			4
-s_rmv			2
 t_min			0
 t_max			4
-t_rmv			2
 cameraName		./in/transcut_dataset/extrinsic.xml
