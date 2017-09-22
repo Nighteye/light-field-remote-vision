@@ -3086,9 +3086,9 @@ void LFScene::renderLightFlowLambertianVideo() {
 
         if(_renderIndex >= 0) {
 
-            save3uMap(outputImage3param, _outdir + "/3g_IBR_%02lu_%02lu.png", frame);
-            save3uMap(outputImage4param, _outdir + "/4g_IBR_%02lu_%02lu.png", frame);
-            save3uMap(outputImage6param, _outdir + "/6g_IBR_%02lu_%02lu.png", frame);
+            save3uMap(outputImage3param, _outdir + "/3g_IBR_%02lu.png", _renderIndex);
+            save3uMap(outputImage4param, _outdir + "/4g_IBR_%02lu.png", _renderIndex);
+            save3uMap(outputImage6param, _outdir + "/6g_IBR_%02lu.png", _renderIndex);
 
         } else {
 
