@@ -586,6 +586,12 @@ bool InputCam::importCamTranslations( char *cameraName, uint viewIndex ) {
     }
 }
 
+bool LFScene::checkExistenceNoArg(const std::string& name) {
+
+    struct stat buffer;
+    return (stat (name.c_str(), &buffer) == 0);
+}
+
 bool LFScene::checkExistence(const std::string& name, int arg1) {
 
     char temp[500];

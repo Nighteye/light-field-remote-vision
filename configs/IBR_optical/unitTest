@@ -4,10 +4,10 @@ unitTest		1
 # VIEW RANGE
 s_min			0
 s_max			4
-s_rmv			-1
+s_rmv			2
 t_min			0
 t_max			4
-t_rmv			-1
+t_rmv			2
 
 # INPUT
 imageName		./in/transcut_dataset/obj1/scn1/images_25_629_469/%u_rect.ppm

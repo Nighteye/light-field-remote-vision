@@ -253,18 +253,32 @@ int main( int argc, char **argv ) {
         std::cout << "Compute flowed lightfield" << std::endl;
         lfScene.computeFlowedLFCustomConfig();
 
-        //        if(!lfScene.checkExistence(config_data->_outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex) ||
-        //           !lfScene.checkExistence(config_data->_outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex) ||
-        //           !lfScene.checkExistence(config_data->_outdir + "/model_4g_IHM_%02lu_b.pfm", _renderIndex) ||
-        //           !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_au.pfm", _renderIndex) ||
-        //           !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex) ||
-        //           !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex))
+        //            if(!lfScene.checkExistence(config_data->_outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex) ||
+        //                    !lfScene.checkExistence(config_data->_outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex) ||
+        //                    !lfScene.checkExistence(config_data->_outdir + "/model_4g_IHM_%02lu_b.pfm", _renderIndex) ||
+        //                    !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_au.pfm", _renderIndex) ||
+        //                    !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex) ||
+        //                    !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex))
+
+        //                if(!lfScene.checkExistenceNoArg(config_data->_outdir + "/model_3g_IHM_allViews.pfm") ||
+        //                !lfScene.checkExistenceNoArg(config_data->_outdir + "/model_4g_IHM_allViews_a.pfm") ||
+        //                !lfScene.checkExistenceNoArg(config_data->_outdir + "/model_4g_IHM_allViews_b.pfm") ||
+        //                !lfScene.checkExistenceNoArg(config_data->_outdir + "/model_6g_IHM_allViews_au.pfm") ||
+        //                !lfScene.checkExistenceNoArg(config_data->_outdir + "/model_6g_IHM_allViews_av.pfm") ||
+        //                !lfScene.checkExistenceNoArg(config_data->_outdir + "/model_6g_IHM_allViews_b.pfm"))
 
         std::cout << "Fit position models to light flow samples, with inhomogeneous method (IHM) initialization" << std::endl;
         lfScene.curveFitting(); // OK
 
         std::cout << "Fit color models to light flow samples" << std::endl;
         lfScene.curveFittingColor();
+
+        //        if(!lfScene.checkExistence(config_data->_outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex) ||
+        //                !lfScene.checkExistence(config_data->_outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex) ||
+        //                !lfScene.checkExistence(config_data->_outdir + "/model_4g_IHM_%02lu_b.pfm", _renderIndex) ||
+        //                !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_au.pfm", _renderIndex) ||
+        //                !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex) ||
+        //                !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex))
 
         std::cout << "Perform model selection via BIC" << std::endl;
         lfScene.bic();

@@ -119,6 +119,7 @@ public:
     // ---------------------------------------------------------------------------------------------------------- //
 
     // check existence of file given its name
+    bool checkExistenceNoArg(const std::string& name);
     bool checkExistence(const std::string& name, int arg1);
 
     // check existence of a sequence of files for all views, except central view, given a format name
