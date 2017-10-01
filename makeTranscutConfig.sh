@@ -10,7 +10,7 @@ s_rmv			2
 t_rmv			2
 
 # INPUT
-imageName		./in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/%u_rect.ppm
+imageName		./in/transcut_dataset/obj'$i'/scn'$j'/%u_rect.ppm
 
 # OUTPUT
 outdir			out/IBR_optical/transcut/obj'$i'_scn'$j'' >configs/IBR_optical/transcut/obj"$i"scn"$j"view12
@@ -29,7 +29,7 @@ s_rmv			4
 t_rmv			0
 
 # INPUT
-imageName		./in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/%u_rect.ppm
+imageName		./in/transcut_dataset/obj'$i'/scn'$j'/%u_rect.ppm
 
 # OUTPUT
 outdir			out/IBR_optical/transcut/obj'$i'_scn'$j'' >configs/IBR_optical/transcut/obj"$i"scn"$j"view04
@@ -48,7 +48,7 @@ s_rmv			2
 t_rmv			4
 
 # INPUT
-imageName		./in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/%u_rect.ppm
+imageName		./in/transcut_dataset/obj'$i'/scn'$j'/%u_rect.ppm
 
 # OUTPUT
 outdir			out/IBR_optical/transcut/obj'$i'_scn'$j'' >configs/IBR_optical/transcut/obj"$i"scn"$j"view22
@@ -67,7 +67,7 @@ s_rmv			-1
 t_rmv			-1
 
 # INPUT
-imageName		./in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/%u_rect.ppm
+imageName		./in/transcut_dataset/obj'$i'/scn'$j'/%u_rect.ppm
 
 # OUTPUT
 outdir			out/IBR_optical/transcut/obj'$i'_scn'$j'' >configs/IBR_optical/transcut/obj"$i"scn"$j"allViews

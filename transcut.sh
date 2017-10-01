@@ -42,17 +42,17 @@ do
 	do
 		echo 'obj'$i'/scn'$j
 		echo view 12
-		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/12_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/3g_IBR_12.png'
-		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/12_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/4g_IBR_12.png'
-		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/12_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/6g_IBR_12.png'
+		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/12_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/3g_IBR_12.png'
+		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/12_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/4g_IBR_12.png'
+		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/12_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/6g_IBR_12.png'
 		echo view 04
-		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/4_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/3g_IBR_04.png'
-		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/4_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/4g_IBR_04.png'
-		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/4_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/6g_IBR_04.png'
+		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/4_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/3g_IBR_04.png'
+		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/4_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/4g_IBR_04.png'
+		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/4_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/6g_IBR_04.png'
 		echo view 22
-		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/22_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/3g_IBR_22.png'
-		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/22_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/4g_IBR_22.png'
-		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/images_25_629_469/22_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/6g_IBR_22.png'
+		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/22_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/3g_IBR_22.png'
+		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/22_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/4g_IBR_22.png'
+		psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/22_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/6g_IBR_22.png'
 	done
 done
 
