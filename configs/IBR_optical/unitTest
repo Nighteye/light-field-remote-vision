@@ -10,7 +10,7 @@ t_max			4
 t_rmv			2
 
 # INPUT
-imageName		./in/transcut_dataset/obj1/scn1/images_25_629_469/%u_rect.ppm
+imageName		./in/transcut_dataset/obj1/scn1/%u_rect.ppm
 
 # OUTPUT
 outdir			out/IBR_optical/unitTest
