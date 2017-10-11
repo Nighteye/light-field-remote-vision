@@ -390,7 +390,7 @@ void InputView::load( ) {
     glm::vec3 opticalAxis = glm::transpose(_pinholeCamera._R) * glm::vec3( 0.0f, 0.0f, 1.0f );
     glm::vec3 imageCenter = _pinholeCamera._C + normalized_focal * opticalAxis;
 
-    int nbCenters = 2*3;
+    const int nbCenters = 2*3;
     GLfloat centers[nbCenters] = { _pinholeCamera._C[0], _pinholeCamera._C[1], _pinholeCamera._C[2],
                                    imageCenter[0], imageCenter[1], imageCenter[2] };
 
