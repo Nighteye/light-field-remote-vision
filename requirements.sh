@@ -11,12 +11,12 @@ sudo echo "blacklist nouveau" >> /etc/modprobe.d/blacklist.conf
 # add the line if it doesn't already exist 
 sudo sed -i 's/GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="nouveau.blacklist=1 /g' /etc/default/grub
 # configure grub
-sudo dnf update grub2
+sudo yum update grub2
 sudo grub2-mkconfig -o /boot/grub2/grub
 sudo grub2-mkconfig -o /boot/efi/EFI/fedora/grub
 
 # STEP 3: remove nouveau
-sudo dnf remove xorg-x11-drv-nouveau
+sudo yum remove xorg-x11-drv-nouveau
 
 # STEP 4: rename the nouveau initramfs and create a new one
 sudo mv /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r)-nouveau.img
@@ -35,9 +35,9 @@ systemctl get-default
 sudo init 4
 
 # make sure kernel source tree is not missing, do
-sudo dnf install kernel-devel kernel-headers
-# you must make sure it matches the kernel version. since the lattest version of source us installed by dnf, I recommend you update the kernel
-sudo dnf update kernel-core
+sudo yum install kernel-devel kernel-headers
+# you must make sure it matches the kernel version. since the lattest version of source us installed by yum, I recommend you update the kernel
+sudo yum update kernel-core
 # to check the version of your kernel, type
 uname -r
 
@@ -56,13 +56,13 @@ sudo mv /tmp/* /var/tmp/
 sudo umount -l /tmp
 sudo ln -s ~/tmp /var/tmp
 # it is recommended to install libXmu
-sudo dnf install libXmu-devel
+sudo yum install libXmu-devel
 # to enable more recent versions of gcc, comment line 115 of /usr/local/cuda/include/host_config.h
 
 #----------------------------------------------------------------------------------------------------
 # Configure CUDA (nvcc compiler), I recommend CUDA toolkit 7.5
 # download the file cuda_6.5.14_linux_64.run and run the command lines
-sudo chmod u+x cuda_6.5.14_linux_64.run
+sudo chmod u+x cuda_7.5.18_linux.run
 sudo ./cuda_7.5.18_linux.run --override
 # override to force because gcc 4.9 and up are not supported, driver already installed
 
@@ -71,7 +71,7 @@ sudo ./cuda_7.5.18_linux.run --override
 # OPENCV INSTALLATION
 #----------------------------------------------------------------------------------------------------
 # some opencv2 dependencies
-sudo dnf install cmake eigen3-devel
+sudo yum install cmake eigen3-devel
 
 # opencv2 installation (I hope you don't have gcc 6)
 cd ~
@@ -82,12 +82,18 @@ cmake -DWITH_IPP=OFF
 make -j8
 sudo make install
 
+# if CUDA version >= 8, change 
+# if !defined (HAVE_CUDA) || defined (CUDA_DISABLER)
+# to 
+# if !defined (HAVE_CUDA) || defined (CUDA_DISABLER) || (CUDART_VERSION >= 8000)
+# in graphcuts.cpp
+
 #----------------------------------------------------------------------------------------------------
 
 # CERES INSTALLATION
 #----------------------------------------------------------------------------------------------------
 # CeresSolver dependencies
-sudo dnf install eigen3-devel cmake suitesparse-devel blas-devel lapack-devel atlas-devel
+sudo yum install eigen3-devel cmake suitesparse-devel blas-devel lapack-devel atlas-devel
 
 # CeresSolver installation
 cd ~
@@ -106,38 +112,31 @@ sudo make install
 # some dependencies
 
 # gcc-c++ compiler 
-sudo dnf install gcc-c++
+sudo yum install gcc-c++
 # glsl-like matrix format
-sudo dnf install glm-devel
+sudo yum install glm-devel
 # for openGL
-sudo dnf install glew-devel glfw-devel
+sudo yum install glew-devel glfw-devel
 # reads and writes tiff images for Cimg.h
-sudo dnf install libtiff-devel
+sudo yum install libtiff-devel
 # read images
-sudo dnf install SDL2-devel SDL2_image-devel
+sudo yum install SDL2-devel SDL2_image-devel
 # pixflow dependencies
-sudo dnf install gflags-devel glog-devel
+sudo yum install gflags-devel glog-devel
 # other dependencies (most for cocolib)
-sudo dnf install gsl-devel ann-devel zlib-devel hdf5-devel OpenEXR-devel rply-devel
+sudo yum install gsl-devel ann-devel zlib-devel hdf5-devel OpenEXR-devel rply-devel suitesparse-devel blas-devel lapack-devel
 
 #----------------------------------------------------------------------------------------------------
 # QT file parsing
 # Qt creator config: failed to load help plugin, install following libraries:
-sudo dnf install gstreamer gstreamer-plugins-base
+sudo yum install gstreamer gstreamer-plugins-base
 # to enbale .pro parsing 
-sudo dnf install qt-devel
+sudo yum install qt-devel
 
 #----------------------------------------------------------------------------------------------------
-# to configure cocolib and compile project
-cd ~/lfremotevision/cocolib_unstructured
-./configure-cuda.sh
-make -j8
-	
-#----------------------------------------------------------------------------------------------------
-# to parse the .pro file and compile project
-cd ~/lfremotevision/ULF
-qmake-qt4 ULF.pro -r CONFIG-=debug_and_release CONFIG+=release
-make -j8
+# to configure, parse and compile the project
+cd ~/light-field-remote-vision
+./configure-project.sh
 
 #----------------------------------------------------------------------------------------------------
 
