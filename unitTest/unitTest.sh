@@ -4,7 +4,7 @@
 #cd ../out/IBR_optical/unitTest
 #for f in *
 #do
-#    cp $f 'ref_'$f 
+#    mv $f 'ref_'$f 
 #done
 #cd ../../../unitTest
 
