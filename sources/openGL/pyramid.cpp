@@ -8,7 +8,7 @@
 void pushPull(int W, int H, std::vector<cv::Point3f>& image, const std::vector<float>& weights) {
 
     // HACK
-    uint pyramidHeight = 8;
+    uint pyramidHeight = 7;
 
     std::vector< std::vector<cv::Point3f> > imagePyramid(pyramidHeight + 1);
     std::vector< std::vector<bool> > visibilityPyramid(pyramidHeight + 1);

@@ -2993,7 +2993,7 @@ void LFScene::renderLightFlowLambertianVideo() {
         //        targetC.z = 0.0;
 
         // init buffers
-        for(uint i = 0 ; i < outputImage3param.size() ; ++i) {
+        for(uint i = 0 ; i < nbPixels ; ++i) {
 
             outputImage3param[i] = cv::Point3f(0.0, 0.0, 0.0);
             weightMap3param[i] = 0.0;
@@ -3058,22 +3058,18 @@ void LFScene::renderLightFlowLambertianVideo() {
         }
 
         std::cout << "Normalization step" << std::endl;
-        for(uint y = 0 ; y < _camHeight ; ++y) {
-            for(uint x = 0 ; x < _camWidth ; ++x) {
+        for(uint i = 0 ; i < nbPixels ; ++i) {
 
-                const uint idx = y*_camWidth + x;
+            if(weightMap3param[i] != 0) {
+                outputImage3param[i] /= weightMap3param[i];
+            }
 
-                if(weightMap3param[idx] != 0) {
-                    outputImage3param[idx] /= weightMap3param[idx];
-                }
+            if(weightMap4param[i] != 0) {
+                outputImage4param[i] /= weightMap4param[i];
+            }
 
-                if(weightMap4param[idx] != 0) {
-                    outputImage4param[idx] /= weightMap4param[idx];
-                }
-
-                if(weightMap6param[idx] != 0) {
-                    outputImage6param[idx] /= weightMap6param[idx];
-                }
+            if(weightMap6param[i] != 0) {
+                outputImage6param[i] /= weightMap6param[i];
             }
         }
 
