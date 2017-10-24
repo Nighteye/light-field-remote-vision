@@ -20,6 +20,9 @@
 // Perform push pull Laplacian hole-filling, RGB float images
 void pushPull(int W, int H, std::vector<cv::Point3f>& image, const std::vector<float>& weights);
 
+// Perform push pull as it was implemented by Gortler '96
+void pushPullComplete(int W, int H, std::vector<cv::Point3f>& image, const std::vector<float>& weights);
+
 // DEPTH PYRAMID EXPAND AND REDUCE OPERATIONS (ON DEPTH MAPS)
 
 // filter depth map with oddHDC, don't downsample, size of kernel depends on scale
@@ -82,6 +85,10 @@ void computeLaplacian(int W, int H, int nbChannels, const float* const input, fl
 void oddHDCReduceRGB(int W, int H, int w, int h,
                      const std::vector<cv::Point3f>& inputImage, std::vector<cv::Point3f>& outputImage,
                      const std::vector<bool>& inputVisibility, std::vector<bool>& outputVisibility);
+// reduce for RGB images, with weights, as implemented by Gortler
+void oddHDCReduceGortler(int W, int H, int w, int h,
+                     const std::vector<cv::Point3f>& inputImage, std::vector<cv::Point3f>& outputImage,
+                     const std::vector<float>& inputWeight, std::vector<float>& outputWeight);
 // classic reduce for boolean images
 void oddHDCReduceBool(int W, int H, int w, int h, const std::vector<bool>& input, std::vector<bool>& output);
 // classic expand for RGB images, with visibility test
