@@ -422,9 +422,16 @@ void oddHDCDepthExpand(int loW, int loH, int hiW, int hiH, int nbChannels, float
                         }
                     }
 
-                    if(input[i/2*loW*nbChannels + j*nbChannels + 0] < invalidDepth) {
-                        tempArray[o] += 2*kernel[0]*input[i/2*loW*nbChannels + j*nbChannels + c];
-                        weight += 2*kernel[0];
+                    if(loH-1 < i/2) {
+                        if(input[(loH-1)*loW*nbChannels + j*nbChannels + 0] < invalidDepth) {
+                            tempArray[o] += 2*kernel[0]*input[(loH-1)*loW*nbChannels + j*nbChannels + c];
+                            weight += 2*kernel[0];
+                        }
+                    } else {
+                        if(input[i/2*loW*nbChannels + j*nbChannels + 0] < invalidDepth) {
+                            tempArray[o] += 2*kernel[0]*input[i/2*loW*nbChannels + j*nbChannels + c];
+                            weight += 2*kernel[0];
+                        }
                     }
 
                     if(loH-1 < (i+2)/2) {
@@ -497,9 +504,16 @@ void oddHDCDepthExpand(int loW, int loH, int hiW, int hiH, int nbChannels, float
                         }
                     }
 
-                    if(tempArray[i*loW*nbChannels + j/2*nbChannels + 0] < invalidDepth) {
-                        output[o] += 2*kernel[0]*tempArray[i*loW*nbChannels + j/2*nbChannels + c];
-                        weight += 2*kernel[0];
+                    if(loW-1 < j/2) {
+                        if(tempArray[i*loW*nbChannels + (loW-1)*nbChannels + 0] < invalidDepth) {
+                            output[o] += 2*kernel[0]*tempArray[i*loW*nbChannels + (loW-1)*nbChannels + c];
+                            weight += 2*kernel[0];
+                        }
+                    } else {
+                        if(tempArray[i*loW*nbChannels + j/2*nbChannels + 0] < invalidDepth) {
+                            output[o] += 2*kernel[0]*tempArray[i*loW*nbChannels + j/2*nbChannels + c];
+                            weight += 2*kernel[0];
+                        }
                     }
 
                     if(loW-1 < (j+2)/2) {
@@ -877,7 +891,11 @@ void oddHDCexpanded(int inW, int inH, int outW, int outH, int nbChannels, float 
                         tempArray[o] += 2*kernel[2]*input[(i-2)/2*inW*nbChannels + j*nbChannels + c];
                     }
 
-                    tempArray[o] += 2*kernel[0]*input[i/2*inW*nbChannels + j*nbChannels + c];
+                    if(inH-1 < i/2) {
+                        tempArray[o] += 2*kernel[0]*input[(inH-1)*inW*nbChannels + j*nbChannels + c];
+                    } else {
+                        tempArray[o] += 2*kernel[0]*input[i/2*inW*nbChannels + j*nbChannels + c];
+                    }
 
                     if(inH-1 < (i+2)/2) {
                         tempArray[o] += 2*kernel[2]*input[(inH-1)*inW*nbChannels + j*nbChannels + c];
@@ -918,7 +936,11 @@ void oddHDCexpanded(int inW, int inH, int outW, int outH, int nbChannels, float 
                         output[o] += 2*kernel[2]*tempArray[i*inW*nbChannels + (j-2)/2*nbChannels + c];
                     }
 
-                    output[o] += 2*kernel[0]*tempArray[i*inW*nbChannels + j/2*nbChannels + c];
+                    if(inW-1 < j/2) {
+                        output[o] += 2*kernel[0]*tempArray[i*inW*nbChannels + (inW-1)*nbChannels + c];
+                    } else {
+                        output[o] += 2*kernel[0]*tempArray[i*inW*nbChannels + j/2*nbChannels + c];
+                    }
 
                     if(inW-1 < (j+2)/2) {
                         output[o] += 2*kernel[2]*tempArray[i*inW*nbChannels + (inW-1)*nbChannels + c];
@@ -1302,7 +1324,11 @@ void expand(int W, int H, int w, int h, int nbChannels, const float* const input
                     } else {
                         tempArray[i*w*nbChannels+j*nbChannels + c] += 2*kernel[0]*input[(i-2)/2*w*nbChannels+j*nbChannels + c];
                     }
-                    tempArray[i*w*nbChannels+j*nbChannels + c] += 2*kernel[2]*input[i/2*w*nbChannels+j*nbChannels + c];
+                    if(h-1 < i/2) {
+                        tempArray[i*w*nbChannels+j*nbChannels + c] += 2*kernel[2]*input[(h-1)*w*nbChannels+j*nbChannels + c];
+                    } else {
+                        tempArray[i*w*nbChannels+j*nbChannels + c] += 2*kernel[2]*input[i/2*w*nbChannels+j*nbChannels + c];
+                    }
                     if(h-1 < (i+2)/2) {
                         tempArray[i*w*nbChannels+j*nbChannels + c] += 2*kernel[4]*input[(h-1)*w*nbChannels+j*nbChannels + c];
                     } else {
@@ -1338,6 +1364,11 @@ void expand(int W, int H, int w, int h, int nbChannels, const float* const input
                         output[i*W*nbChannels+j*nbChannels + c] += 2*kernel[0]*tempArray[i*w*nbChannels + c];
                     } else {
                         output[i*W*nbChannels+j*nbChannels + c] += 2*kernel[0]*tempArray[i*w*nbChannels+(j-2)/2*nbChannels + c];
+                    }
+                    if(w-1 < j/2) {
+                        output[i*W*nbChannels+j*nbChannels + c] += 2*kernel[2]*tempArray[i*w*nbChannels+(w-1)*nbChannels + c];
+                    } else {
+                        output[i*W*nbChannels+j*nbChannels + c] += 2*kernel[2]*tempArray[i*w*nbChannels+j/2*nbChannels + c];
                     }
                     output[i*W*nbChannels+j*nbChannels + c] += 2*kernel[2]*tempArray[i*w*nbChannels+j/2*nbChannels + c];
                     if(w-1 < (j+2)/2) {
@@ -1801,7 +1832,11 @@ void oddHDCExpandRGB(int loW, int loH, int hiW, int hiH, const std::vector<cv::P
                     tempArray[o] += 2*kernel[2]*input[(i - 2)/2*loW + j];
                 }
 
-                tempArray[o] += 2*kernel[0]*input[i/2*loW + j];
+                if(loH - 1 < i/2) {
+                    tempArray[o] += 2*kernel[0]*input[(loH - 1)*loW + j];
+                } else {
+                    tempArray[o] += 2*kernel[0]*input[i/2*loW + j];
+                }
 
                 if(loH - 1 < (i + 2)/2) {
                     tempArray[o] += 2*kernel[2]*input[(loH - 1)*loW + j];
@@ -1843,7 +1878,11 @@ void oddHDCExpandRGB(int loW, int loH, int hiW, int hiH, const std::vector<cv::P
                         output[o] += 2*kernel[2]*tempArray[i*loW + (j - 2)/2];
                     }
 
-                    output[o] += 2*kernel[0]*tempArray[i*loW + j/2];
+                    if(loW - 1 < j/2) {
+                        output[o] += 2*kernel[0]*tempArray[i*loW + (loW - 1)];
+                    } else {
+                        output[o] += 2*kernel[0]*tempArray[i*loW + j/2];
+                    }
 
                     if(loW - 1 < (j + 2)/2) {
                         output[o] += 2*kernel[2]*tempArray[i*loW + (loW - 1)];
