@@ -3078,6 +3078,11 @@ void LFScene::renderLightFlowLambertianVideo() {
         pushPull(_camWidth, _camHeight, outputImage4param, weightMap4param);
         pushPull(_camWidth, _camHeight, outputImage6param, weightMap6param);
 
+//        std::cout << "PULL/PUSH" << std::endl;
+//        pushPullGortler(_camWidth, _camHeight, outputImage3param, weightMap3param);
+//        pushPullGortler(_camWidth, _camHeight, outputImage4param, weightMap4param);
+//        pushPullGortler(_camWidth, _camHeight, outputImage6param, weightMap6param);
+
         // SAVE PNG OUTMUT FILES
 
         if(_renderIndex >= 0) {

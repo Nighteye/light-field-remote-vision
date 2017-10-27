@@ -21,7 +21,7 @@
 void pushPull(int W, int H, std::vector<cv::Point3f>& image, const std::vector<float>& weights);
 
 // Perform push pull as it was implemented by Gortler '96
-void pushPullComplete(int W, int H, std::vector<cv::Point3f>& image, const std::vector<float>& weights);
+void pushPullGortler(int W, int H, std::vector<cv::Point3f>& image, const std::vector<float>& weights);
 
 // DEPTH PYRAMID EXPAND AND REDUCE OPERATIONS (ON DEPTH MAPS)
 
@@ -85,13 +85,17 @@ void computeLaplacian(int W, int H, int nbChannels, const float* const input, fl
 void oddHDCReduceRGB(int W, int H, int w, int h,
                      const std::vector<cv::Point3f>& inputImage, std::vector<cv::Point3f>& outputImage,
                      const std::vector<bool>& inputVisibility, std::vector<bool>& outputVisibility);
-// reduce for RGB images, with weights, as implemented by Gortler
+// reduce for RGB images, with weights, as implemented by Gortler '96
 void oddHDCReduceGortler(int W, int H, int w, int h,
-                     const std::vector<cv::Point3f>& inputImage, std::vector<cv::Point3f>& outputImage,
-                     const std::vector<float>& inputWeight, std::vector<float>& outputWeight);
+                         const std::vector<cv::Point3f>& inputImage, std::vector<cv::Point3f>& outputImage,
+                         const std::vector<float>& inputWeight, std::vector<float>& outputWeight);
 // classic reduce for boolean images
 void oddHDCReduceBool(int W, int H, int w, int h, const std::vector<bool>& input, std::vector<bool>& output);
 // classic expand for RGB images, with visibility test
 void oddHDCExpandRGB(int loW, int loH, int hiW, int hiH, const std::vector<cv::Point3f>& input, std::vector<cv::Point3f>& output, const std::vector<bool>& visibility);
+// expand for RGB images, with weights, as implemented by Gortler '96
+void oddHDCExpandGortler(int loW, int loH, int hiW, int hiH,
+                         const std::vector<cv::Point3f>& inputImage, std::vector<cv::Point3f>& outputImage,
+                         const std::vector<float>& inputWeight, std::vector<float>& outputWeight);
 
 #endif /* #ifndef PYRAMID_H */

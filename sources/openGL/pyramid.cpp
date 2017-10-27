@@ -33,12 +33,12 @@ void pushPull(int W, int H, std::vector<cv::Point3f>& image, const std::vector<f
 
         oddHDCReduceRGB(Wscale, Hscale, wscale, hscale,
                         imagePyramid[s - 1], imagePyramid[s],
-                        visibilityPyramid[s - 1], visibilityPyramid[s]);
+                visibilityPyramid[s - 1], visibilityPyramid[s]);
 
-//        std::cout << "Writing reduced image " << s << " in " << "out/IBR_optical/tarot_coarse_wide_cropped/reducedImage" + std::to_string(s) + ".pfm" << std::endl;
-//        savePFM(imagePyramid[s], wscale, hscale, "out/IBR_optical/tarot_coarse_wide_cropped/reducedImage" + std::to_string(s) + ".pfm");
-//        std::cout << "Writing reduced visibility " << s << " in " << "out/IBR_optical/tarot_coarse_wide_cropped/reducedVisibility" + std::to_string(s) + ".pfm" << std::endl;
-//        savePFM(visibilityPyramid[s], wscale, hscale, "out/IBR_optical/tarot_coarse_wide_cropped/reducedVisibility" + std::to_string(s) + ".pfm");
+        //        std::cout << "Writing reduced image " << s << " in " << "out/IBR_optical/tarot_coarse_wide_cropped/reducedImage" + std::to_string(s) + ".pfm" << std::endl;
+        //        savePFM(imagePyramid[s], wscale, hscale, "out/IBR_optical/tarot_coarse_wide_cropped/reducedImage" + std::to_string(s) + ".pfm");
+        //        std::cout << "Writing reduced visibility " << s << " in " << "out/IBR_optical/tarot_coarse_wide_cropped/reducedVisibility" + std::to_string(s) + ".pfm" << std::endl;
+        //        savePFM(visibilityPyramid[s], wscale, hscale, "out/IBR_optical/tarot_coarse_wide_cropped/reducedVisibility" + std::to_string(s) + ".pfm");
     }
 
     for(uint s = (uint)pyramidHeight ; 0 < s ; --s) {
@@ -50,15 +50,15 @@ void pushPull(int W, int H, std::vector<cv::Point3f>& image, const std::vector<f
 
         oddHDCExpandRGB(wscale, hscale, Wscale, Hscale, imagePyramid[s], imagePyramid[s-1], visibilityPyramid[s-1]);
 
-//        std::cout << "Writing expanded image " << s << " in " << "out/IBR_optical/tarot_coarse_wide_cropped/expandedImage" + std::to_string(s) + ".pfm" << std::endl;
-//        savePFM(imagePyramid[s-1], Wscale, Hscale, "out/IBR_optical/tarot_coarse_wide_cropped/expandedImage" + std::to_string(s) + ".pfm");
+        //        std::cout << "Writing expanded image " << s << " in " << "out/IBR_optical/tarot_coarse_wide_cropped/expandedImage" + std::to_string(s) + ".pfm" << std::endl;
+        //        savePFM(imagePyramid[s-1], Wscale, Hscale, "out/IBR_optical/tarot_coarse_wide_cropped/expandedImage" + std::to_string(s) + ".pfm");
     }
 
     image = imagePyramid[0];
 }
 
 // Perform push pull as it was implemented by Gortler '96
-void pushPullComplete(int W, int H, std::vector<cv::Point3f>& image, const std::vector<float>& weights) {
+void pushPullGortler(int W, int H, std::vector<cv::Point3f>& image, const std::vector<float>& weights) {
 
     // HACK
     uint pyramidHeight = 8;
@@ -69,11 +69,11 @@ void pushPullComplete(int W, int H, std::vector<cv::Point3f>& image, const std::
     // init scale 0
     imagePyramid[0] = image;
     weightPyramid[0].resize(W*H);
-    for(int i = 0 ; i < W*H ; ++i) {
-        weightPyramid[0][i] = weights[i];
+    for(uint i = 0 ; i < weightPyramid[0].size() ; ++i) { // pre-filter saturated weights
+        weightPyramid[0][i] = std::min(weights[i], 1.0f);
     }
 
-    for(uint s = 1 ; s <= (uint)pyramidHeight ; ++s) {
+    for(uint s = 1 ; s <= (uint)pyramidHeight ; ++s) { // PULL
 
         uint Wscale = (uint)W / (uint)pow(2.0, (double)(s - 1));
         uint Hscale = (uint)H / (uint)pow(2.0, (double)(s - 1));
@@ -81,29 +81,34 @@ void pushPullComplete(int W, int H, std::vector<cv::Point3f>& image, const std::
         uint hscale = (uint)H / (uint)pow(2.0, (double)s);
 
         imagePyramid[s].assign(wscale*hscale, cv::Point3f(0.0f, 0.0f, 0.0f));
-        weightPyramid[s].assign(wscale*hscale, false);
+        weightPyramid[s].assign(wscale*hscale, 0.0f);
 
-        oddHDCReduceGortler(Wscale, Hscale, wscale, hscale,
-                        imagePyramid[s - 1], imagePyramid[s],
-                        weightPyramid[s - 1], weightPyramid[s]);
+        oddHDCReduceGortler(Wscale, Hscale, wscale, hscale, imagePyramid[s - 1], imagePyramid[s], weightPyramid[s - 1], weightPyramid[s]);
 
-//        std::cout << "Writing reduced image " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(s) + ".pfm" << std::endl;
-//        savePFM(imagePyramid[s], wscale, hscale, "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(s) + ".pfm");
-//        std::cout << "Writing reduced visibility " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedVisibility" + std::to_string(s) + ".pfm" << std::endl;
-//        savePFM(weightPyramid[s], wscale, hscale, "out/IBR_optical/transcut/obj1_scn1/reducedVisibility" + std::to_string(s) + ".pfm");
+        std::cout << "Writing reduced image " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(s) + ".pfm" << std::endl;
+        savePFM(imagePyramid[s], wscale, hscale, "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(s) + ".pfm");
+        std::cout << "Writing reduced weight " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(s) + ".pfm" << std::endl;
+        savePFM(weightPyramid[s], wscale, hscale, "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(s) + ".pfm");
     }
 
-    for(uint s = (uint)pyramidHeight ; 0 < s ; --s) {
+    std::cout << "Writing reduced image " << 0 << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(0) + ".pfm" << std::endl;
+    savePFM(imagePyramid[0], W, H, "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(0) + ".pfm");
+    std::cout << "Writing reduced weight " << 0 << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(0) + ".pfm" << std::endl;
+    savePFM(weightPyramid[0], W, H, "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(0) + ".pfm");
+
+    for(uint s = (uint)pyramidHeight ; 0 < s ; --s) { // PUSH
 
         uint Wscale = (uint)W / (uint)pow(2.0, (double)(s - 1));
         uint Hscale = (uint)H / (uint)pow(2.0, (double)(s - 1));
         uint wscale = (uint)W / (uint)pow(2.0, (double)s);
         uint hscale = (uint)H / (uint)pow(2.0, (double)s);
 
-        //oddHDCExpandGortler(wscale, hscale, Wscale, Hscale, imagePyramid[s], imagePyramid[s-1], weightPyramid[s-1]);
+        oddHDCExpandGortler(wscale, hscale, Wscale, Hscale, imagePyramid[s], imagePyramid[s-1], weightPyramid[s], weightPyramid[s-1]);
 
-//        std::cout << "Writing expanded image " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/expandedImage" + std::to_string(s) + ".pfm" << std::endl;
-//        savePFM(imagePyramid[s-1], Wscale, Hscale, "out/IBR_optical/transcut/obj1_scn1/expandedImage" + std::to_string(s) + ".pfm");
+        std::cout << "Writing expanded image " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/expandedImage" + std::to_string(s) + ".pfm" << std::endl;
+        savePFM(imagePyramid[s-1], Wscale, Hscale, "out/IBR_optical/transcut/obj1_scn1/expandedImage" + std::to_string(s) + ".pfm");
+        std::cout << "Writing expanded weight " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/expandedWeight" + std::to_string(s) + ".pfm" << std::endl;
+        savePFM(weightPyramid[s-1], Wscale, Hscale, "out/IBR_optical/transcut/obj1_scn1/expandedWeight" + std::to_string(s) + ".pfm");
     }
 
     image = imagePyramid[0];
@@ -1789,8 +1794,8 @@ void oddHDCReduceRGB(int W, int H, int w, int h,
 }
 
 void oddHDCReduceGortler(int W, int H, int w, int h,
-                     const std::vector<cv::Point3f>& inputImage, std::vector<cv::Point3f>& outputImage,
-                     const std::vector<float>& inputWeight, std::vector<float>& outputWeight) {
+                         const std::vector<cv::Point3f>& inputImage, std::vector<cv::Point3f>& outputImage,
+                         const std::vector<float>& inputWeight, std::vector<float>& outputWeight) {
 
     const int radius = 2; // radius
     const float a = 0.4f;
@@ -1803,42 +1808,29 @@ void oddHDCReduceGortler(int W, int H, int w, int h,
         for(int j = 0 ; j < W ; ++j) {
 
             uint idx = i*W + j;
-            tempArrayImage[idx] = cv::Point3f(0.0f, 0.0f, 0.0f);
-            tempArrayWeight[i*W+j] = 0.0;
-
-            if(inputWeight[2*i*W + j] > 0.0) {
-                tempArrayImage[idx] += kernel[0]*std::min(inputWeight[2*i*W + j], 1.0f)*inputImage[2*i*W + j];
-                tempArrayWeight[idx] += kernel[0]*std::min(inputWeight[2*i*W + j], 1.0f);
-            }
+            tempArrayImage[idx] = kernel[0]*std::min(inputWeight[2*i*W + j], 1.0f)*inputImage[2*i*W + j];
+            tempArrayWeight[i*W + j] = kernel[0]*std::min(inputWeight[2*i*W + j], 1.0f);
 
             for(int k = 1 ; k <= radius ; ++k) {
 
                 if(2*i - k < 0) {
-                    if(inputWeight[j] > 0.0) {
-                        tempArrayImage[idx] += kernel[k]*std::min(inputWeight[j], 1.0f)*inputImage[j];
-                        tempArrayWeight[idx] += kernel[k]*std::min(inputWeight[j], 1.0f);
-                    }
+                    tempArrayImage[idx] += kernel[k]*std::min(inputWeight[j], 1.0f)*inputImage[j];
+                    tempArrayWeight[idx] += kernel[k]*std::min(inputWeight[j], 1.0f);
                 } else {
-                    if(inputWeight[(2*i - k)*W + j] > 0.0) {
-                        tempArrayImage[idx] += kernel[k]*std::min(inputWeight[(2*i - k)*W + j], 1.0f)*inputImage[(2*i - k)*W + j];
-                        tempArrayWeight[idx] += kernel[k]*std::min(inputWeight[(2*i - k)*W + j], 1.0f);
-                    }
+                    tempArrayImage[idx] += kernel[k]*std::min(inputWeight[(2*i - k)*W + j], 1.0f)*inputImage[(2*i - k)*W + j];
+                    tempArrayWeight[idx] += kernel[k]*std::min(inputWeight[(2*i - k)*W + j], 1.0f);
                 }
 
                 if(H - 1 < 2*i + k) {
-                    if(inputWeight[(H - 1)*W + j] > 0.0) {
-                        tempArrayImage[idx] += kernel[k]*std::min(inputWeight[(H - 1)*W + j], 1.0f)*inputImage[(H - 1)*W + j];
-                        tempArrayWeight[idx] += kernel[k]*std::min(inputWeight[(H - 1)*W + j], 1.0f);
-                    }
+                    tempArrayImage[idx] += kernel[k]*std::min(inputWeight[(H - 1)*W + j], 1.0f)*inputImage[(H - 1)*W + j];
+                    tempArrayWeight[idx] += kernel[k]*std::min(inputWeight[(H - 1)*W + j], 1.0f);
                 } else {
-                    if(inputWeight[(2*i + k)*W + j] > 0.0) {
-                        tempArrayImage[idx] += kernel[k]*std::min(inputWeight[(2*i + k)*W + j], 1.0f)*inputImage[(2*i + k)*W + j];
-                        tempArrayWeight[idx] += kernel[k]*std::min(inputWeight[(2*i + k)*W + j], 1.0f);
-                    }
+                    tempArrayImage[idx] += kernel[k]*std::min(inputWeight[(2*i + k)*W + j], 1.0f)*inputImage[(2*i + k)*W + j];
+                    tempArrayWeight[idx] += kernel[k]*std::min(inputWeight[(2*i + k)*W + j], 1.0f);
                 }
             }
 
-            if(tempArrayWeight[idx] > 0) {
+            if(tempArrayWeight[idx] > 0.0f) {
 
                 tempArrayImage[idx] /= tempArrayWeight[idx];
             }
@@ -1849,42 +1841,29 @@ void oddHDCReduceGortler(int W, int H, int w, int h,
         for(int j = 0 ; j < w ; ++j) {
 
             uint idx = i*w + j;
-            outputImage[idx] = cv::Point3f(0.0f, 0.0f, 0.0f);
-            outputWeight[idx] = 0.0;
-
-            if(tempArrayWeight[i*W + 2*j]) {
-                outputImage[idx] += kernel[0]*std::min(tempArrayWeight[i*W + 2*j], 1.0f)*tempArrayImage[i*W + 2*j];
-                outputWeight[idx] += kernel[0]*std::min(tempArrayWeight[i*W + 2*j], 1.0f);
-            }
+            outputImage[idx] = kernel[0]*std::min(tempArrayWeight[i*W + 2*j], 1.0f)*tempArrayImage[i*W + 2*j];
+            outputWeight[idx] = kernel[0]*std::min(tempArrayWeight[i*W + 2*j], 1.0f);
 
             for(int k = 1 ; k <= radius ; ++k) {
 
                 if(2*j - k < 0) {
-                    if(tempArrayWeight[i*W] > 0.0) {
-                        outputImage[idx] += kernel[k]*std::min(tempArrayWeight[i*W], 1.0f)*tempArrayImage[i*W];
-                        outputWeight[idx] += kernel[k]*std::min(tempArrayWeight[i*W], 1.0f);
-                    }
+                    outputImage[idx] += kernel[k]*std::min(tempArrayWeight[i*W], 1.0f)*tempArrayImage[i*W];
+                    outputWeight[idx] += kernel[k]*std::min(tempArrayWeight[i*W], 1.0f);
                 } else {
-                    if(tempArrayWeight[i*W + (2*j - k)] > 0.0) {
-                        outputImage[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (2*j - k)], 1.0f)*tempArrayImage[i*W + (2*j - k)];
-                        outputWeight[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (2*j - k)], 1.0f);
-                    }
+                    outputImage[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (2*j - k)], 1.0f)*tempArrayImage[i*W + (2*j - k)];
+                    outputWeight[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (2*j - k)], 1.0f);
                 }
 
                 if(W - 1 < 2*j + k) {
-                    if(tempArrayWeight[i*W + (W - 1)] > 0.0) {
-                        outputImage[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (W - 1)], 1.0f)*tempArrayImage[i*W + (W - 1)];
-                        outputWeight[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (W - 1)], 1.0f);
-                    }
+                    outputImage[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (W - 1)], 1.0f)*tempArrayImage[i*W + (W - 1)];
+                    outputWeight[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (W - 1)], 1.0f);
                 } else {
-                    if(tempArrayWeight[i*W + (2*j + k)] > 0.0) {
-                        outputImage[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (2*j + k)], 1.0f)*tempArrayImage[i*W + (2*j + k)];
-                        outputWeight[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (2*j + k)], 1.0f);
-                    }
+                    outputImage[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (2*j + k)], 1.0f)*tempArrayImage[i*W + (2*j + k)];
+                    outputWeight[idx] += kernel[k]*std::min(tempArrayWeight[i*W + (2*j + k)], 1.0f);
                 }
             }
 
-            if(outputWeight[idx] > 0) {
+            if(outputWeight[idx] > 0.0f) {
 
                 outputImage[idx] /= outputWeight[idx];
             }
@@ -2062,6 +2041,137 @@ void oddHDCExpandRGB(int loW, int loH, int hiW, int hiH, const std::vector<cv::P
                     }
                 }
             }
+        }
+    }
+}
+
+void oddHDCExpandGortler(int loW, int loH, int hiW, int hiH,
+                         const std::vector<cv::Point3f>& inputImage, std::vector<cv::Point3f>& outputImage,
+                         const std::vector<float>& inputWeight, std::vector<float>& outputWeight) {
+
+    const int radius = 2; // radius
+    const float a = 0.4f;
+    float kernel[radius + 1] = {a, 0.25f, 0.25f - 0.5f*a};
+
+    std::vector<cv::Point3f> tempArrayImage(loW*hiH);
+    std::vector<float> tempArrayWeight(loW*hiH);
+
+    for(int i = 0 ; i < hiH ; ++i) {
+        for(int j = 0 ; j < loW ; ++j) {
+
+            uint o = i*loW + j;
+            tempArrayImage[o] = cv::Point3f(0.0f, 0.0f, 0.0f);
+            tempArrayWeight[o] = 0.0f;
+
+            if(i%2 == 0) {
+
+                if((i - 2)/2 < 0) {
+                    tempArrayImage[o] += 2*kernel[2]*std::min(inputWeight[j], 1.0f)*inputImage[j];
+                    tempArrayWeight[o] += 2*kernel[2]*std::min(inputWeight[j], 1.0f);
+                } else {
+                    tempArrayImage[o] += 2*kernel[2]*std::min(inputWeight[(i - 2)/2*loW + j], 1.0f)*inputImage[(i - 2)/2*loW + j];
+                    tempArrayWeight[o] += 2*kernel[2]*std::min(inputWeight[(i - 2)/2*loW + j], 1.0f);
+                }
+
+                if(loH - 1 < i/2) {
+                    tempArrayImage[o] += 2*kernel[0]*std::min(inputWeight[(loH - 1)*loW + j], 1.0f)*inputImage[(loH - 1)*loW + j];
+                    tempArrayWeight[o] += 2*kernel[0]*std::min(inputWeight[(loH - 1)*loW + j], 1.0f);
+                } else {
+                    tempArrayImage[o] += 2*kernel[0]*std::min(inputWeight[i/2*loW + j], 1.0f)*inputImage[i/2*loW + j];
+                    tempArrayWeight[o] += 2*kernel[0]*std::min(inputWeight[i/2*loW + j], 1.0f);
+                }
+
+                if(loH - 1 < (i + 2)/2) {
+                    tempArrayImage[o] += 2*kernel[2]*std::min(inputWeight[(loH - 1)*loW + j], 1.0f)*inputImage[(loH - 1)*loW + j];
+                    tempArrayWeight[o] += 2*kernel[2]*std::min(inputWeight[(loH - 1)*loW + j], 1.0f);
+                } else {
+                    tempArrayImage[o] += 2*kernel[2]*std::min(inputWeight[(i + 2)/2*loW + j], 1.0f)*inputImage[(i + 2)/2*loW + j];
+                    tempArrayWeight[o] += 2*kernel[2]*std::min(inputWeight[(i + 2)/2*loW + j], 1.0f);
+                }
+
+            } else {
+
+                if((i - 1)/2 < 0) {
+                    tempArrayImage[o] += 2*kernel[1]*std::min(inputWeight[j], 1.0f)*inputImage[j];
+                    tempArrayWeight[o] += 2*kernel[1]*std::min(inputWeight[j], 1.0f);
+                } else {
+                    tempArrayImage[o] += 2*kernel[1]*std::min(inputWeight[(i - 1)/2*loW + j], 1.0f)*inputImage[(i - 1)/2*loW + j];
+                    tempArrayWeight[o] += 2*kernel[1]*std::min(inputWeight[(i - 1)/2*loW + j], 1.0f);
+                }
+
+                if(loH - 1 < (i + 1)/2) {
+                    tempArrayImage[o] += 2*kernel[1]*std::min(inputWeight[(loH - 1)*loW + j], 1.0f)*inputImage[(loH - 1)*loW + j];
+                    tempArrayWeight[o] += 2*kernel[1]*std::min(inputWeight[(loH - 1)*loW + j], 1.0f);
+                } else {
+                    tempArrayImage[o] += 2*kernel[1]*std::min(inputWeight[(i + 1)/2*loW + j], 1.0f)*inputImage[(i + 1)/2*loW + j];
+                    tempArrayWeight[o] += 2*kernel[1]*std::min(inputWeight[(i + 1)/2*loW + j], 1.0f);
+                }
+            }
+        }
+    }
+
+    for(int i = 0 ; i < hiH ; ++i) {
+        for(int j = 0 ; j < hiW ; ++j) {
+
+            uint o = i*hiW + j;
+
+            cv::Point3f tmpOutputImage = cv::Point3f(0.0f, 0.0f, 0.0f);
+            float tmpOutputWeight = 0.0f;
+
+            if(j%2 == 0) {
+
+                if((j - 2)/2 < 0) {
+                    tmpOutputImage += 2*kernel[2]*std::min(tempArrayWeight[i*loW], 1.0f)*tempArrayImage[i*loW];
+                    tmpOutputWeight += 2*kernel[2]*std::min(tempArrayWeight[i*loW], 1.0f);
+                } else {
+                    tmpOutputImage += 2*kernel[2]*std::min(tempArrayWeight[i*loW + (j - 2)/2], 1.0f)*tempArrayImage[i*loW + (j - 2)/2];
+                    tmpOutputWeight += 2*kernel[2]*std::min(tempArrayWeight[i*loW + (j - 2)/2], 1.0f);
+                }
+
+                if(loW - 1 < j/2) {
+                    tmpOutputImage += 2*kernel[0]*std::min(tempArrayWeight[i*loW + (loW - 1)], 1.0f)*tempArrayImage[i*loW + (loW - 1)];
+                    tmpOutputWeight += 2*kernel[0]*std::min(tempArrayWeight[i*loW + (loW - 1)], 1.0f);
+                } else {
+                    tmpOutputImage += 2*kernel[0]*std::min(tempArrayWeight[i*loW + j/2], 1.0f)*tempArrayImage[i*loW + j/2];
+                    tmpOutputWeight += 2*kernel[0]*std::min(tempArrayWeight[i*loW + j/2], 1.0f);
+                }
+
+                if(loW - 1 < (j + 2)/2) {
+                    tmpOutputImage += 2*kernel[2]*std::min(tempArrayWeight[i*loW + (loW - 1)], 1.0f)*tempArrayImage[i*loW + (loW - 1)];
+                    tmpOutputWeight += 2*kernel[2]*std::min(tempArrayWeight[i*loW + (loW - 1)], 1.0f);
+                } else {
+                    tmpOutputImage += 2*kernel[2]*std::min(tempArrayWeight[i*loW + (j + 2)/2], 1.0f)*tempArrayImage[i*loW + (j + 2)/2];
+                    tmpOutputWeight += 2*kernel[2]*std::min(tempArrayWeight[i*loW + (j + 2)/2], 1.0f);
+                }
+
+            } else {
+
+                if((j - 1)/2 < 0) {
+                    tmpOutputImage += 2*kernel[1]*std::min(tempArrayWeight[i*loW], 1.0f)*tempArrayImage[i*loW];
+                    tmpOutputWeight += 2*kernel[1]*std::min(tempArrayWeight[i*loW], 1.0f);
+                } else {
+                    tmpOutputImage += 2*kernel[1]*std::min(tempArrayWeight[i*loW + (j - 1)/2], 1.0f)*tempArrayImage[i*loW + (j - 1)/2];
+                    tmpOutputWeight += 2*kernel[1]*std::min(tempArrayWeight[i*loW + (j - 1)/2], 1.0f);
+                }
+
+                if(loW - 1 < (j + 1)/2) {
+                    tmpOutputImage += 2*kernel[1]*std::min(tempArrayWeight[i*loW + (loW - 1)], 1.0f)*tempArrayImage[i*loW + (loW - 1)];
+                    tmpOutputWeight += 2*kernel[1]*std::min(tempArrayWeight[i*loW + (loW - 1)], 1.0f);
+                } else {
+                    tmpOutputImage += 2*kernel[1]*std::min(tempArrayWeight[i*loW + (j + 1)/2], 1.0f)*tempArrayImage[i*loW + (j + 1)/2];
+                    tmpOutputWeight += 2*kernel[1]*std::min(tempArrayWeight[i*loW + (j + 1)/2], 1.0f);
+                }
+            }
+
+            // normalization
+            if(tmpOutputWeight > 0.0f) {
+
+                tmpOutputImage /= tmpOutputWeight;
+            }
+
+            // compositing
+            outputImage[o] = (1.0f - outputWeight[o]) * tmpOutputImage + outputWeight[o] * outputImage[o];
+            outputWeight[o] = (1.0f - outputWeight[o]) * tmpOutputWeight + outputWeight[o];
         }
     }
 }
