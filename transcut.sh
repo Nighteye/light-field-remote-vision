@@ -8,10 +8,14 @@ for i in {1..7}
 do
 	for j in {1..7}
 	do
+		rm 'out/IBR_optical/transcut/obj'$i'_scn'$j'/model_9p_LIN_12.pfm'
+		rm 'out/IBR_optical/transcut/obj'$i'_scn'$j'/model_9p_LIN_04.pfm'
+		rm 'out/IBR_optical/transcut/obj'$i'_scn'$j'/model_9p_LIN_22.pfm'
+		rm 'out/IBR_optical/transcut/obj'$i'_scn'$j'/model_9p_LIN_allViews.pfm'
 		./ULF -config 'configs/IBR_optical/transcut/obj'$i'scn'$j'view12'
 		./ULF -config 'configs/IBR_optical/transcut/obj'$i'scn'$j'view04'
 		./ULF -config 'configs/IBR_optical/transcut/obj'$i'scn'$j'view22'
-#		./ULF -config 'configs/IBR_optical/transcut/obj'$i'scn'$j'allViews'
+		./ULF -config 'configs/IBR_optical/transcut/obj'$i'scn'$j'allViews'
 	done
 done
 

@@ -1776,17 +1776,17 @@ void LFScene::curveFittingColor() {
     // SAVE PARAMETER MAPS (LINEAR METHOD ONLY) AND FINAL COST MAPS
     if(_renderIndex >= 0) {
 
-        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
-        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
-        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_%02lu.pfm", _renderIndex);
+        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_%02lu_s.pfm", _renderIndex);
+        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_%02lu_t.pfm", _renderIndex);
+        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_%02lu_0.pfm", _renderIndex);
 
         save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_LIN_%02lu.pfm", _renderIndex);
 
     } else {
 
-        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
-        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
-        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews.pfm", _renderIndex);
+        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_allViews_s.pfm", _renderIndex);
+        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews_t.pfm", _renderIndex);
+        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews_0.pfm", _renderIndex);
 
         save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_LIN_allViews.pfm", _renderIndex);
     }
