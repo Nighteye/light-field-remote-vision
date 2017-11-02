@@ -236,6 +236,17 @@ private:
     std::vector<int> _tIndicesRight;
     std::vector<int> _sIndicesLeft;
     std::vector<int> _tIndicesLeft;
+
+    std::vector<cv::Point3f> map3param(nbPixels);
+    std::vector<cv::Point2f> mapAlpha4param(nbPixels);
+    std::vector<cv::Point2f> mapBeta4param(nbPixels);
+    std::vector<cv::Point2f> mapAlphau6param(nbPixels);
+    std::vector<cv::Point2f> mapAlphav6param(nbPixels);
+    std::vector<cv::Point2f> mapBeta6param(nbPixels);
+
+    std::vector<cv::Point3f> mapS9param(nbPixels);
+    std::vector<cv::Point3f> mapT9param(nbPixels);
+    std::vector<cv::Point3f> map09param(nbPixels);
 };
 
 #endif /* #ifndef LF_SCENE_H */

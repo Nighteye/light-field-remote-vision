@@ -2853,54 +2853,181 @@ void LFScene::renderLightFlowVideo() {
     }
 }
 
+void LFScene::renderFrame(const uint frame, const std::string &geomModel, const std::string &photoModel) {
+
+    const uint nbPixels = _camWidth*_camHeight;
+
+    // OUTPUT IMAGE
+    std::vector<cv::Point3f> outputImage(nbPixels);
+    std::vector<float> weightMap(nbPixels); // splat contribution (for normalization)
+
+    // TARGET CAM PARAMETERS
+    PinholeCamera targetCam;
+    cv::Mat targetR, targetK;
+    cv::Point3f targetC;
+
+    if(_renderIndex >= 0) {
+
+        targetCam = _vCam[_renderIndex]->getPinholeCamera();
+
+    } else {
+
+        // TARGET CAM PARAMETERS
+
+        //        std::string targetCameraName = _outdir + "/%08i.ini";
+        //        char targetCameraNameChar[500];
+        //        memset(targetCameraNameChar, 0, sizeof(targetCameraNameChar));
+        //        sprintf( targetCameraNameChar, targetCameraName.c_str(), frame );
+        //        loadTargetView(targetK, targetR, targetC, std::string(targetCameraNameChar));
+
+        // INPUT VIEWS
+        //        targetCam = _vCam[frame]->getPinholeCamera();
+
+        // ZOOM
+        //        targetCam = _vCam[12]->getPinholeCamera();
+        //        targetCam._K[0][0] += (float)frame * 600.0f;
+        //        targetCam._K[1][1] += (float)frame * 600.0f;
+
+        // PANNING
+        targetCam = _vCam[_centralIndex]->getPinholeCamera();
+        const float step = 50;
+        PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 2]->getPinholeCamera();
+        PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 2]->getPinholeCamera();
+        targetCam._C = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
+        targetCam._C = targetCam._C + (float)frame * 2.5f * glm::vec3(0, 0, 1) + (float)frame * 0.5f * glm::vec3(0, 1, 0);
+    }
+
+    targetK = (cv::Mat_<float>(3,3) << targetCam._K[0][0], targetCam._K[1][0], targetCam._K[2][0],
+            targetCam._K[0][1], targetCam._K[1][1], targetCam._K[2][1],
+            targetCam._K[0][2], targetCam._K[1][2], targetCam._K[2][2]);
+    targetR = (cv::Mat_<float>(3,3) << targetCam._R[0][0], targetCam._R[1][0], targetCam._R[2][0],
+            targetCam._R[0][1], targetCam._R[1][1], targetCam._R[2][1],
+            targetCam._R[0][2], targetCam._R[1][2], targetCam._R[2][2]);
+    targetC = cv::Point3f((float)targetCam._C[0], (float)targetCam._C[1], (float)targetCam._C[2]);
+
+    //        targetC.z = 0.0;
+
+    // init buffers
+    for(uint i = 0 ; i < nbPixels ; ++i) {
+
+        outputImage[i] = cv::Point3f(0.0, 0.0, 0.0);
+        weightMap[i] = 0.0;
+    }
+
+    std::cout << "Blending step" << std::endl;
+    for(uint y = _windowH1 ; y < _windowH2 ; ++y) {
+        for(uint x = _windowW1 ; x < _windowW2 ; ++x) {
+
+            const uint idx = y*_camWidth + x;
+
+            // find position (splat destination and size/orientation)
+
+            cv::Point2f destPoint = cv::Point2f(0.0, 0.0);
+
+            if() { // 3 PARAMETERS
+
+            }
+            const cv::Point3f parameters = map3param[idx];
+
+
+            splatProjection3param(destPoint, parameters, targetK, targetR, targetC);
+
+//                splatProjection6param2(destPoint, color, alphau6param, alphav6param, beta6param, parameterSMap[idx], parameterTMap[idx], parameter0Map[idx], targetK, targetR, targetC);
+
+            // interpolation (splatting)
+            if(0.0 <= destPoint.x && destPoint.x < (float)_camWidth &&
+                    0.0 <= destPoint.y && destPoint.y < (float)_camHeight) {
+
+                projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage, weightMap, destPoint);
+            }
+
+            // 4 PARAMETERS
+            const cv::Point2f alpha4param = mapAlpha4param[idx];
+            const cv::Point2f beta4param = mapBeta4param[idx];
+
+            splatProjection4param(destPoint, alpha4param, beta4param, targetK, targetR, targetC);
+
+            // interpolation (splatting)
+            if(0.0 <= destPoint.x && destPoint.x < (float)_camWidth &&
+                    0.0 <= destPoint.y && destPoint.y < (float)_camHeight) {
+
+                projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage, weightMap, destPoint);
+            }
+
+            // 6 PARAMETERS
+            const cv::Point2f alphau6param = mapAlphau6param[idx];
+            const cv::Point2f alphav6param = mapAlphav6param[idx];
+            const cv::Point2f beta6param = mapBeta6param[idx];
+
+            splatProjection6param(destPoint, alphau6param, alphav6param, beta6param, targetK, targetR, targetC);
+
+            // interpolation (splatting)
+            if(0.0 <= destPoint.x && destPoint.x < (float)_camWidth &&
+                    0.0 <= destPoint.y && destPoint.y < (float)_camHeight) {
+
+                projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage, weightMap, destPoint);
+            }
+        }
+    }
+
+    std::cout << "Normalization step" << std::endl;
+    for(uint i = 0 ; i < nbPixels ; ++i) {
+
+        if(weightMap3param[i] != 0) {
+            outputImage[i] /= weightMap[i];
+        }
+    }
+
+    std::cout << "Hole filling" << std::endl;
+    pushPull(_camWidth, _camHeight, outputImage, weightMap);
+
+//        std::cout << "PULL/PUSH" << std::endl;
+//        pushPullGortler(_camWidth, _camHeight, outputImage, weightMap);
+
+    // SAVE PNG OUTMUT FILES
+
+    if(_renderIndex >= 0) {
+
+        save3uMap(outputImage, _outdir + "/" + geomModel + "_" + photoModel + "_%02lu.png", _renderIndex);
+
+    } else {
+
+        save3uMap(outputImage, _outdir + "/" + geomModel + "_" + photoModel + "_panning_%03lu.png", frame);
+//        save3uMap(outputImage, _outdir + "/" + geomModel + "_" + photoModel + "_zooming_%03lu.png", frame);
+    }
+}
+
 void LFScene::renderLightFlowLambertianVideo() {
 
     const uint nbPixels = _camWidth*_camHeight;
 
-    // TARGET CAM PARAMETERS
-
-    cv::Mat targetR, targetK;
-    cv::Point3f targetC;
-
     // LOAD PHOTOMETRIC AND GEOMETRIC MODEL PARAMETERS
-
-    std::vector<cv::Point3f> map3param(nbPixels);
-    std::vector<cv::Point2f> mapAlpha4param(nbPixels);
-    std::vector<cv::Point2f> mapBeta4param(nbPixels);
-    std::vector<cv::Point2f> mapAlphau6param(nbPixels);
-    std::vector<cv::Point2f> mapAlphav6param(nbPixels);
-    std::vector<cv::Point2f> mapBeta6param(nbPixels);
-
-    std::vector<cv::Point3f> mapS9param(nbPixels);
-    std::vector<cv::Point3f> mapT9param(nbPixels);
-    std::vector<cv::Point3f> map09param(nbPixels);
-
 
     if(_renderIndex >= 0) {
 
-        load3fMap(map3param, _outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex);
-        load2fMap(mapAlpha4param, _outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex);
-        load2fMap(mapBeta4param, _outdir + "/model_4g_IHM_%02lu_b.pfm", _renderIndex);
-        load2fMap(mapAlphau6param, _outdir + "/model_6g_IHM_%02lu_au.pfm", _renderIndex);
-        load2fMap(mapAlphav6param, _outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex);
-        load2fMap(mapBeta6param, _outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex);
+        load3fMap(_map3param, _outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex);
+        load2fMap(_mapAlpha4param, _outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex);
+        load2fMap(_mapBeta4param, _outdir + "/model_4g_IHM_%02lu_b.pfm", _renderIndex);
+        load2fMap(_mapAlphau6param, _outdir + "/model_6g_IHM_%02lu_au.pfm", _renderIndex);
+        load2fMap(_mapAlphav6param, _outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex);
+        load2fMap(_mapBeta6param, _outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex);
 
-        load3fMap(mapS9param, _outdir + "/model_9p_LIN_%02lu_s.pfm", _renderIndex);
-        load3fMap(mapT9param, _outdir + "/model_9p_LIN_%02lu_t.pfm", _renderIndex);
-        load3fMap(map09param, _outdir + "/model_9p_LIN_%02lu_0.pfm", _renderIndex);
+        load3fMap(_mapS9param, _outdir + "/model_9p_LIN_%02lu_s.pfm", _renderIndex);
+        load3fMap(_mapT9param, _outdir + "/model_9p_LIN_%02lu_t.pfm", _renderIndex);
+        load3fMap(_map09param, _outdir + "/model_9p_LIN_%02lu_0.pfm", _renderIndex);
 
     } else {
 
-        load3fMap(map3param, _outdir + "/model_3g_IHM_allViews.pfm", _renderIndex);
-        load2fMap(mapAlpha4param, _outdir + "/model_4g_IHM_allViews_a.pfm", _renderIndex);
-        load2fMap(mapBeta4param, _outdir + "/model_4g_IHM_allViews_b.pfm", _renderIndex);
-        load2fMap(mapAlphau6param, _outdir + "/model_6g_IHM_allViews_au.pfm", _renderIndex);
-        load2fMap(mapAlphav6param, _outdir + "/model_6g_IHM_allViews_av.pfm", _renderIndex);
-        load2fMap(mapBeta6param, _outdir + "/model_6g_IHM_allViews_b.pfm", _renderIndex);
+        load3fMap(_map3param, _outdir + "/model_3g_IHM_allViews.pfm", _renderIndex);
+        load2fMap(_mapAlpha4param, _outdir + "/model_4g_IHM_allViews_a.pfm", _renderIndex);
+        load2fMap(_mapBeta4param, _outdir + "/model_4g_IHM_allViews_b.pfm", _renderIndex);
+        load2fMap(_mapAlphau6param, _outdir + "/model_6g_IHM_allViews_au.pfm", _renderIndex);
+        load2fMap(_mapAlphav6param, _outdir + "/model_6g_IHM_allViews_av.pfm", _renderIndex);
+        load2fMap(_mapBeta6param, _outdir + "/model_6g_IHM_allViews_b.pfm", _renderIndex);
 
-        load3fMap(mapS9param, _outdir + "/model_9p_LIN_allViews_s.pfm", _renderIndex);
-        load3fMap(mapT9param, _outdir + "/model_9p_LIN_allViews_t.pfm", _renderIndex);
-        load3fMap(map09param, _outdir + "/model_9p_LIN_allViews_0.pfm", _renderIndex);
+        load3fMap(_mapS9param, _outdir + "/model_9p_LIN_allViews_s.pfm", _renderIndex);
+        load3fMap(_mapT9param, _outdir + "/model_9p_LIN_allViews_t.pfm", _renderIndex);
+        load3fMap(_map09param, _outdir + "/model_9p_LIN_allViews_0.pfm", _renderIndex);
     }
 
     // for every light flow (set of parameters)
@@ -2909,7 +3036,6 @@ void LFScene::renderLightFlowLambertianVideo() {
     // assign the splat destination the computed average color
 
     // AVERAGE COLOR IMAGE
-    // TODO: interpolate color like position
 
     std::vector<cv::Point3f> colorMap(nbPixels);
 
@@ -2944,17 +3070,6 @@ void LFScene::renderLightFlowLambertianVideo() {
         }
     }
 
-    // OUTPUT IMAGE
-
-    std::vector<cv::Point3f> outputImage3param(nbPixels);
-    std::vector<float> weightMap3param(nbPixels); // splat contribution (for normalization)
-
-    std::vector<cv::Point3f> outputImage4param(nbPixels);
-    std::vector<float> weightMap4param(nbPixels); // splat contribution (for normalization)
-
-    std::vector<cv::Point3f> outputImage6param(nbPixels);
-    std::vector<float> weightMap6param(nbPixels); // splat contribution (for normalization)
-
     std::cout << "RENDERING " << std::endl;
 
     const int firstFrame = 0;
@@ -2964,161 +3079,13 @@ void LFScene::renderLightFlowLambertianVideo() {
     }
     for(int frame = firstFrame ; frame <= lastFrame ; ++frame) {
 
-        PinholeCamera targetCam;
+        renderFrame(frame, "3p", "IBR");
+        renderFrame(frame, "4p", "IBR");
+        renderFrame(frame, "6p", "IBR");
 
-        if(_renderIndex >= 0) {
-
-            targetCam = _vCam[_renderIndex]->getPinholeCamera();
-
-        } else {
-
-            // TARGET CAM PARAMETERS
-
-            //        std::string targetCameraName = _outdir + "/%08i.ini";
-            //        char targetCameraNameChar[500];
-            //        memset(targetCameraNameChar, 0, sizeof(targetCameraNameChar));
-            //        sprintf( targetCameraNameChar, targetCameraName.c_str(), frame );
-            //        loadTargetView(targetK, targetR, targetC, std::string(targetCameraNameChar));
-
-            // INPUT VIEWS
-            //        targetCam = _vCam[frame]->getPinholeCamera();
-
-            // ZOOM
-            //        targetCam = _vCam[12]->getPinholeCamera();
-            //        targetCam._K[0][0] += (float)frame * 600.0f;
-            //        targetCam._K[1][1] += (float)frame * 600.0f;
-
-            // PANNING
-            targetCam = _vCam[_centralIndex]->getPinholeCamera();
-            const float step = 50;
-            PinholeCamera pinholeCamera1 = _vCam[_centralIndex - 2]->getPinholeCamera();
-            PinholeCamera pinholeCamera2 = _vCam[_centralIndex + 2]->getPinholeCamera();
-            targetCam._C = pinholeCamera1._C + (float)frame * (pinholeCamera2._C - pinholeCamera1._C) / step;
-            targetCam._C = targetCam._C + (float)frame * 2.5f * glm::vec3(0, 0, 1) + (float)frame * 0.5f * glm::vec3(0, 1, 0);
-        }
-
-        targetK = (cv::Mat_<float>(3,3) << targetCam._K[0][0], targetCam._K[1][0], targetCam._K[2][0],
-                targetCam._K[0][1], targetCam._K[1][1], targetCam._K[2][1],
-                targetCam._K[0][2], targetCam._K[1][2], targetCam._K[2][2]);
-        targetR = (cv::Mat_<float>(3,3) << targetCam._R[0][0], targetCam._R[1][0], targetCam._R[2][0],
-                targetCam._R[0][1], targetCam._R[1][1], targetCam._R[2][1],
-                targetCam._R[0][2], targetCam._R[1][2], targetCam._R[2][2]);
-        targetC = cv::Point3f((float)targetCam._C[0], (float)targetCam._C[1], (float)targetCam._C[2]);
-
-        //        targetC.z = 0.0;
-
-        // init buffers
-        for(uint i = 0 ; i < nbPixels ; ++i) {
-
-            outputImage3param[i] = cv::Point3f(0.0, 0.0, 0.0);
-            weightMap3param[i] = 0.0;
-
-            outputImage4param[i] = cv::Point3f(0.0, 0.0, 0.0);
-            weightMap4param[i] = 0.0;
-
-            outputImage6param[i] = cv::Point3f(0.0, 0.0, 0.0);
-            weightMap6param[i] = 0.0;
-        }
-
-        std::cout << "Blending step" << std::endl;
-        for(uint y = _windowH1 ; y < _windowH2 ; ++y) {
-            for(uint x = _windowW1 ; x < _windowW2 ; ++x) {
-
-                const uint idx = y*_camWidth + x;
-
-                // find position (splat destination and size/orientation)
-
-                // 3 PARAMETERS
-                cv::Point2f destPoint3param = cv::Point2f(0.0, 0.0);
-                const cv::Point3f parameters = map3param[idx];
-
-
-                splatProjection3param(destPoint3param, parameters, targetK, targetR, targetC);
-
-                splatProjection6param2(destPoint6param, color, alphau6param, alphav6param, beta6param, parameterSMap[idx], parameterTMap[idx], parameter0Map[idx], targetK, targetR, targetC);
-
-                // interpolation (splatting)
-                if(0.0 <= destPoint3param.x && destPoint3param.x < (float)_camWidth &&
-                        0.0 <= destPoint3param.y && destPoint3param.y < (float)_camHeight) {
-
-                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage3param, weightMap3param, destPoint3param);
-                }
-
-                // 4 PARAMETERS
-                cv::Point2f destPoint4param = cv::Point2f(0.0, 0.0);
-                const cv::Point2f alpha4param = mapAlpha4param[idx];
-                const cv::Point2f beta4param = mapBeta4param[idx];
-
-                splatProjection4param(destPoint4param, alpha4param, beta4param, targetK, targetR, targetC);
-
-                // interpolation (splatting)
-                if(0.0 <= destPoint4param.x && destPoint4param.x < (float)_camWidth &&
-                        0.0 <= destPoint4param.y && destPoint4param.y < (float)_camHeight) {
-
-                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage4param, weightMap4param, destPoint4param);
-                }
-
-                // 6 PARAMETERS
-                cv::Point2f destPoint6param = cv::Point2f(0.0, 0.0);
-                const cv::Point2f alphau6param = mapAlphau6param[idx];
-                const cv::Point2f alphav6param = mapAlphav6param[idx];
-                const cv::Point2f beta6param = mapBeta6param[idx];
-
-                splatProjection6param(destPoint6param, alphau6param, alphav6param, beta6param, targetK, targetR, targetC);
-
-                // interpolation (splatting)
-                if(0.0 <= destPoint6param.x && destPoint6param.x < (float)_camWidth &&
-                        0.0 <= destPoint6param.y && destPoint6param.y < (float)_camHeight) {
-
-                    projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage6param, weightMap6param, destPoint6param);
-                }
-            }
-        }
-
-        std::cout << "Normalization step" << std::endl;
-        for(uint i = 0 ; i < nbPixels ; ++i) {
-
-            if(weightMap3param[i] != 0) {
-                outputImage3param[i] /= weightMap3param[i];
-            }
-
-            if(weightMap4param[i] != 0) {
-                outputImage4param[i] /= weightMap4param[i];
-            }
-
-            if(weightMap6param[i] != 0) {
-                outputImage6param[i] /= weightMap6param[i];
-            }
-        }
-
-        std::cout << "Hole filling" << std::endl;
-        pushPull(_camWidth, _camHeight, outputImage3param, weightMap3param);
-        pushPull(_camWidth, _camHeight, outputImage4param, weightMap4param);
-        pushPull(_camWidth, _camHeight, outputImage6param, weightMap6param);
-
-//        std::cout << "PULL/PUSH" << std::endl;
-//        pushPullGortler(_camWidth, _camHeight, outputImage3param, weightMap3param);
-//        pushPullGortler(_camWidth, _camHeight, outputImage4param, weightMap4param);
-//        pushPullGortler(_camWidth, _camHeight, outputImage6param, weightMap6param);
-
-        // SAVE PNG OUTMUT FILES
-
-        if(_renderIndex >= 0) {
-
-            save3uMap(outputImage3param, _outdir + "/3g_IBR_%02lu.png", _renderIndex);
-            save3uMap(outputImage4param, _outdir + "/4g_IBR_%02lu.png", _renderIndex);
-            save3uMap(outputImage6param, _outdir + "/6g_IBR_%02lu.png", _renderIndex);
-
-        } else {
-
-            save3uMap(outputImage3param, _outdir + "/3g_IBR_panning_%03lu.png", frame);
-            save3uMap(outputImage4param, _outdir + "/4g_IBR_panning_%03lu.png", frame);
-            save3uMap(outputImage6param, _outdir + "/6g_IBR_panning_%03lu.png", frame);
-
-            //            save3uMap(outputImage3param, _outdir + "/3g_IBR_zooming_%03lu.png", frame);
-            //            save3uMap(outputImage4param, _outdir + "/4g_IBR_zooming_%03lu.png", frame);
-            //            save3uMap(outputImage6param, _outdir + "/6g_IBR_zooming_%03lu.png", frame);
-        }
+        renderFrame(frame, "3p", "9p");
+        renderFrame(frame, "4p", "9p");
+        renderFrame(frame, "6p", "9p");
     }
 }
 
