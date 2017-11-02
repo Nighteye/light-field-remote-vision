@@ -1219,7 +1219,7 @@ void LFScene::computeFlowedLFCustomConfig() {
     for(uint viewIndex = 0 ; viewIndex < _nbCameras ; ++viewIndex) {
         
         if(viewIndex == _nbCameras/2) {
-            std::cout << "central flow, don't load" << std::endl;
+            std::cout << "central flow, don't load" << std::endl; // optical flow of central view is always set to 0
             continue;
         }
         
@@ -1251,6 +1251,8 @@ void LFScene::computeFlowedLFCustomConfig() {
             }
             int idx2 = 0;
             
+            _flowedLightField[idx1][_nbCameras/2] = cv::Point2f((float)x, (float)y); // central view, always append
+
             x2 = cv::Point2f((float)x + flowLtoR[6][idx1].x, (float)y + flowLtoR[6][idx1].y);
             _flowedLightField[idx1][6] = x2;
             if(0 <= x2.x && x2.x < _camWidth &&
@@ -2860,7 +2862,7 @@ void LFScene::renderLightFlowLambertianVideo() {
     cv::Mat targetR, targetK;
     cv::Point3f targetC;
 
-    // LOAD POSITION MODEL PARAMETERS
+    // LOAD PHOTOMETRIC AND GEOMETRIC MODEL PARAMETERS
 
     std::vector<cv::Point3f> map3param(nbPixels);
     std::vector<cv::Point2f> mapAlpha4param(nbPixels);
@@ -2868,6 +2870,11 @@ void LFScene::renderLightFlowLambertianVideo() {
     std::vector<cv::Point2f> mapAlphau6param(nbPixels);
     std::vector<cv::Point2f> mapAlphav6param(nbPixels);
     std::vector<cv::Point2f> mapBeta6param(nbPixels);
+
+    std::vector<cv::Point3f> mapS9param(nbPixels);
+    std::vector<cv::Point3f> mapT9param(nbPixels);
+    std::vector<cv::Point3f> map09param(nbPixels);
+
 
     if(_renderIndex >= 0) {
 
@@ -2878,6 +2885,10 @@ void LFScene::renderLightFlowLambertianVideo() {
         load2fMap(mapAlphav6param, _outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex);
         load2fMap(mapBeta6param, _outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex);
 
+        load3fMap(mapS9param, _outdir + "/model_9p_LIN_%02lu_s.pfm", _renderIndex);
+        load3fMap(mapT9param, _outdir + "/model_9p_LIN_%02lu_t.pfm", _renderIndex);
+        load3fMap(map09param, _outdir + "/model_9p_LIN_%02lu_0.pfm", _renderIndex);
+
     } else {
 
         load3fMap(map3param, _outdir + "/model_3g_IHM_allViews.pfm", _renderIndex);
@@ -2886,6 +2897,10 @@ void LFScene::renderLightFlowLambertianVideo() {
         load2fMap(mapAlphau6param, _outdir + "/model_6g_IHM_allViews_au.pfm", _renderIndex);
         load2fMap(mapAlphav6param, _outdir + "/model_6g_IHM_allViews_av.pfm", _renderIndex);
         load2fMap(mapBeta6param, _outdir + "/model_6g_IHM_allViews_b.pfm", _renderIndex);
+
+        load3fMap(mapS9param, _outdir + "/model_9p_LIN_allViews_s.pfm", _renderIndex);
+        load3fMap(mapT9param, _outdir + "/model_9p_LIN_allViews_t.pfm", _renderIndex);
+        load3fMap(map09param, _outdir + "/model_9p_LIN_allViews_0.pfm", _renderIndex);
     }
 
     // for every light flow (set of parameters)
@@ -3017,7 +3032,10 @@ void LFScene::renderLightFlowLambertianVideo() {
                 cv::Point2f destPoint3param = cv::Point2f(0.0, 0.0);
                 const cv::Point3f parameters = map3param[idx];
 
+
                 splatProjection3param(destPoint3param, parameters, targetK, targetR, targetC);
+
+                splatProjection6param2(destPoint6param, color, alphau6param, alphav6param, beta6param, parameterSMap[idx], parameterTMap[idx], parameter0Map[idx], targetK, targetR, targetC);
 
                 // interpolation (splatting)
                 if(0.0 <= destPoint3param.x && destPoint3param.x < (float)_camWidth &&

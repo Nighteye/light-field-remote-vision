@@ -267,8 +267,8 @@ int main( int argc, char **argv ) {
         //                !lfScene.checkExistenceNoArg(config_data->_outdir + "/model_6g_IHM_allViews_av.pfm") ||
         //                !lfScene.checkExistenceNoArg(config_data->_outdir + "/model_6g_IHM_allViews_b.pfm"))
 
-//        std::cout << "Fit position models to light flow samples, with inhomogeneous method (IHM) initialization" << std::endl;
-//        lfScene.curveFitting(); // OK
+        std::cout << "Fit position models to light flow samples, with inhomogeneous method (IHM) initialization" << std::endl;
+        lfScene.curveFitting(); // OK
 
         std::cout << "Fit color models to light flow samples" << std::endl;
         lfScene.curveFittingColor();
@@ -280,14 +280,14 @@ int main( int argc, char **argv ) {
         //                !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex) ||
         //                !lfScene.checkExistence(config_data->_outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex))
 
-//        std::cout << "Perform model selection via BIC" << std::endl;
-//        lfScene.bic();
+        std::cout << "Perform model selection via BIC" << std::endl;
+        lfScene.bic();
 
-//        std::cout << "Render image by interpolating the light flow" << std::endl;
+        std::cout << "Render image by interpolating the light flow" << std::endl;
 
-//        //        lfScene.renderLightFlow(); // NOT OK
-//        //        lfScene.renderLightFlowLambertianModel(); // NOT OK
-//        lfScene.renderLightFlowLambertianVideo(); // OK
+        //        lfScene.renderLightFlow(); // NOT OK
+        //        lfScene.renderLightFlowLambertianModel(); // NOT OK
+        lfScene.renderLightFlowLambertianVideo(); // OK
 
         // DEPRECATED FUNCTIONS
 
