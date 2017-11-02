@@ -31,20 +31,18 @@ void pushPull(int W, int H, std::vector<cv::Point3f>& image, const std::vector<f
         imagePyramid[s].assign(wscale*hscale, cv::Point3f(0.0f, 0.0f, 0.0f));
         visibilityPyramid[s].assign(wscale*hscale, false);
 
-        oddHDCReduceRGB(Wscale, Hscale, wscale, hscale,
-                        imagePyramid[s - 1], imagePyramid[s],
-                visibilityPyramid[s - 1], visibilityPyramid[s]);
+        oddHDCReduceRGB(Wscale, Hscale, wscale, hscale, imagePyramid[s - 1], imagePyramid[s], visibilityPyramid[s - 1], visibilityPyramid[s]);
 
-        std::cout << "Writing reduced image " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(s) + ".pfm" << std::endl;
-        savePFM(imagePyramid[s], wscale, hscale, "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(s) + ".pfm");
-        std::cout << "Writing reduced weight " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(s) + ".pfm" << std::endl;
-        savePFM(visibilityPyramid[s], wscale, hscale, "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(s) + ".pfm");
+//        std::cout << "Writing reduced image " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(s) + ".pfm" << std::endl;
+//        savePFM(imagePyramid[s], wscale, hscale, "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(s) + ".pfm");
+//        std::cout << "Writing reduced weight " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(s) + ".pfm" << std::endl;
+//        savePFM(visibilityPyramid[s], wscale, hscale, "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(s) + ".pfm");
     }
 
-    std::cout << "Writing reduced image " << 0 << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(0) + ".pfm" << std::endl;
-    savePFM(imagePyramid[0], W, H, "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(0) + ".pfm");
-    std::cout << "Writing reduced weight " << 0 << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(0) + ".pfm" << std::endl;
-    savePFM(visibilityPyramid[0], W, H, "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(0) + ".pfm");
+//    std::cout << "Writing reduced image " << 0 << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(0) + ".pfm" << std::endl;
+//    savePFM(imagePyramid[0], W, H, "out/IBR_optical/transcut/obj1_scn1/reducedImage" + std::to_string(0) + ".pfm");
+//    std::cout << "Writing reduced weight " << 0 << " in " << "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(0) + ".pfm" << std::endl;
+//    savePFM(visibilityPyramid[0], W, H, "out/IBR_optical/transcut/obj1_scn1/reducedWeight" + std::to_string(0) + ".pfm");
 
     for(uint s = (uint)pyramidHeight ; 0 < s ; --s) {
 
@@ -55,10 +53,10 @@ void pushPull(int W, int H, std::vector<cv::Point3f>& image, const std::vector<f
 
         oddHDCExpandRGB(wscale, hscale, Wscale, Hscale, imagePyramid[s], imagePyramid[s-1], visibilityPyramid[s-1]);
 
-        std::cout << "Writing expanded image " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/expandedImage" + std::to_string(s) + ".pfm" << std::endl;
-        savePFM(imagePyramid[s-1], Wscale, Hscale, "out/IBR_optical/transcut/obj1_scn1/expandedImage" + std::to_string(s) + ".pfm");
-        std::cout << "Writing expanded weight " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/expandedWeight" + std::to_string(s) + ".pfm" << std::endl;
-        savePFM(visibilityPyramid[s-1], Wscale, Hscale, "out/IBR_optical/transcut/obj1_scn1/expandedWeight" + std::to_string(s) + ".pfm");
+//        std::cout << "Writing expanded image " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/expandedImage" + std::to_string(s) + ".pfm" << std::endl;
+//        savePFM(imagePyramid[s-1], Wscale, Hscale, "out/IBR_optical/transcut/obj1_scn1/expandedImage" + std::to_string(s) + ".pfm");
+//        std::cout << "Writing expanded weight " << s << " in " << "out/IBR_optical/transcut/obj1_scn1/expandedWeight" + std::to_string(s) + ".pfm" << std::endl;
+//        savePFM(visibilityPyramid[s-1], Wscale, Hscale, "out/IBR_optical/transcut/obj1_scn1/expandedWeight" + std::to_string(s) + ".pfm");
     }
 
     image = imagePyramid[0];

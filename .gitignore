@@ -11,6 +11,7 @@ obj
 *.tar.gz
 
 psnr/psnr
+psnr/results
 unitTest/unitTest
 
 configs/IBR_optical/transcut/obj*

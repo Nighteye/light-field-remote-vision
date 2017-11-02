@@ -37,7 +37,8 @@ done
 # EVALUATE RESULT QUALITY
 
 timestamp=$(date)
-touch "psnr/$timestamp"
+filename="psnr/results/$timestamp"
+touch "$filename"
 
 for i in {1..7}
 do
@@ -53,19 +54,19 @@ do
 		psnr4g22=$(psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/22_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/4g_IBR_22.png')
 		psnr6g22=$(psnr/psnr 'in/transcut_dataset/obj'$i'/scn'$j'/22_rect.ppm' 'out/IBR_optical/transcut/obj'$i'_scn'$j'/6g_IBR_22.png')
 
-		echo 'obj'$i'/scn'$j >>"psnr/$timestamp"
-		echo 'view 12' >>"psnr/$timestamp"
-		echo $psnr3g12 >>"psnr/$timestamp"
-		echo $psnr4g12 >>"psnr/$timestamp"
-		echo $psnr6g12 >>"psnr/$timestamp"
-		echo 'view 04' >>"psnr/$timestamp"
-		echo $psnr3g04 >>"psnr/$timestamp"
-		echo $psnr4g04 >>"psnr/$timestamp"
-		echo $psnr6g04 >>"psnr/$timestamp"
-		echo 'view 22' >>"psnr/$timestamp"
-		echo $psnr3g22 >>"psnr/$timestamp"
-		echo $psnr4g22 >>"psnr/$timestamp"
-		echo $psnr6g22 >>"psnr/$timestamp"
+		echo 'obj'$i'/scn'$j >>"$filename"
+		echo 'view 12' >>"$filename"
+		echo $psnr3g12 >>"$filename"
+		echo $psnr4g12 >>"$filename"
+		echo $psnr6g12 >>"$filename"
+		echo 'view 04' >>"$filename"
+		echo $psnr3g04 >>"$filename"
+		echo $psnr4g04 >>"$filename"
+		echo $psnr6g04 >>"$filename"
+		echo 'view 22' >>"$filename"
+		echo $psnr3g22 >>"$filename"
+		echo $psnr4g22 >>"$filename"
+		echo $psnr6g22 >>"$filename"
 	done
 done
 
