@@ -210,6 +210,9 @@ public:
     void renderLightFlowVideo();
     void renderLightFlowLambertianVideo();
 
+    // render one frame given the frame number and the geometric and photometric model types
+    void renderFrame(const uint frame, const std::string &geomModel, const std::string &photoModel);
+
 private:
 
     int _unitTest;
@@ -232,21 +235,21 @@ private:
     uint _centralIndex; // index of the central view (for optical flow)
     std::vector<InputCam*> _vCam;
     std::vector<std::vector<cv::Point2f> > _flowedLightField;
+    std::vector<cv::Point3f> _colorMap;
+    std::vector<cv::Point3f> _map3param;
+    std::vector<cv::Point2f> _mapAlpha4param;
+    std::vector<cv::Point2f> _mapBeta4param;
+    std::vector<cv::Point2f> _mapAlphau6param;
+    std::vector<cv::Point2f> _mapAlphav6param;
+    std::vector<cv::Point2f> _mapBeta6param;
+    std::vector<cv::Point3f> _mapS9param;
+    std::vector<cv::Point3f> _mapT9param;
+    std::vector<cv::Point3f> _map09param;
+
     std::vector<int> _sIndicesRight;
     std::vector<int> _tIndicesRight;
     std::vector<int> _sIndicesLeft;
     std::vector<int> _tIndicesLeft;
-
-    std::vector<cv::Point3f> map3param(nbPixels);
-    std::vector<cv::Point2f> mapAlpha4param(nbPixels);
-    std::vector<cv::Point2f> mapBeta4param(nbPixels);
-    std::vector<cv::Point2f> mapAlphau6param(nbPixels);
-    std::vector<cv::Point2f> mapAlphav6param(nbPixels);
-    std::vector<cv::Point2f> mapBeta6param(nbPixels);
-
-    std::vector<cv::Point3f> mapS9param(nbPixels);
-    std::vector<cv::Point3f> mapT9param(nbPixels);
-    std::vector<cv::Point3f> map09param(nbPixels);
 };
 
 #endif /* #ifndef LF_SCENE_H */

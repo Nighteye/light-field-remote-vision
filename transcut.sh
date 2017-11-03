@@ -4,9 +4,9 @@
 
 # ESTIMATE MODELS AND RENDER NOVEL VIEWS
 
-for i in {1..7}
+for i in {1..1}
 do
-	for j in {1..7}
+	for j in {1..1}
 	do
 		./ULF -config 'configs/IBR_optical/transcut/obj'$i'scn'$j'view12'
 		./ULF -config 'configs/IBR_optical/transcut/obj'$i'scn'$j'view04'

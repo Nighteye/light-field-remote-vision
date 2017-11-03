@@ -92,7 +92,17 @@ LFScene::LFScene(bool unitTest,
     _sMin(sMin), _sMax(sMax), _sRmv(sRmv),
     _tMin(tMin), _tMax(tMax), _tRmv(tRmv),
     _stanfordConfig(stanfordConfig),
-    _flowedLightField(camWidth*camHeight) {
+    _flowedLightField(camWidth*camHeight),
+    _colorMap(camWidth*camHeight),
+    _map3param(camWidth*camHeight),
+    _mapAlpha4param(camWidth*camHeight),
+    _mapBeta4param(camWidth*camHeight),
+    _mapAlphau6param(camWidth*camHeight),
+    _mapAlphav6param(camWidth*camHeight),
+    _mapBeta6param(camWidth*camHeight),
+    _mapS9param(camWidth*camHeight),
+    _mapT9param(camWidth*camHeight),
+    _map09param(camWidth*camHeight) {
     
     _mveRdrIdx = 17*_tRmv + _sRmv;
     _S = _sMax - _sMin + 1;
@@ -2911,7 +2921,7 @@ void LFScene::renderFrame(const uint frame, const std::string &geomModel, const 
     for(uint i = 0 ; i < nbPixels ; ++i) {
 
         outputImage[i] = cv::Point3f(0.0, 0.0, 0.0);
-        weightMap[i] = 0.0;
+        weightMap[i] = 0.0f;
     }
 
     std::cout << "Blending step" << std::endl;
@@ -2922,50 +2932,48 @@ void LFScene::renderFrame(const uint frame, const std::string &geomModel, const 
 
             // find position (splat destination and size/orientation)
 
-            cv::Point2f destPoint = cv::Point2f(0.0, 0.0);
+            cv::Point2f destPoint = cv::Point2f(0.0f, 0.0f);
+            cv::Point3f color = _colorMap[idx];
 
-            if() { // 3 PARAMETERS
+            if(std::strcmp(geomModel.c_str(), "3g") == 0) {
 
+                if(std::strcmp(photoModel.c_str(), "IBR") == 0) {
+                    splatProjection3param(destPoint, _map3param[idx], targetK, targetR, targetC);
+                } else if(std::strcmp(photoModel.c_str(), "9p") == 0) {
+                    splatProjection3param2(destPoint, color, _map3param[idx], _mapS9param[idx], _mapT9param[idx], _map09param[idx], targetK, targetR, targetC);
+                } else {
+                    assert(false);
+                }
+
+            } else if(std::strcmp(geomModel.c_str(), "4g") == 0) {
+
+                if(std::strcmp(photoModel.c_str(), "IBR") == 0) {
+                    splatProjection4param(destPoint, _mapAlpha4param[idx], _mapBeta4param[idx], targetK, targetR, targetC);
+                } else if(std::strcmp(photoModel.c_str(), "9p") == 0) {
+                    splatProjection4param2(destPoint, color, _mapAlpha4param[idx], _mapBeta4param[idx], _mapS9param[idx], _mapT9param[idx], _map09param[idx], targetK, targetR, targetC);
+                } else {
+                    assert(false);
+                }
+
+            } else if(std::strcmp(geomModel.c_str(), "6g") == 0) {
+
+                if(std::strcmp(photoModel.c_str(), "IBR") == 0) {
+                    splatProjection6param(destPoint, _mapAlphau6param[idx], _mapAlphav6param[idx], _mapBeta6param[idx], targetK, targetR, targetC);
+                } else if(std::strcmp(photoModel.c_str(), "9p") == 0) {
+                    splatProjection6param2(destPoint, color, _mapAlphau6param[idx], _mapAlphav6param[idx], _mapBeta6param[idx], _mapS9param[idx], _mapT9param[idx], _map09param[idx], targetK, targetR, targetC);
+                } else {
+                    assert(false);
+                }
+
+            } else {
+                assert(false);
             }
-            const cv::Point3f parameters = map3param[idx];
-
-
-            splatProjection3param(destPoint, parameters, targetK, targetR, targetC);
-
-//                splatProjection6param2(destPoint, color, alphau6param, alphav6param, beta6param, parameterSMap[idx], parameterTMap[idx], parameter0Map[idx], targetK, targetR, targetC);
 
             // interpolation (splatting)
             if(0.0 <= destPoint.x && destPoint.x < (float)_camWidth &&
                     0.0 <= destPoint.y && destPoint.y < (float)_camHeight) {
 
-                projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage, weightMap, destPoint);
-            }
-
-            // 4 PARAMETERS
-            const cv::Point2f alpha4param = mapAlpha4param[idx];
-            const cv::Point2f beta4param = mapBeta4param[idx];
-
-            splatProjection4param(destPoint, alpha4param, beta4param, targetK, targetR, targetC);
-
-            // interpolation (splatting)
-            if(0.0 <= destPoint.x && destPoint.x < (float)_camWidth &&
-                    0.0 <= destPoint.y && destPoint.y < (float)_camHeight) {
-
-                projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage, weightMap, destPoint);
-            }
-
-            // 6 PARAMETERS
-            const cv::Point2f alphau6param = mapAlphau6param[idx];
-            const cv::Point2f alphav6param = mapAlphav6param[idx];
-            const cv::Point2f beta6param = mapBeta6param[idx];
-
-            splatProjection6param(destPoint, alphau6param, alphav6param, beta6param, targetK, targetR, targetC);
-
-            // interpolation (splatting)
-            if(0.0 <= destPoint.x && destPoint.x < (float)_camWidth &&
-                    0.0 <= destPoint.y && destPoint.y < (float)_camHeight) {
-
-                projectSplat(_camWidth, _camHeight, colorMap[idx], outputImage, weightMap, destPoint);
+                projectSplat(_camWidth, _camHeight, color, outputImage, weightMap, destPoint);
             }
         }
     }
@@ -2973,7 +2981,7 @@ void LFScene::renderFrame(const uint frame, const std::string &geomModel, const 
     std::cout << "Normalization step" << std::endl;
     for(uint i = 0 ; i < nbPixels ; ++i) {
 
-        if(weightMap3param[i] != 0) {
+        if(weightMap[i] != 0) {
             outputImage[i] /= weightMap[i];
         }
     }
@@ -2998,8 +3006,6 @@ void LFScene::renderFrame(const uint frame, const std::string &geomModel, const 
 }
 
 void LFScene::renderLightFlowLambertianVideo() {
-
-    const uint nbPixels = _camWidth*_camHeight;
 
     // LOAD PHOTOMETRIC AND GEOMETRIC MODEL PARAMETERS
 
@@ -3037,11 +3043,9 @@ void LFScene::renderLightFlowLambertianVideo() {
 
     // AVERAGE COLOR IMAGE
 
-    std::vector<cv::Point3f> colorMap(nbPixels);
+    for(uint i = 0 ; i < _colorMap.size() ; ++i) {
 
-    for(uint i = 0 ; i < colorMap.size() ; ++i) {
-
-        colorMap[i] = cv::Point3f(0.0, 0.0, 0.0);
+        _colorMap[i] = cv::Point3f(0.0, 0.0, 0.0);
     }
 
     std::cout << "Compute color map (average) " << std::endl;
@@ -3061,11 +3065,11 @@ void LFScene::renderLightFlowLambertianVideo() {
             // find splat color (average color)
             for(uint k = 0 ; k < _vCam.size() ; ++k) {
 
-                backwardWarping(_camWidth, _camHeight, _vCam[k]->getTextureRGB(), colorMap, weight, x, y, flow[k], 1);
+                backwardWarping(_camWidth, _camHeight, _vCam[k]->getTextureRGB(), _colorMap, weight, x, y, flow[k], 1);
             }
 
             if(weight != 0) {
-                colorMap[idx] /= weight;
+                _colorMap[idx] /= weight;
             }
         }
     }
@@ -3079,13 +3083,13 @@ void LFScene::renderLightFlowLambertianVideo() {
     }
     for(int frame = firstFrame ; frame <= lastFrame ; ++frame) {
 
-        renderFrame(frame, "3p", "IBR");
-        renderFrame(frame, "4p", "IBR");
-        renderFrame(frame, "6p", "IBR");
+        renderFrame(frame, "3g", "IBR");
+        renderFrame(frame, "4g", "IBR");
+        renderFrame(frame, "6g", "IBR");
 
-        renderFrame(frame, "3p", "9p");
-        renderFrame(frame, "4p", "9p");
-        renderFrame(frame, "6p", "9p");
+        renderFrame(frame, "3g", "9p");
+        renderFrame(frame, "4g", "9p");
+        renderFrame(frame, "6g", "9p");
     }
 }
 
