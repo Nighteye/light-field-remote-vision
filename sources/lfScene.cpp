@@ -1665,22 +1665,22 @@ void LFScene::curveFitting() {
 
     } else {
 
-        save3fMap(parameter3Map, _outdir + "/model_3g_IHM_allViews.pfm", _renderIndex);
-        save2fMap(parameterAlpha2Map, _outdir + "/model_4g_IHM_allViews_a.pfm", _renderIndex);
-        save2fMap(parameterBeta2Map, _outdir + "/model_4g_IHM_allViews_b.pfm", _renderIndex);
-        save2fMap(parameter6AlphauMap, _outdir + "/model_6g_IHM_allViews_au.pfm", _renderIndex);
-        save2fMap(parameter6AlphavMap, _outdir + "/model_6g_IHM_allViews_av.pfm", _renderIndex);
-        save2fMap(parameter6BetaMap, _outdir + "/model_6g_IHM_allViews_b.pfm", _renderIndex);
+        save3fMap(parameter3Map, _outdir + "/model_3g_IHM_allViews.pfm");
+        save2fMap(parameterAlpha2Map, _outdir + "/model_4g_IHM_allViews_a.pfm");
+        save2fMap(parameterBeta2Map, _outdir + "/model_4g_IHM_allViews_b.pfm");
+        save2fMap(parameter6AlphauMap, _outdir + "/model_6g_IHM_allViews_au.pfm");
+        save2fMap(parameter6AlphavMap, _outdir + "/model_6g_IHM_allViews_av.pfm");
+        save2fMap(parameter6BetaMap, _outdir + "/model_6g_IHM_allViews_b.pfm");
 
         // SAVE FINAL COST MAPS
-        save1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
-        save1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_allViews.pfm", _renderIndex);
-        save1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_allViews.pfm");
+        save1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_allViews.pfm");
+        save1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_allViews.pfm");
 
         // SAVE CONDITION NUMBER MAPS
-        save1fMap(conditionNumber3Map, _outdir + "/conditionNumber_3g_IHM_allViews.pfm", _renderIndex);
-        save1fMap(conditionNumber4Map, _outdir + "/conditionNumber_4g_IHM_allViews.pfm", _renderIndex);
-        save1fMap(conditionNumber6Map, _outdir + "/conditionNumber_6g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(conditionNumber3Map, _outdir + "/conditionNumber_3g_IHM_allViews.pfm");
+        save1fMap(conditionNumber4Map, _outdir + "/conditionNumber_4g_IHM_allViews.pfm");
+        save1fMap(conditionNumber6Map, _outdir + "/conditionNumber_6g_IHM_allViews.pfm");
     }
 }
 
@@ -1796,11 +1796,11 @@ void LFScene::curveFittingColor() {
 
     } else {
 
-        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_allViews_s.pfm", _renderIndex);
-        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews_t.pfm", _renderIndex);
-        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews_0.pfm", _renderIndex);
+        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_allViews_s.pfm");
+        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews_t.pfm");
+        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews_0.pfm");
 
-        save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_LIN_allViews.pfm", _renderIndex);
+        save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_LIN_allViews.pfm");
     }
 }
 
@@ -2159,9 +2159,9 @@ void LFScene::bic() {
     } else {
 
         // LOAD FINAL COST MAPS
-        load1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_allViews.pfm", _renderIndex);
-        load1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_allViews.pfm", _renderIndex);
-        load1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_allViews.pfm", _renderIndex);
+        load1fMap(finalCost3Map, _outdir + "/finalCost_3g_IHM_allViews.pfm");
+        load1fMap(finalCost4Map, _outdir + "/finalCost_4g_IHM_allViews.pfm");
+        load1fMap(finalCost6Map, _outdir + "/finalCost_6g_IHM_allViews.pfm");
     }
 
     // OUTPUT BIC
@@ -2197,7 +2197,7 @@ void LFScene::bic() {
 
     } else {
 
-        save1fMap(selectedModel, _outdir + "/selectedModel_g_IHM_allViews.pfm", _renderIndex);
+        save1fMap(selectedModel, _outdir + "/selectedModel_g_IHM_allViews.pfm");
     }
 }
 
@@ -3024,16 +3024,16 @@ void LFScene::renderLightFlowLambertianVideo() {
 
     } else {
 
-        load3fMap(_map3param, _outdir + "/model_3g_IHM_allViews.pfm", _renderIndex);
-        load2fMap(_mapAlpha4param, _outdir + "/model_4g_IHM_allViews_a.pfm", _renderIndex);
-        load2fMap(_mapBeta4param, _outdir + "/model_4g_IHM_allViews_b.pfm", _renderIndex);
-        load2fMap(_mapAlphau6param, _outdir + "/model_6g_IHM_allViews_au.pfm", _renderIndex);
-        load2fMap(_mapAlphav6param, _outdir + "/model_6g_IHM_allViews_av.pfm", _renderIndex);
-        load2fMap(_mapBeta6param, _outdir + "/model_6g_IHM_allViews_b.pfm", _renderIndex);
+        load3fMap(_map3param, _outdir + "/model_3g_IHM_allViews.pfm");
+        load2fMap(_mapAlpha4param, _outdir + "/model_4g_IHM_allViews_a.pfm");
+        load2fMap(_mapBeta4param, _outdir + "/model_4g_IHM_allViews_b.pfm");
+        load2fMap(_mapAlphau6param, _outdir + "/model_6g_IHM_allViews_au.pfm");
+        load2fMap(_mapAlphav6param, _outdir + "/model_6g_IHM_allViews_av.pfm");
+        load2fMap(_mapBeta6param, _outdir + "/model_6g_IHM_allViews_b.pfm");
 
-        load3fMap(_mapS9param, _outdir + "/model_9p_LIN_allViews_s.pfm", _renderIndex);
-        load3fMap(_mapT9param, _outdir + "/model_9p_LIN_allViews_t.pfm", _renderIndex);
-        load3fMap(_map09param, _outdir + "/model_9p_LIN_allViews_0.pfm", _renderIndex);
+        load3fMap(_mapS9param, _outdir + "/model_9p_LIN_allViews_s.pfm");
+        load3fMap(_mapT9param, _outdir + "/model_9p_LIN_allViews_t.pfm");
+        load3fMap(_map09param, _outdir + "/model_9p_LIN_allViews_0.pfm");
     }
 
     // for every light flow (set of parameters)

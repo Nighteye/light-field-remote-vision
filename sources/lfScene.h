@@ -147,15 +147,15 @@ public:
     // IBR_optical
     // ---------------------------------------------------------------------------------------------------------- //
 
-    void save1fMap(const std::vector<float>& map, const std::string& name, int arg1);
-    void save2fMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1);
-    void save3fMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1);
-    void save1uMap(const std::vector<float>& map, const std::string& name, int arg1);
-    void save2uMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1);
-    void save3uMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1);
-    void load1fMap(std::vector<float>& map, const std::string& name, int arg1);
-    void load2fMap(std::vector<cv::Point2f>& map, const std::string& name, int arg1);
-    void load3fMap(std::vector<cv::Point3f>& map, const std::string& name, int arg1);
+    void save1fMap(const std::vector<float>& map, const std::string& name, int arg1 = 0);
+    void save2fMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1 = 0);
+    void save3fMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1 = 0);
+    void save1uMap(const std::vector<float>& map, const std::string& name, int arg1 = 0);
+    void save2uMap(const std::vector<cv::Point2f>& map, const std::string& name, int arg1 = 0);
+    void save3uMap(const std::vector<cv::Point3f>& map, const std::string& name, int arg1 = 0);
+    void load1fMap(std::vector<float>& map, const std::string& name, int arg1 = 0);
+    void load2fMap(std::vector<cv::Point2f>& map, const std::string& name, int arg1 = 0);
+    void load3fMap(std::vector<cv::Point3f>& map, const std::string& name, int arg1 = 0);
 
     void computeVisibilityMask(std::vector<cv::Point2f>& flowLtoR, std::vector<cv::Point2f>& flowRtoL,
                                std::vector<bool>& visibilityMask);

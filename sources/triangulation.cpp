@@ -169,16 +169,38 @@ void splatProjection3param2(cv::Point2f &imagePoint, cv::Point3f &color,
                             const cv::Point3f& paramS, const cv::Point3f& paramT, const cv::Point3f& param0,
                             const cv::Mat &K, const cv::Mat &R, const cv::Point3f &C) {
 
-    float m = parameters.x - (C.z - 1)/C.z;
-    Mat M = (Mat_<float>(2, 2) << m, 0, 0, m);
-    Mat M_inv = M.inv();
-    float buc = C.x/C.z;
-    float bvc = C.y/C.z;
-    Mat b = (Mat_<float>(2, 1) << buc - parameters.y, bvc - parameters.z);
-    Mat st = M_inv * b;
+    Mat x = (Mat_<float>(3, 1) << 0, 0, 0);
+    Mat st = (Mat_<float>(2, 1) << 0, 0);
 
-    Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
-    Mat x = K * R * X;
+    if(C.z > 0.0000001) { // the optical center of the target view is NOT located on the plane (s,t)
+
+        float m = parameters.x - (C.z - dist)/C.z;
+        Mat M = (Mat_<float>(2, 2) << m, 0, 0, m);
+        Mat M_inv = M.inv();
+        float buc = dist*C.x/C.z;
+        float bvc = dist*C.y/C.z;
+        Mat b = (Mat_<float>(2, 1) << buc - parameters.y, bvc - parameters.z);
+        st = M_inv * b;
+
+        // we project the point (s,t,0)
+
+        Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
+        x = K * R * X;
+
+    } else {
+
+        // simplified rendering equations
+        st = (Mat_<float>(2, 1) << C.x, C.y);
+
+        // we project the point (u,v,dist)
+
+        Mat Ap = (Mat_<float>(2, 2) << parameters.x, 0, 0, parameters.x);
+        Mat Bp = (Mat_<float>(2, 1) << parameters.y, parameters.z);
+        Mat uv = Ap*st + Bp;
+
+        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, dist - C.z);
+        x = K * R * X;
+    }
 
     imagePoint.x = x.at<float>(0, 0)/x.at<float>(2, 0);
     imagePoint.y = x.at<float>(1, 0)/x.at<float>(2, 0);
@@ -197,16 +219,36 @@ void splatProjection4param2(cv::Point2f &imagePoint, cv::Point3f &color,
                             const cv::Point3f& paramS, const cv::Point3f& paramT, const cv::Point3f& param0,
                             const cv::Mat &K, const cv::Mat &R, const cv::Point3f &C) {
 
-    float ac = (C.z - 1)/C.z;
-    Mat M = (Mat_<float>(2, 2) << alpha.x - ac, 0, 0, alpha.y - ac);
-    Mat M_inv = M.inv();
-    float buc = C.x/C.z;
-    float bvc = C.y/C.z;
-    Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
-    Mat st = M_inv * b;
+    Mat x = (Mat_<float>(3, 1) << 0, 0, 0);
+    Mat st = (Mat_<float>(2, 1) << 0, 0);
 
-    Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
-    Mat x = K * R * X;
+    if(C.z > 0.0000001) { // the optical center of the target view is NOT located on the plane (s,t)
+
+        float ac = (C.z - dist)/C.z;
+        Mat M = (Mat_<float>(2, 2) << alpha.x - ac, 0, 0, alpha.y - ac);
+        Mat M_inv = M.inv();
+        float buc = dist*C.x/C.z;
+        float bvc = dist*C.y/C.z;
+        Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
+        st = M_inv * b;
+
+        Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
+        x = K * R * X;
+
+    } else {
+
+        // simplified rendering equations
+        st = (Mat_<float>(2, 1) << C.x, C.y);
+
+        // we project the point (u,v,dist)
+
+        Mat Ap = (Mat_<float>(2, 2) << alpha.x, 0, 0, alpha.y);
+        Mat Bp = (Mat_<float>(2, 1) << beta.x, beta.y);
+        Mat uv = Ap*st + Bp;
+
+        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, dist - C.z);
+        x = K * R * X;
+    }
 
     imagePoint.x = x.at<float>(0, 0)/x.at<float>(2, 0);
     imagePoint.y = x.at<float>(1, 0)/x.at<float>(2, 0);
@@ -225,16 +267,36 @@ void splatProjection6param2(cv::Point2f &imagePoint, cv::Point3f &color,
                             const cv::Point3f& paramS, const cv::Point3f& paramT, const cv::Point3f& param0,
                             const cv::Mat &K, const cv::Mat &R, const cv::Point3f &C) {
 
-    float ac = (C.z - 1)/C.z;
-    Mat M = (Mat_<float>(2, 2) << alphau.x - ac, alphau.y, alphav.x, alphav.y - ac);
-    Mat M_inv = M.inv();
-    float buc = C.x/C.z;
-    float bvc = C.y/C.z;
-    Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
-    Mat st = M_inv * b;
+    Mat x = (Mat_<float>(3, 1) << 0, 0, 0);
+    Mat st = (Mat_<float>(2, 1) << 0, 0);
 
-    Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
-    Mat x = K * R * X;
+    if(C.z > 0.0000001) { // the optical center of the target view is NOT located on the plane (s,t)
+
+        float ac = (C.z - dist)/C.z;
+        Mat M = (Mat_<float>(2, 2) << alphau.x - ac, alphau.y, alphav.x, alphav.y - ac);
+        Mat M_inv = M.inv();
+        float buc = dist*C.x/C.z;
+        float bvc = dist*C.y/C.z;
+        Mat b = (Mat_<float>(2, 1) << buc - beta.x, bvc - beta.y);
+        st = M_inv * b;
+
+        Mat X = (Mat_<float>(3, 1) << st.at<float>(0, 0) - C.x, st.at<float>(1, 0) - C.y, - C.z);
+        x = K * R * X;
+
+    } else {
+
+        // simplified rendering equations
+        st = (Mat_<float>(2, 1) << C.x, C.y);
+
+        // we project the point (u,v,dist)
+
+        Mat Ap = (Mat_<float>(2, 2) << alphau.x, alphau.y, alphav.x, alphav.y);
+        Mat Bp = (Mat_<float>(2, 1) << beta.x, beta.y);
+        Mat uv = Ap*st + Bp;
+
+        Mat X = (Mat_<float>(3, 1) << uv.at<float>(0, 0) - C.x, uv.at<float>(1, 0) - C.y, dist - C.z);
+        x = K * R * X;
+    }
 
     imagePoint.x = x.at<float>(0, 0)/x.at<float>(2, 0);
     imagePoint.y = x.at<float>(1, 0)/x.at<float>(2, 0);
