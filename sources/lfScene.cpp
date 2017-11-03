@@ -1768,7 +1768,7 @@ void LFScene::curveFittingColor() {
             }
 
             std::vector<float> parameter(9); // [rs, rt, r0 ; gs, gt, g0 ; bs, bt, b0]
-            float finalCost9p(0.0);
+            float finalCost9p(0.0f);
 
             colorRegression(flow.size(), flow, colorSampleSet, K_inv, R_transp, C, parameter, finalCost9p, verbose);
             finalCost9pMap[idx] = (float)finalCost9p;
@@ -1788,19 +1788,19 @@ void LFScene::curveFittingColor() {
     // SAVE PARAMETER MAPS (LINEAR METHOD ONLY) AND FINAL COST MAPS
     if(_renderIndex >= 0) {
 
-        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_%02lu_s.pfm", _renderIndex);
-        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_%02lu_t.pfm", _renderIndex);
-        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_%02lu_0.pfm", _renderIndex);
+        save3fMap(parameterS9pMap, _outdir + "/model_9p_IHM_%02lu_s.pfm", _renderIndex);
+        save3fMap(parameterT9pMap, _outdir + "/model_9p_IHM_%02lu_t.pfm", _renderIndex);
+        save3fMap(parameter09pMap, _outdir + "/model_9p_IHM_%02lu_0.pfm", _renderIndex);
 
-        save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_LIN_%02lu.pfm", _renderIndex);
+        save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_IHM_%02lu.pfm", _renderIndex);
 
     } else {
 
-        save3fMap(parameterS9pMap, _outdir + "/model_9p_LIN_allViews_s.pfm");
-        save3fMap(parameterT9pMap, _outdir + "/model_9p_LIN_allViews_t.pfm");
-        save3fMap(parameter09pMap, _outdir + "/model_9p_LIN_allViews_0.pfm");
+        save3fMap(parameterS9pMap, _outdir + "/model_9p_IHM_allViews_s.pfm");
+        save3fMap(parameterT9pMap, _outdir + "/model_9p_IHM_allViews_t.pfm");
+        save3fMap(parameter09pMap, _outdir + "/model_9p_IHM_allViews_0.pfm");
 
-        save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_LIN_allViews.pfm");
+        save1fMap(finalCost9pMap, _outdir + "/finalCost_9p_IHM_allViews.pfm");
     }
 }
 
@@ -3018,9 +3018,9 @@ void LFScene::renderLightFlowLambertianVideo() {
         load2fMap(_mapAlphav6param, _outdir + "/model_6g_IHM_%02lu_av.pfm", _renderIndex);
         load2fMap(_mapBeta6param, _outdir + "/model_6g_IHM_%02lu_b.pfm", _renderIndex);
 
-        load3fMap(_mapS9param, _outdir + "/model_9p_LIN_%02lu_s.pfm", _renderIndex);
-        load3fMap(_mapT9param, _outdir + "/model_9p_LIN_%02lu_t.pfm", _renderIndex);
-        load3fMap(_map09param, _outdir + "/model_9p_LIN_%02lu_0.pfm", _renderIndex);
+        load3fMap(_mapS9param, _outdir + "/model_9p_IHM_%02lu_s.pfm", _renderIndex);
+        load3fMap(_mapT9param, _outdir + "/model_9p_IHM_%02lu_t.pfm", _renderIndex);
+        load3fMap(_map09param, _outdir + "/model_9p_IHM_%02lu_0.pfm", _renderIndex);
 
     } else {
 
@@ -3031,9 +3031,9 @@ void LFScene::renderLightFlowLambertianVideo() {
         load2fMap(_mapAlphav6param, _outdir + "/model_6g_IHM_allViews_av.pfm");
         load2fMap(_mapBeta6param, _outdir + "/model_6g_IHM_allViews_b.pfm");
 
-        load3fMap(_mapS9param, _outdir + "/model_9p_LIN_allViews_s.pfm");
-        load3fMap(_mapT9param, _outdir + "/model_9p_LIN_allViews_t.pfm");
-        load3fMap(_map09param, _outdir + "/model_9p_LIN_allViews_0.pfm");
+        load3fMap(_mapS9param, _outdir + "/model_9p_IHM_allViews_s.pfm");
+        load3fMap(_mapT9param, _outdir + "/model_9p_IHM_allViews_t.pfm");
+        load3fMap(_map09param, _outdir + "/model_9p_IHM_allViews_0.pfm");
     }
 
     // for every light flow (set of parameters)

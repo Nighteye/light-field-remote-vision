@@ -423,19 +423,15 @@ void colorRegression(int nbSamples, const std::vector<cv::Point2f> &flow, const 
     Problem problem;
     const uint nbParams = x.size();
 
-    // init model parameters
-    const double initialValue = 0.0;
-    std::vector<double> xd(nbParams);
-    for(uint i = 0 ; i < xd.size() ; ++i) {
-
-        xd[i] = initialValue;
-    }
-
     if(verbose) {
-        std::cout << "COLOR REGRESSION, POLYNOME OF DEGREE 1, " << nbParams << " PARAMETERS" << std::endl;
+        std::cout << "INHOMOGENEOUS METHOD FOR INITIALIZATION, " << nbParams << " PARAMETERS" << std::endl;
     }
 
-    for (int k = 0; k < nbSamples; ++k) {
+    cv::Mat M9 = cv::Mat::zeros(3*nbSamples, 9, CV_32FC1); // 9p (inhomogeneous)
+    cv::Mat b9 = cv::Mat::zeros(3*nbSamples, 1, CV_32FC1);
+
+    // fill system matrix
+    for(uint k(0) ; k < (uint)nbSamples ; ++k) {
 
         const cv::Mat K_invk = K_inv[k];
         const cv::Mat R_transpk = R_transp[k];
@@ -446,13 +442,42 @@ void colorRegression(int nbSamples, const std::vector<cv::Point2f> &flow, const 
         Mat a = (Mat_<float>(2, 1) << ray.at<float>(0, 0)/ray.at<float>(2, 0),
                  ray.at<float>(1, 0)/ray.at<float>(2, 0));
 
-        S[2*k+0] = Ck.x + a.at<float>(0, 0)*(-Ck.z); // s
-        S[2*k+1] = Ck.y + a.at<float>(1, 0)*(-Ck.z); // t
-        assert(S[2*k+0] == S[2*k+0]);
-        assert(S[2*k+1] == S[2*k+1]);
-        assert(colorSampleSet[k].x == colorSampleSet[k].x);
-        assert(colorSampleSet[k].y == colorSampleSet[k].y);
-        assert(colorSampleSet[k].z == colorSampleSet[k].z);
+        S[2*k + 0] = Ck.x + a.at<float>(0, 0)*(-Ck.z); // s
+        S[2*k + 1] = Ck.y + a.at<float>(1, 0)*(-Ck.z); // t
+
+        M9.at<float>(3*k + 0, 0) = S[2*k+0]; M9.at<float>(3*k + 0, 1) = S[2*k+1]; M9.at<float>(3*k + 0, 2) = 1.0f; M9.at<float>(2*k + 0, 3) = 0.0f; M9.at<float>(2*k + 0, 4) = 0.0f; M9.at<float>(2*k + 0, 5) = 0.0f; M9.at<float>(2*k + 0, 6) = 0.0f; M9.at<float>(2*k + 0, 7) = 0.0f; M9.at<float>(2*k + 0, 8) = 0.0f;
+        M9.at<float>(3*k + 1, 0) = 0.0f; M9.at<float>(3*k + 1, 1) = 0.0f; M9.at<float>(3*k + 1, 2) = 0.0f; M9.at<float>(2*k + 1, 3) = S[2*k+0]; M9.at<float>(2*k + 1, 4) = S[2*k+1]; M9.at<float>(2*k + 1, 5) = 1.0f; M9.at<float>(2*k + 1, 6) = 0.0f; M9.at<float>(2*k + 1, 7) = 0.0f; M9.at<float>(2*k + 1, 8) = 0.0f;
+        M9.at<float>(3*k + 2, 0) = 0.0f; M9.at<float>(3*k + 2, 1) = 0.0f; M9.at<float>(3*k + 2, 2) = 0.0f; M9.at<float>(2*k + 2, 3) = 0.0f; M9.at<float>(2*k + 2, 4) = 0.0f; M9.at<float>(2*k + 2, 5) = 0.0f; M9.at<float>(2*k + 2, 6) = S[2*k+0]; M9.at<float>(2*k + 2, 7) = S[2*k+1]; M9.at<float>(2*k + 2, 8) = 1.0f;
+        b9.at<float>(3*k + 0, 0) = colorSampleSet[k].x;
+        b9.at<float>(3*k + 1, 0) = colorSampleSet[k].y;
+        b9.at<float>(3*k + 2, 0) = colorSampleSet[k].z;
+    }
+
+    cv::Mat M9t = cv::Mat::zeros(2*nbSamples, 9, CV_32FC1);
+    cv::transpose(M9, M9t);
+    cv::Mat M9tM9 = M9t * M9;
+    cv::Mat M9tM9_inv = cv::Mat::zeros(2*nbSamples, 9, CV_32FC1);
+    cv::invert(M9tM9, M9tM9_inv);
+    cv::Mat res9 = M9tM9_inv * (M9t * b9);
+    x[0] = res9.at<float>(0, 0);
+    x[1] = res9.at<float>(1, 0);
+    x[2] = res9.at<float>(2, 0);
+    x[3] = res9.at<float>(3, 0);
+    x[4] = res9.at<float>(4, 0);
+    x[5] = res9.at<float>(5, 0);
+
+    // init model parameters
+    std::vector<double> xd(nbParams);
+    for(uint i = 0 ; i < xd.size() ; ++i) {
+
+        xd[i] = (double)x[i];
+    }
+
+    if(verbose) {
+        std::cout << "NON LINEAR OPTIMIZATION, " << nbParams << " PARAMETERS" << std::endl;
+    }
+
+    for (int k = 0; k < nbSamples; ++k) {
 
         std::vector<float> sK = {S[2*k+0], S[2*k+1]};
         std::vector<float> colorK = {colorSampleSet[k].x, colorSampleSet[k].y, colorSampleSet[k].z};
@@ -477,13 +502,6 @@ void colorRegression(int nbSamples, const std::vector<cv::Point2f> &flow, const 
     for(uint i = 0 ; i < xd.size() ; ++i) {
 
         x[i] = (float)xd[i];
-    }
-
-    if(verbose) {
-        std::cout << summary.FullReport() << std::endl;
-        for(uint i = 0 ; i < nbParams ; ++i) {
-            std::cout << "parameter " << i << ": " << initialValue << " -> " << x[i] << std::endl;
-        }
     }
 }
 

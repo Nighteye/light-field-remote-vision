@@ -270,8 +270,8 @@ int main( int argc, char **argv ) {
 //        std::cout << "Fit geometric models to light flow samples, with inhomogeneous method (IHM) initialization" << std::endl;
 //        lfScene.curveFitting(); // OK
 
-//        std::cout << "Fit photometric models to light flow samples" << std::endl;
-//        lfScene.curveFittingColor();
+        std::cout << "Fit photometric models to light flow samples" << std::endl;
+        lfScene.curveFittingColor();
 
         //        if(!lfScene.checkExistence(config_data->_outdir + "/model_3g_IHM_%02lu.pfm", _renderIndex) ||
         //                !lfScene.checkExistence(config_data->_outdir + "/model_4g_IHM_%02lu_a.pfm", _renderIndex) ||

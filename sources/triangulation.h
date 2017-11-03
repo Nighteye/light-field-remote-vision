@@ -31,7 +31,7 @@ void splatProjection6param2(cv::Point2f &imagePoint, cv::Point3f &color,
                             const cv::Point3f& paramS, const cv::Point3f& paramT, const cv::Point3f& param0,
                             const cv::Mat &K, const cv::Mat &R, const cv::Point3f &C);
 
-// compute sample points and eigenvalues, necessary for the residual
+// compute GEOMETRIC sample points and eigenvalues, necessary for the residual
 void computeResidualParameters(int nbSamples, const std::vector<cv::Point2f> &flow, const std::vector<cv::Mat> &K_inv, const std::vector<cv::Mat> &R_transp, const std::vector<cv::Point3f> &C,
                                std::vector<float>& eigenVectors, std::vector<float>& eigenValues, std::vector<float>& samplePoint);
 
