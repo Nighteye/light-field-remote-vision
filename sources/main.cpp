@@ -267,8 +267,8 @@ int main( int argc, char **argv ) {
         //                !lfScene.checkExistenceNoArg(config_data->_outdir + "/model_6g_IHM_allViews_av.pfm") ||
         //                !lfScene.checkExistenceNoArg(config_data->_outdir + "/model_6g_IHM_allViews_b.pfm"))
 
-//        std::cout << "Fit geometric models to light flow samples, with inhomogeneous method (IHM) initialization" << std::endl;
-//        lfScene.curveFitting(); // OK
+        std::cout << "Fit geometric models to light flow samples, with inhomogeneous method (IHM) initialization" << std::endl;
+        lfScene.curveFitting(); // OK
 
         std::cout << "Fit photometric models to light flow samples" << std::endl;
         lfScene.curveFittingColor();

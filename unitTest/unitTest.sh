@@ -1,13 +1,13 @@
 # CREATE reference data from transcut/obj1_scn1
 
-#rm ../out/IBR_optical/unitTest/
-#cp ../out/IBR_optical/transcut/obj1_scn1/* ../out/IBR_optical/unitTest/
-#cd ../out/IBR_optical/unitTest
-#for f in *
-#do
-#    mv $f 'ref_'$f 
-#done
-#cd ../../../unitTest
+rm ../out/IBR_optical/unitTest/*
+cp ../out/IBR_optical/transcut/obj1_scn1/* ../out/IBR_optical/unitTest/
+cd ../out/IBR_optical/unitTest
+for f in *
+do
+    mv $f 'ref_'$f 
+done
+cd ../../../unitTest
 
 # RUN tests
 

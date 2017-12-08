@@ -54,7 +54,7 @@ sudo init 5
 mkdir /var/tmp
 sudo mv /tmp/* /var/tmp/
 sudo umount -l /tmp
-sudo ln -s ~/tmp /var/tmp
+sudo ln -s /var/tmp /tmp
 # it is recommended to install libXmu
 sudo yum install libXmu-devel
 # to enable more recent versions of gcc, comment line 115 of /usr/local/cuda/include/host_config.h
