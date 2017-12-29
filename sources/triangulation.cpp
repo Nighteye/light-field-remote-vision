@@ -495,6 +495,7 @@ void colorRegression(int nbSamples, const std::vector<cv::Point2f> &flow, const 
     options.linear_solver_type = ceres::DENSE_QR;
     options.minimizer_progress_to_stdout = verbose;
     options.max_num_iterations = 200;
+    options.num_threads = 8;
     Solver::Summary summary;
     Solve(options, &problem, &summary);
     finalCost = summary.final_cost;
@@ -1078,6 +1079,7 @@ void optimize(int kNumObservations,
     options.linear_solver_type = ceres::DENSE_QR;
     options.minimizer_progress_to_stdout = verbose;
     options.max_num_iterations = 200;
+    options.num_threads = 8;
     Solver::Summary summary;
     Solve(options, &problem, &summary);
     finalCost = summary.final_cost;
